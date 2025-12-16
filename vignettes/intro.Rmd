@@ -1,0 +1,37 @@
+---
+title: "Getting Started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette introduces the localmap compendium structure and shows how to
+access configuration and the input manifest without attaching the package.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+```{r}
+# Read config and manifest using fully-qualified calls
+cfg <- localmap::cfg_read()
+mf  <- localmap::read_manifest(cfg$data$manifest)
+mf
+```
+
+```{r}
+#| eval: false
+# Resolve species queries defined in metadata/species_requests.csv
+requests <- localmap::read_species_requests(cfg$data$species_requests)
+resolved <- localmap::ala_resolve_species(requests)
+head(resolved)
+```
+
+If you've executed the pipeline (`targets::tar_make()`), you can also read
+targets directly:
+
+```{r}
+# targets::tar_read(manifest_summary)
+```

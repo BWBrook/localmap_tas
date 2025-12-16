@@ -1,0 +1,64 @@
+Package: localmap
+Title: Local Species Occurrence Mapping Toolkit
+Version: 0.0.0.9000
+Authors@R: c(person(given = "Barry", family = "Brook", role = c("aut","cre")))
+Description: Tools for sourcing, harmonising, and mapping species occurrence data
+    managed by the Localmap project. The compendium keeps the reproducible
+    workflow conventions from the template, integrating 'renv', 'targets', and
+    'Quarto' to support transparent biodiversity analyses.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 4.5)
+Imports:
+    targets,
+    tarchetypes,
+    dplyr,
+    readr,
+    purrr,
+    tidyr,
+    tibble,
+    stringr,
+    config,
+    qs,
+    lgr,
+    progressr,
+    yaml,
+    checkmate,
+    janitor,
+    dotenv,
+    here,
+    rlang,
+    cli,
+    httr2,
+    import,
+    galah,
+    sf,
+    ggplot2,
+    geosphere,
+    ggspatial,
+    maptiles,
+    png,
+    rnaturalearth,
+    rnaturalearthdata,
+    tidyterra
+Suggests:
+    testthat,
+    lintr,
+    styler,
+    quarto,
+    roxygen2,
+    rcmdcheck,
+    devtools,
+    pkgload,
+    future,
+    future.batchtools,
+    pak,
+    renv,
+    pkgdown,
+    knitr,
+    rmarkdown
+Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+RoxygenNote: 7.3.3

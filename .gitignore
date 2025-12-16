@@ -1,0 +1,56 @@
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Rprofile.user
+.DS_Store
+
+# renv
+renv/library/
+renv/staging/
+renv/sandbox/
+
+# targets
+_targets/
+
+# Quarto
+.quarto/
+.quarto/_freeze/
+docs/_site/
+
+# data (raw or large) — track only small samples in inst/extdata
+data/
+data-raw/
+data-raw/cache/
+inst/extdata/*.zip
+inst/extdata/*.gz
+src/
+AGENTS.md
+
+# build / checks
+.Rcheck/
+
+# outputs
+outputs/
+/*.tar.gz
+/*.zip
+
+# vignette/build artefacts
+vignettes/*.html
+vignettes/*.pdf
+
+# rmarkdown/quarto temporary artefacts
+*.knit.md
+/report_files
+*.tex
+*.log
+*.aux
+*.toc
+
+# _targets cache (explicit)
+/_targets/*
+
+# Editors
+.vscode/
+.idea/

@@ -1,0 +1,33 @@
+---
+title: Development Notes
+format: gfm
+---
+
+This repository hosts localmap, the species occurrence sourcing and mapping
+workflow.
+
+Conventions:
+
+- Dependencies managed with `renv`; do not commit large data.
+- Pipeline with `{targets}`; helpers live in `R/` and are sourced via `tar_source("R")`.
+- Use `import::from()` inside functions; avoid `library()` calls.
+- Tests in `tests/testthat/` with table-driven cases.
+- Small example data under `inst/extdata/`.
+- Species queries live in `metadata/species_requests.csv`; add rows with
+  `species_id`, `common_name`, and/or `scientific_name`. The pipeline resolves
+  names via `{galah}` and downloads occurrences into `species_occurrences`.
+  Set occurrence filters (year, state province, optional latitude, polygon
+  boundaries) in `config/config.yaml` under `data$occurrence`. Ensure the ALA
+  section includes a valid email and `download_reason_id`.
+
+Common tasks (run in RStudio Console):
+
+```r
+renv::restore(prompt = FALSE)
+source("dependencies.R")
+pak::pkg_install(project_dependencies())
+devtools::document()
+testthat::test_dir("tests/testthat", reporter = "summary")
+targets::tar_make()
+pkgdown::build_site(preview = FALSE)
+```
