@@ -10,6 +10,8 @@ ala_fetch_occurrences(
   boundary = NULL,
   boundary_simplify = NULL,
   columns = ala_default_occurrence_fields(),
+  min_lat = NULL,
+  state_province = NULL,
   fetch_fun = NULL,
   config = NULL
 )
@@ -28,6 +30,10 @@ passed via \code{galah::galah_polygon()}.}
 applied when simplifying the boundary geometry.}
 
 \item{columns}{Character vector of occurrence fields to request.}
+
+\item{min_lat}{Optional numeric latitude threshold. Negative values retain
+southerly records at or below the threshold; positive values retain
+northerly records at or above the threshold.}
 
 \item{fetch_fun}{Optional function overriding the download implementation.
 Defaults to an internal wrapper around \code{galah} and exists mostly for

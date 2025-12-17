@@ -4,10 +4,16 @@
 \alias{cfg_read}
 \title{Read project configuration}
 \usage{
-cfg_read(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"))
+cfg_read(
+  profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
+  config_path = NULL
+)
 }
 \arguments{
 \item{profile}{Character scalar. Config profile name.}
+
+\item{config_path}{Optional path to the YAML file. Defaults to
+\code{here::here("config", "config.yaml")}.}
 }
 \value{
 A named list with configuration values.
