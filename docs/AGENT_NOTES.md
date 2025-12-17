@@ -70,3 +70,21 @@
   - Clean `.gitignore`; fix profiles to use local SLURM template.
   - Add vignette placeholder, docs index, and Makefile.
   - Add `_pkgdown.yml` and `combined_data` target with reader helper.
+
+- 2025-12-17: Hygiene + reproducibility gates; add offline-safe demo profile.
+  - Fixed MIT license metadata (MIT stub `LICENSE` + full `LICENSE.md`) and removed placeholder repository URL from `CITATION.cff` (now a TODO recorded in `docs/decisions.md`).
+  - Repaired `.Rbuildignore` (removed literal `\\n` artefacts) and added ignore rules to avoid packaging `CITATION.cff` files outside `inst/`.
+  - Added CI scaffolding under `.github/workflows/ci.yaml` running lint + R CMD check (no secrets).
+  - Regenerated roxygen docs (`devtools::document()`): updated `NAMESPACE` and `man/` files, and fixed roxygen mismatches for camera-site helpers and ALA functions.
+  - Hardened config/metadata resolution so installed packages can find `inst/config/config.yaml` and `inst/metadata/*.csv`.
+  - Added `demo` config profile that runs end-to-end offline via small fixtures in `inst/extdata/` and ALA fixture helpers (`R/ala_fixture.R`).
+  - Verification gates (local, 2025-12-17):
+    - `renv::restore()` + `renv::status()` OK (consistent state).
+    - `lintr::lint_package()` OK (0 lints).
+    - `devtools::test()` OK (80 passing).
+    - `rcmdcheck::rcmdcheck(args = \"--no-manual\")` OK with 2 NOTEs (import usage + `import::from` checks).
+    - Demo pipeline: `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` completed; outputs inspected:
+      - `outputs/maps/demo_species_occurrences.png` shows Tasmania outline with fixture points within the configured bounding box.
+      - `outputs/maps/demo_camera_sites.png` shows camera sites on placeholder basemap; extent and symbol scaling appear coherent.
+      - `outputs/maps/demo_camera_sites_panel.png` renders as expected for a 1×1 panel.
+    - Remaining: demo camera basemap intentionally uses a placeholder tile (warnings expected when provider URL is empty).
