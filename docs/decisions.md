@@ -41,3 +41,8 @@ Format:
 - and a sidecar metadata file (YAML/JSON) including request params and timestamp.
 **Rationale:** Scientific traceability and reproducibility.
 **Status:** Active.
+
+## 2025-12-17 — CITATION repository URL is a TODO until we have a canonical remote
+**Decision:** Remove placeholder repository URLs from `CITATION.cff` and leave an explicit TODO comment until the canonical repository URL is known.
+**Rationale:** Avoid publishing incorrect metadata; the correct URL depends on where the repo is hosted and may change before v1.0.
+**Status:** Active.

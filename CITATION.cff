@@ -6,7 +6,7 @@ authors:
     given-names: Barry
 type: software
 version: 0.0.0.9000
-repository-code: https://example.org/localmap
+# TODO(PI): Set `repository-code` to the canonical repository URL before release.
 license: MIT
 keywords:
   - R
