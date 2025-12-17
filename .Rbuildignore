@@ -4,6 +4,7 @@
 ^docs$
 ^inst/extdata/cache$
 ^\.github$
+^\.vscode$
 ^\.lintr$
 ^\.quarto$
 ^outputs$
@@ -14,3 +15,5 @@
 ^_pkgdown\.yml$
 ^docs/pkgdown$
 ^\.Rproj\.user$
+^CITATION\.cff$
+^reports/CITATION\.cff$

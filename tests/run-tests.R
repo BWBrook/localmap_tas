@@ -1,4 +1,6 @@
-# Run tests for the localmap compendium
+# Run tests for the localmap package (triggered by `R CMD check`).
 
-source("tests/testthat/helper-setup.R")
-testthat::test_dir("tests/testthat", reporter = "summary")
+if (requireNamespace("testthat", quietly = TRUE)) {
+  library(localmap)
+  testthat::test_dir("testthat", reporter = "summary")
+}

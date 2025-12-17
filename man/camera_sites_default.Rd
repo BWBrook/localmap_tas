@@ -2,17 +2,19 @@
 % Please edit documentation in R/camera_sites_map.R
 \name{camera_sites_default}
 \alias{camera_sites_default}
-\title{Read camera site metrics from CSV}
+\title{Coalesce optional config values}
 \usage{
 camera_sites_default(value, default)
 }
 \arguments{
-\item{path}{Character scalar. Path to the CSV containing columns \code{site},
-\code{lat}, \code{lon}, \code{rd}, and \code{obs}.}
+\item{value}{Any value (possibly \code{NULL}).}
+
+\item{default}{Value returned when \code{value} is \code{NULL}.}
 }
 \value{
-Tibble with the expected columns.
+\code{value} if non-\code{NULL}, otherwise \code{default}.
 }
 \description{
-Read camera site metrics from CSV
+Coalesce optional config values
 }
+\keyword{internal}

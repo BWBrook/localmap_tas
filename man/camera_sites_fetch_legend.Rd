@@ -2,20 +2,22 @@
 % Please edit documentation in R/camera_sites_map.R
 \name{camera_sites_fetch_legend}
 \alias{camera_sites_fetch_legend}
-\title{Render camera site map with effort-scaled points}
+\title{Fetch a WMS legend graphic (optional)}
 \usage{
 camera_sites_fetch_legend(basemap_cfg, legend_cfg)
 }
 \arguments{
-\item{context}{List returned by \code{prepare_camera_site_context()}.}
+\item{basemap_cfg}{Basemap configuration list containing at least a WMS \code{url}
+and \code{layers} vector. If \code{legend_path} is present it is used for caching.}
 
-\item{tile_path}{Optional path to a background tile image.}
-
-\item{map_cfg}{List of display options (colours, output path, etc.).}
+\item{legend_cfg}{Legend configuration list controlling whether to fetch the
+legend and (optionally) the \code{GetLegendGraphic} size/format.}
 }
 \value{
-Path to the rendered PNG file.
+Path to the legend PNG, or \code{NULL} when the legend is disabled or
+cannot be fetched.
 }
 \description{
-Render camera site map with effort-scaled points
+Fetch a WMS legend graphic (optional)
 }
+\keyword{internal}

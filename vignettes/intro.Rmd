@@ -33,5 +33,6 @@ If you've executed the pipeline (`targets::tar_make()`), you can also read
 targets directly:
 
 ```{r}
-# targets::tar_read(manifest_summary)
+#| eval: false
+targets::tar_read(manifest_summary)
 ```

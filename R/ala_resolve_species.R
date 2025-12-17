@@ -23,7 +23,10 @@ ala_resolve_species <- function(species_requests, search_fun = galah::search_tax
   import::from("tibble", as_tibble, tibble, .into = fn_env)
 
   assert_data_frame(species_requests, min.rows = 1L)
-  assert_names(colnames(species_requests), must.include = c("species_id", "common_name", "scientific_name"))
+  assert_names(
+    colnames(species_requests),
+    must.include = c("species_id", "common_name", "scientific_name")
+  )
   if (!is_function(search_fun)) {
     abort("`search_fun` must be a function.", class = "ala_resolve_species_bad_search")
   }

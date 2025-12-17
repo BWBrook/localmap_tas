@@ -1,7 +1,7 @@
 Package: localmap
 Title: Local Species Occurrence Mapping Toolkit
 Version: 0.0.0.9000
-Authors@R: c(person(given = "Barry", family = "Brook", role = c("aut","cre")))
+Authors@R: c(person(given = "Barry", family = "Brook", role = c("aut","cre"), email = "barry.brook@utas.edu.au"))
 Description: Tools for sourcing, harmonising, and mapping species occurrence data
     managed by the Localmap project. The compendium keeps the reproducible
     workflow conventions from the template, integrating 'renv', 'targets', and
@@ -55,6 +55,7 @@ Suggests:
     future.batchtools,
     pak,
     renv,
+    lwgeom,
     pkgdown,
     knitr,
     rmarkdown

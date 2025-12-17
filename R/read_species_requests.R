@@ -22,7 +22,12 @@ read_species_requests <- function(path) {
 
   assert_character(path, any.missing = FALSE, len = 1L)
 
-  candidate_paths <- c(path, here(path))
+  candidate_paths <- unique(c(
+    path,
+    here(path),
+    system.file(path, package = "localmap")
+  ))
+  candidate_paths <- candidate_paths[nzchar(candidate_paths)]
   path_resolved <- candidate_paths[file.exists(candidate_paths)][1]
   if (is.na(path_resolved)) {
     abort(

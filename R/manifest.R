@@ -23,9 +23,23 @@ read_manifest <- function(manifest_path) {
 
   # Allow relative paths
   csv_path <- manifest_path
+  root_dir <- NULL
   if (!file.exists(csv_path)) {
     # Try resolving under repo root
-    csv_path <- here(manifest_path)
+    csv_path_here <- here(manifest_path)
+    if (file.exists(csv_path_here)) {
+      csv_path <- csv_path_here
+      root_dir <- here()
+    }
+  } else {
+    root_dir <- tryCatch(here(), error = function(e) NULL)
+  }
+  if (!file.exists(csv_path)) {
+    csv_path_pkg <- system.file(manifest_path, package = "localmap")
+    if (nzchar(csv_path_pkg) && file.exists(csv_path_pkg)) {
+      csv_path <- csv_path_pkg
+      root_dir <- system.file(package = "localmap")
+    }
   }
   if (!file.exists(csv_path)) {
     abort(
@@ -36,6 +50,9 @@ read_manifest <- function(manifest_path) {
       class = "read_manifest_missing"
     )
   }
+  if (is.null(root_dir) || !nzchar(root_dir)) {
+    root_dir <- dirname(csv_path)
+  }
 
   dat <- read_csv(csv_path, show_col_types = FALSE, progress = FALSE)
   # Validate minimal schema
@@ -44,7 +61,18 @@ read_manifest <- function(manifest_path) {
   dat$id <- str_trim(dat$id)
   dat$path <- str_trim(dat$path)
 
-  out <- mutate(dat, abs_path = here(path))
+  resolve_path <- function(p) {
+    candidate <- file.path(root_dir, p)
+    if (!file.exists(candidate) && startsWith(p, "inst/")) {
+      candidate_inst <- file.path(root_dir, substring(p, nchar("inst/") + 1L))
+      if (file.exists(candidate_inst)) {
+        return(candidate_inst)
+      }
+    }
+    candidate
+  }
+
+  out <- mutate(dat, abs_path = vapply(path, resolve_path, character(1)))
   # Warn for missing files but do not abort; downstream targets may generate them
   missing <- out[!file.exists(out$abs_path), , drop = FALSE]
   if (nrow(missing) > 0L) {

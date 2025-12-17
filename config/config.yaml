@@ -136,3 +136,37 @@ slurm:
   workers: 64
   time: "06:00:00"
   mem_gb: 4
+
+demo:
+  inherits: default
+  ala:
+    use_fixture: true
+    fixture_occurrences: "inst/extdata/occurrences_demo.csv"
+  data:
+    occurrence:
+      map:
+        output_path: "outputs/maps/demo_species_occurrences.png"
+        topo_output_path: "outputs/maps/demo_species_topo.png"
+        additional_points:
+          path: null
+        enable_topo_tiles: false
+    camera_sites:
+      path: "inst/extdata/camera_sites_demo.csv"
+      central_site: "centre"
+      bbox_half_km: 10
+      basemap:
+        url: ""
+        layers: []
+        overlays: []
+        output_path: "outputs/tiles/demo_camera_sites_tile.png"
+      map:
+        output_path: "outputs/maps/demo_camera_sites.png"
+        legend:
+          show: false
+      stack:
+        paths: ["outputs/maps/demo_camera_sites.png"]
+        glob: []
+        input_dir: []
+        columns: 1
+        rows: 1
+        output_path: "outputs/maps/demo_camera_sites_panel.png"

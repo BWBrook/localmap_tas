@@ -1,0 +1,6 @@
+species_id,longitude,latitude,eventDate,matched_common_name,matched_scientific_name,query_common_name,query_scientific_name,dataResourceName,taxonConceptID
+superb_lyrebird,145.281,-41.132,2023-04-12,Superb Lyrebird,Menura novaehollandiae,Superb Lyrebird,Menura novaehollandiae,Fixture demo dataset,urn:lsid:biodiversity.org.au:afd.taxon:123
+superb_lyrebird,145.334,-41.091,2022-11-03,Superb Lyrebird,Menura novaehollandiae,Superb Lyrebird,Menura novaehollandiae,Fixture demo dataset,urn:lsid:biodiversity.org.au:afd.taxon:123
+superb_lyrebird,145.402,-41.058,2021-08-19,Superb Lyrebird,Menura novaehollandiae,Superb Lyrebird,Menura novaehollandiae,Fixture demo dataset,urn:lsid:biodiversity.org.au:afd.taxon:123
+superb_lyrebird,145.219,-41.014,2020-02-27,Superb Lyrebird,Menura novaehollandiae,Superb Lyrebird,Menura novaehollandiae,Fixture demo dataset,urn:lsid:biodiversity.org.au:afd.taxon:123
+superb_lyrebird,145.366,-41.177,2019-06-05,Superb Lyrebird,Menura novaehollandiae,Superb Lyrebird,Menura novaehollandiae,Fixture demo dataset,urn:lsid:biodiversity.org.au:afd.taxon:123

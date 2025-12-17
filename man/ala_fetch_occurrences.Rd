@@ -35,6 +35,9 @@ applied when simplifying the boundary geometry.}
 southerly records at or below the threshold; positive values retain
 northerly records at or above the threshold.}
 
+\item{state_province}{Optional string used to filter records by the
+\code{stateProvince} field (e.g., "Tasmania").}
+
 \item{fetch_fun}{Optional function overriding the download implementation.
 Defaults to an internal wrapper around \code{galah} and exists mostly for
 testing.}

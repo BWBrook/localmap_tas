@@ -11,7 +11,7 @@ test_that("read_camera_sites validates and loads data", {
     ),
     tmp
   )
-  data <- read_camera_sites(tmp)
+  data <- localmap:::read_camera_sites(tmp)
   expect_s3_class(data, "tbl_df")
   expect_equal(nrow(data), 2L)
 })
@@ -24,7 +24,7 @@ test_that("prepare_camera_site_context builds square bbox and filters", {
     rd = c(100, 50, 20),
     obs = c(1, 0, 0)
   )
-  ctx <- prepare_camera_site_context(data, central_site = "centre", half_width_km = 20)
+  ctx <- localmap:::prepare_camera_site_context(data, central_site = "centre", half_width_km = 20)
   expect_true(inherits(ctx$bbox_3857, "sfc_POLYGON"))
   bb <- sf::st_bbox(ctx$bbox_3857)
   expect_equal(unname(round((bb["xmax"] - bb["xmin"]) / 1000, 1)), 40.0)
@@ -40,16 +40,19 @@ test_that("fetch_camera_wms_tile creates placeholder when URL missing", {
     rd = c(100),
     obs = c(1)
   )
-  ctx <- prepare_camera_site_context(data, central_site = "centre", half_width_km = 5)
+  ctx <- localmap:::prepare_camera_site_context(data, central_site = "centre", half_width_km = 5)
   tmp_tile <- file.path(tempdir(), "tile.png")
   if (file.exists(tmp_tile)) unlink(tmp_tile)
-  tile_path <- fetch_camera_wms_tile(
-    bbox_3857 = ctx$bbox_3857,
-    provider_cfg = list(
-      url = "",
-      layers = "TASVEG",
-      output_path = tmp_tile
-    )
+  expect_warning(
+    tile_path <- localmap:::fetch_camera_wms_tile(
+      bbox_3857 = ctx$bbox_3857,
+      provider_cfg = list(
+        url = "",
+        layers = "TASVEG",
+        output_path = tmp_tile
+      )
+    ),
+    "No WMS URL provided"
   )
   expect_equal(tile_path, tmp_tile)
   expect_true(file.exists(tmp_tile))
@@ -63,20 +66,23 @@ test_that("render_camera_sites_map writes map output", {
     rd = c(100, 40),
     obs = c(1, 0)
   )
-  ctx <- prepare_camera_site_context(data, central_site = "centre", half_width_km = 10)
+  ctx <- localmap:::prepare_camera_site_context(data, central_site = "centre", half_width_km = 10)
   tmp_tile <- file.path(tempdir(), "tile_render.png")
   if (file.exists(tmp_tile)) unlink(tmp_tile)
-  invisible(fetch_camera_wms_tile(
-    bbox_3857 = ctx$bbox_3857,
-    provider_cfg = list(
-      url = "",
-      layers = "TASVEG",
-      output_path = tmp_tile
-    )
-  ))
+  expect_warning(
+    invisible(localmap:::fetch_camera_wms_tile(
+      bbox_3857 = ctx$bbox_3857,
+      provider_cfg = list(
+        url = "",
+        layers = "TASVEG",
+        output_path = tmp_tile
+      )
+    )),
+    "No WMS URL provided"
+  )
   tmp_map <- file.path(tempdir(), "camera_map.png")
   if (file.exists(tmp_map)) unlink(tmp_map)
-  out <- render_camera_sites_map(
+  out <- localmap:::render_camera_sites_map(
     context = ctx,
     tile_path = tmp_tile,
     map_cfg = list(
@@ -101,7 +107,7 @@ test_that("prepare_camera_site_context clamps to max scale", {
   )
   basemap_cfg <- list(width = 1024, dpi = 254, max_scale = 100000)
   expect_warning(
-    ctx <- prepare_camera_site_context(
+    ctx <- localmap:::prepare_camera_site_context(
       data,
       central_site = "centre",
       half_width_km = 50,
@@ -112,7 +118,10 @@ test_that("prepare_camera_site_context clamps to max scale", {
   allowed_half_km <- ((1024 * 100000 * 0.0254) / 254) / 2 / 1000
   expect_equal(ctx$half_width_km, allowed_half_km)
   bb <- sf::st_bbox(ctx$bbox_3857)
-  expect_equal(unname(round((bb["xmax"] - bb["xmin"]) / 1000, 3)), unname(round(allowed_half_km * 2, 3)))
+  expect_equal(
+    unname(round((bb["xmax"] - bb["xmin"]) / 1000, 3)),
+    unname(round(allowed_half_km * 2, 3))
+  )
 })
 
 
@@ -143,7 +152,7 @@ test_that("camera_sites_stack_maps stacks PNGs vertically", {
   png::writePNG(img_c, target = paths[[3]])
 
   output_path <- file.path(tmp_dir, "stacked.png")
-  res <- camera_sites_stack_maps(
+  res <- localmap:::camera_sites_stack_maps(
     stack_cfg = list(
       paths = c(paths, paths),
       glob = file.path(tmp_dir, "*.png"),
@@ -224,7 +233,7 @@ test_that("camera_sites_stack_maps builds grids with labels", {
   }
 
   output_path <- file.path(tmp_dir, "stacked_grid.png")
-  res <- camera_sites_stack_maps(
+  res <- localmap:::camera_sites_stack_maps(
     stack_cfg = list(
       input_dir = tmp_dir,
       pattern = "panel_.*\\.png$",
@@ -303,7 +312,7 @@ test_that("camera_sites_stack_maps honours layout overrides and ordering", {
   }
 
   output_path <- file.path(tmp_dir, "panel_order.png")
-  res <- camera_sites_stack_maps(
+  res <- localmap:::camera_sites_stack_maps(
     stack_cfg = list(
       input_dir = tmp_dir,
       pattern = "panel_.*\\.png$",

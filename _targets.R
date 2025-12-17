@@ -24,7 +24,7 @@ list(
 
   targets::tar_target(
     ala_config,
-    ala_configure(cfg$ala),
+    if (isTRUE(cfg$ala$use_fixture)) cfg$ala else ala_configure(cfg$ala),
     description = "Configured galah options for ALA access."
   ),
 
@@ -36,22 +36,36 @@ list(
 
   targets::tar_target(
     species_taxa,
-    ala_resolve_species(species_requests),
+    if (isTRUE(cfg$ala$use_fixture)) {
+      ala_fixture_taxa(species_requests)
+    } else {
+      ala_resolve_species(species_requests)
+    },
     description = "Resolved species metadata from the Atlas of Living Australia."
   ),
 
   targets::tar_target(
     species_occurrences,
-    ala_fetch_occurrences(
-      taxa = species_taxa,
-      min_year = cfg$data$occurrence$min_year,
-      boundary = cfg$data$occurrence$boundary,
-      boundary_simplify = cfg$data$occurrence$boundary_simplify,
-      columns = cfg$data$occurrence$fields,
-      min_lat = cfg$data$occurrence$min_lat,
-      state_province = cfg$data$occurrence$state_province,
-      config = ala_config
-    ),
+    if (isTRUE(cfg$ala$use_fixture)) {
+      ala_fixture_occurrences(
+        taxa = species_taxa,
+        fixture_path = cfg$ala$fixture_occurrences,
+        min_year = cfg$data$occurrence$min_year,
+        min_lat = cfg$data$occurrence$min_lat,
+        state_province = cfg$data$occurrence$state_province
+      )
+    } else {
+      ala_fetch_occurrences(
+        taxa = species_taxa,
+        min_year = cfg$data$occurrence$min_year,
+        boundary = cfg$data$occurrence$boundary,
+        boundary_simplify = cfg$data$occurrence$boundary_simplify,
+        columns = cfg$data$occurrence$fields,
+        min_lat = cfg$data$occurrence$min_lat,
+        state_province = cfg$data$occurrence$state_province,
+        config = ala_config
+      )
+    },
     description = "Occurrence records retrieved from the Atlas of Living Australia."
   ),
 

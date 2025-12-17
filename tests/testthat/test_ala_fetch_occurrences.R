@@ -1,4 +1,13 @@
-fake_fetch <- function(identifier, species_row, min_year, boundary_wkt, columns, min_lat, state_province, config) {
+fake_fetch <- function(
+  identifier,
+  species_row,
+  min_year,
+  boundary_wkt,
+  columns,
+  min_lat,
+  state_province,
+  config
+) {
   testthat::expect_equal(identifier, "Menura novaehollandiae")
   testthat::expect_equal(min_year, 1970)
   testthat::expect_equal(columns, c("decimalLongitude", "decimalLatitude"))
@@ -35,7 +44,16 @@ testthat::test_that("ala_fetch_occurrences iterates over taxa", {
   testthat::expect_equal(records$species_id, "superb_lyrebird")
 })
 
-filter_fetch <- function(identifier, species_row, min_year, boundary_wkt, columns, min_lat, state_province, config) {
+filter_fetch <- function(
+  identifier,
+  species_row,
+  min_year,
+  boundary_wkt,
+  columns,
+  min_lat,
+  state_province,
+  config
+) {
   out <- tibble::tibble(
     longitude = c(150.1, 150.2),
     latitude = c(-39.5, -41.2),

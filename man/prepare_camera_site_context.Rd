@@ -17,6 +17,10 @@ prepare_camera_site_context(
 \item{central_site}{Character scalar identifying the focal site.}
 
 \item{half_width_km}{Numeric scalar giving half the side length in km.}
+
+\item{basemap_cfg}{Optional list describing basemap settings (e.g. image
+width, dpi, max scale) used to clamp the requested extent when the service
+has visibility constraints.}
 }
 \value{
 List containing filtered \code{sf} objects and bounding boxes in EPSG:4326

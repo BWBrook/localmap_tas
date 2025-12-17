@@ -21,15 +21,44 @@ map_species_occurrences <- function(occurrences,
                                     mapping_settings = NULL,
                                     output_path = NULL) {
   fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_list, assert_numeric, assert_string, .into = fn_env)
+  import::from(
+    "checkmate",
+    assert_data_frame,
+    assert_list,
+    assert_numeric,
+    assert_string,
+    .into = fn_env
+  )
   import::from("dplyr", mutate, coalesce, .into = fn_env)
   import::from("geosphere", destPoint, .into = fn_env)
-  import::from("ggplot2", coord_sf, geom_sf, geom_sf_text, ggplot, ggsave, labs, theme, theme_minimal, .into = fn_env)
+  import::from(
+    "ggplot2",
+    coord_sf,
+    geom_sf,
+    geom_sf_text,
+    ggplot,
+    ggsave,
+    labs,
+    theme,
+    theme_minimal,
+    .into = fn_env
+  )
   import::from("here", here, .into = fn_env)
   import::from("rnaturalearth", ne_states, .into = fn_env)
   import::from("readr", read_csv, .into = fn_env)
   import::from("rlang", abort, warn, .into = fn_env)
-  import::from("sf", st_as_sf, st_bbox, st_crop, st_make_valid, st_polygon, st_sfc, st_within, st_filter, .into = fn_env)
+  import::from(
+    "sf",
+    st_as_sf,
+    st_bbox,
+    st_crop,
+    st_make_valid,
+    st_polygon,
+    st_sfc,
+    st_within,
+    st_filter,
+    .into = fn_env
+  )
   import::from("utils", modifyList, .into = fn_env)
 
   assert_data_frame(occurrences, min.rows = 0L)
@@ -73,7 +102,10 @@ map_species_occurrences <- function(occurrences,
 
   top_left <- bbox_cfg$top_left
   if (is.null(top_left)) {
-    abort("Bounding box must include a `top_left` coordinate.", class = "map_species_occurrences_missing_top_left")
+    abort(
+      "Bounding box must include a `top_left` coordinate.",
+      class = "map_species_occurrences_missing_top_left"
+    )
   }
   top_left_vec <- coerce_top_left(top_left)
 
@@ -278,7 +310,16 @@ load_additional_points <- function(cfg) {
 
 create_graticule <- function(bbox) {
   fn_env <- environment()
-  import::from("sf", st_as_sf, st_bbox, st_graticule, st_make_valid, st_segmentize, st_transform, .into = fn_env)
+  import::from(
+    "sf",
+    st_as_sf,
+    st_bbox,
+    st_graticule,
+    st_make_valid,
+    st_segmentize,
+    st_transform,
+    .into = fn_env
+  )
 
   bb <- st_bbox(bbox)
   lon_seq <- seq(floor(bb["xmin"]), ceiling(bb["xmax"]), by = 1)
@@ -309,11 +350,11 @@ create_graticule <- function(bbox) {
 
   format_lon <- function(x) {
     dir <- ifelse(x >= 0, "E", "W")
-    sprintf("%.1f°%s", abs(x), dir)
+    sprintf("%.1f\u00b0%s", abs(x), dir)
   }
   format_lat <- function(y) {
     dir <- ifelse(y >= 0, "N", "S")
-    sprintf("%.1f°%s", abs(y), dir)
+    sprintf("%.1f\u00b0%s", abs(y), dir)
   }
 
   lon_labels <- st_as_sf(
@@ -357,13 +398,42 @@ generate_topo_tile_map <- function(occurrences,
                                    mapping_settings = NULL,
                                    output_path = NULL) {
   fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_logical, assert_numeric, assert_string, .into = fn_env)
+  import::from(
+    "checkmate",
+    assert_data_frame,
+    assert_logical,
+    assert_numeric,
+    assert_string,
+    .into = fn_env
+  )
   import::from("dplyr", mutate, coalesce, .into = fn_env)
-  import::from("ggplot2", aes, coord_sf, geom_sf, geom_sf_text, ggplot, ggsave, labs, theme, theme_void, .into = fn_env)
+  import::from(
+    "ggplot2",
+    aes,
+    coord_sf,
+    geom_sf,
+    geom_sf_text,
+    ggplot,
+    ggsave,
+    labs,
+    theme,
+    theme_void,
+    .into = fn_env
+  )
   import::from("here", here, .into = fn_env)
   import::from("maptiles", get_tiles, .into = fn_env)
   import::from("rlang", warn, .into = fn_env)
-  import::from("sf", st_as_sf, st_bbox, st_crs, st_filter, st_make_valid, st_transform, st_within, .into = fn_env)
+  import::from(
+    "sf",
+    st_as_sf,
+    st_bbox,
+    st_crs,
+    st_filter,
+    st_make_valid,
+    st_transform,
+    st_within,
+    .into = fn_env
+  )
   import::from("tidyterra", geom_spatraster_rgb, .into = fn_env)
   import::from("utils", modifyList, .into = fn_env)
 
@@ -373,6 +443,7 @@ generate_topo_tile_map <- function(occurrences,
   defaults <- list(
     show_title = FALSE,
     show_legend = FALSE,
+    enable_topo_tiles = TRUE,
     point_colour = "#2ca25f",
     point_size = 1.6,
     additional_points = list(
@@ -387,6 +458,15 @@ generate_topo_tile_map <- function(occurrences,
     tile_graticule = FALSE
   )
   mapping_settings <- modifyList(defaults, mapping_settings)
+
+  enable_tiles <- mapping_settings$enable_topo_tiles
+  if (is.null(enable_tiles)) {
+    enable_tiles <- TRUE
+  }
+  assert_logical(enable_tiles, len = 1L, any.missing = FALSE)
+  if (!isTRUE(enable_tiles)) {
+    return(map_species_occurrences(occurrences, mapping_settings, output_path))
+  }
 
   assert_numeric(mapping_settings$point_size, len = 1L, lower = 0)
   assert_string(mapping_settings$point_colour, min.chars = 1L)
@@ -576,7 +656,10 @@ build_square_bbox <- function(top_left, side_length_km) {
   normalize_lonlat <- function(coord) {
     vals <- as.numeric(coord)
     if (length(vals) != 2L || any(is.na(vals))) {
-      abort("destPoint returned invalid coordinates when constructing bounding box.", class = "map_species_occurrences_invalid_bbox")
+      abort(
+        "destPoint returned invalid coordinates when constructing bounding box.",
+        class = "map_species_occurrences_invalid_bbox"
+      )
     }
     structure(vals, names = c("lon", "lat"))
   }
@@ -598,10 +681,21 @@ build_square_bbox <- function(top_left, side_length_km) {
 
 get_basemap_tasmania <- function(bbox) {
   fn_env <- environment()
-  import::from("rnaturalearth", ne_states, .into = fn_env)
-  import::from("sf", st_bbox, st_crop, st_make_valid, .into = fn_env)
+  import::from("rnaturalearth", ne_countries, .into = fn_env)
+  import::from(
+    "sf",
+    st_as_sf,
+    st_as_sfc,
+    st_bbox,
+    st_geometry,
+    st_intersection,
+    st_make_valid,
+    .into = fn_env
+  )
 
-  australia_states <- ne_states(country = "australia", returnclass = "sf")
-  australia_states <- st_make_valid(australia_states)
-  st_crop(australia_states, st_bbox(bbox))
+  australia <- ne_countries(scale = 50, country = "australia", returnclass = "sf")
+  australia <- st_make_valid(australia)
+  bbox_sfc <- st_as_sfc(st_bbox(bbox))
+  clipped <- st_intersection(st_geometry(australia), bbox_sfc)
+  st_as_sf(clipped)
 }

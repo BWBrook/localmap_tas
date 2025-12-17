@@ -15,6 +15,8 @@
 #' @param min_lat Optional numeric latitude threshold. Negative values retain
 #'   southerly records at or below the threshold; positive values retain
 #'   northerly records at or above the threshold.
+#' @param state_province Optional string used to filter records by the
+#'   `stateProvince` field (e.g., "Tasmania").
 #' @param fetch_fun Optional function overriding the download implementation.
 #'   Defaults to an internal wrapper around `galah` and exists mostly for
 #'   testing.
@@ -33,7 +35,14 @@ ala_fetch_occurrences <- function(taxa,
                                   fetch_fun = NULL,
                                   config = NULL) {
   fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_names, assert_numeric, assert_string, .into = fn_env)
+  import::from(
+    "checkmate",
+    assert_data_frame,
+    assert_names,
+    assert_numeric,
+    assert_string,
+    .into = fn_env
+  )
   import::from("dplyr", filter, .into = fn_env)
   import::from("purrr", map_dfr, .into = fn_env)
   import::from("rlang", is_function, .data, .into = fn_env)
@@ -57,7 +66,10 @@ ala_fetch_occurrences <- function(taxa,
   if (is.null(fetch_fun)) {
     fetch_fun <- ala_fetch_occurrences_galah
   } else if (!is_function(fetch_fun)) {
-    rlang::abort("`fetch_fun` must be a function when supplied.", class = "ala_fetch_occurrences_bad_fetch")
+    rlang::abort(
+      "`fetch_fun` must be a function when supplied.",
+      class = "ala_fetch_occurrences_bad_fetch"
+    )
   }
 
   boundary_wkt <- prepare_boundary(boundary, boundary_simplify)
@@ -119,17 +131,29 @@ ala_fetch_occurrences <- function(taxa,
   })
 }
 
-ala_fetch_occurrences_galah <- function(identifier,
-                                         species_row,
-                                         min_year,
-                                         boundary_wkt,
-                                         columns,
-                                         min_lat,
-                                         state_province,
-                                         config) {
+ala_fetch_occurrences_galah <- function(
+  identifier,
+  species_row,
+  min_year,
+  boundary_wkt,
+  columns,
+  min_lat,
+  state_province,
+  config
+) {
   fn_env <- environment()
   import::from("dplyr", mutate, rename, .into = fn_env)
-  import::from("galah", atlas_occurrences, galah_call, galah_config, galah_filter, galah_identify, galah_polygon, galah_select, .into = fn_env)
+  import::from(
+    "galah",
+    atlas_occurrences,
+    galah_call,
+    galah_config,
+    galah_filter,
+    galah_identify,
+    galah_polygon,
+    galah_select,
+    .into = fn_env
+  )
   import::from("httr2", resp_body_string, .into = fn_env)
   import::from("rlang", exec, syms, .into = fn_env)
   import::from("tibble", as_tibble, .into = fn_env)
@@ -148,18 +172,40 @@ ala_fetch_occurrences_galah <- function(identifier,
     sprintf("galah::galah_identify(%s)", shQuote(identifier))
   )
   if (!is.null(min_year)) {
-    pipeline_steps <- c(pipeline_steps, sprintf("galah::galah_filter(year >= %s)", as.numeric(min_year)))
+    pipeline_steps <- c(
+      pipeline_steps,
+      sprintf("galah::galah_filter(year >= %s)", as.numeric(min_year))
+    )
   }
   if (!is.null(state_province) && nzchar(state_province)) {
-    pipeline_steps <- c(pipeline_steps, sprintf("galah::galah_filter(stateProvince == %s)", shQuote(state_province)))
+    pipeline_steps <- c(
+      pipeline_steps,
+      sprintf(
+        "galah::galah_filter(stateProvince == %s)",
+        shQuote(state_province)
+      )
+    )
   }
   if (!is.null(min_lat) && !is.na(min_lat) && min_lat != 0) {
     lat_cutoff <- as.numeric(min_lat)
     op <- if (lat_cutoff < 0) "<=" else ">="
-    pipeline_steps <- c(pipeline_steps, sprintf("galah::galah_filter(decimalLatitude %s %s)", op, lat_cutoff))
+    pipeline_steps <- c(
+      pipeline_steps,
+      sprintf(
+        "galah::galah_filter(decimalLatitude %s %s)",
+        op,
+        lat_cutoff
+      )
+    )
   }
   if (!is.null(columns) && length(columns) > 0L) {
-    pipeline_steps <- c(pipeline_steps, sprintf("galah::galah_select(%s)", paste(columns, collapse = ", ")))
+    pipeline_steps <- c(
+      pipeline_steps,
+      sprintf(
+        "galah::galah_select(%s)",
+        paste(columns, collapse = ", ")
+      )
+    )
   }
   pipeline_expr <- parse(text = paste(pipeline_steps, collapse = " |>\n    "))
   call <- eval(pipeline_expr)
@@ -216,7 +262,18 @@ ala_fetch_occurrences_galah <- function(identifier,
 
 prepare_boundary <- function(boundary, simplify) {
   fn_env <- environment()
-  import::from("sf", read_sf, st_as_text, st_crs, st_geometry, st_make_valid, st_simplify, st_transform, st_union, .into = fn_env)
+  import::from(
+    "sf",
+    read_sf,
+    st_as_text,
+    st_crs,
+    st_geometry,
+    st_make_valid,
+    st_simplify,
+    st_transform,
+    st_union,
+    .into = fn_env
+  )
 
   if (is.null(boundary)) {
     return(NULL)

@@ -24,6 +24,6 @@ jobs:
       - uses: r-lib/actions/setup-renv@v2
 
       - name: Lint
-        run: Rscript -e 'if (!requireNamespace(\"lintr\", quietly = TRUE)) install.packages(\"lintr\"); lintr::lint_package()'
+        run: Rscript -e 'if (!requireNamespace(\"lintr\", quietly = TRUE)) install.packages(\"lintr\"); l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) }'
 
       - uses: r-lib/actions/check-r-package@v2

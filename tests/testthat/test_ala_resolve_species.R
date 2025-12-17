@@ -2,7 +2,10 @@ fake_search <- function(term) {
   tibble::tibble(
     scientificName = c("Menura novaehollandiae", "Menura alberti"),
     vernacularName = c("Superb Lyrebird", "Albert's Lyrebird"),
-    taxonConceptID = c("urn:lsid:biodiversity.org.au:afd.taxon:123", "urn:lsid:biodiversity.org.au:afd.taxon:456"),
+    taxonConceptID = c(
+      "urn:lsid:biodiversity.org.au:afd.taxon:123",
+      "urn:lsid:biodiversity.org.au:afd.taxon:456"
+    ),
     rank = c("species", "species"),
     search = term
   )
@@ -26,7 +29,10 @@ testthat::test_that("ala_resolve_species flags missing matches", {
     scientific_name = "Not real"
   )
   empty_search <- function(term) tibble::tibble()
-  resolved <- localmap::ala_resolve_species(queries, search_fun = empty_search)
+  testthat::expect_warning(
+    resolved <- localmap::ala_resolve_species(queries, search_fun = empty_search),
+    "No taxonomic match"
+  )
   testthat::expect_true(is.na(resolved$matched_scientific_name))
   testthat::expect_equal(resolved$match_type, "not_found")
 })
