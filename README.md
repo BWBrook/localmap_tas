@@ -1,214 +1,69 @@
-# localmap
+# localmap_tas — Reproducible local mapping workflow for Tasmania
 
-Localmap bundles the scaffolding we need to source, clean, and map species occurrence
-data. The repository keeps the reproducible tooling from the template but orients it
-squarely around biodiversity workflows.
+localmap_tas is an R-based workflow for generating **publication-quality maps of field sites in Tasmania**.
+You configure a site (points + extent) and desired GIS layers (from The List and elsewhere), then run a reproducible pipeline to produce map figures and (optionally) site-level extracted attributes.
 
-- Reproducible environment with `renv`
-- Pipeline orchestrated by `{targets}`
-- Tests with `{testthat}`
-- Documentation via Quarto in `docs/` and long-form reports under `reports/`
-  - Vignettes under `vignettes/`
-  - Package site configured for `docs/pkgdown/`
+## What you get
 
-Quick start (run in the RStudio Console):
+- A **site overview map** (basemap + site points + annotations)
+- A **multi-panel figure** (e.g., orthophoto, vegetation, elevation/slope, canopy)
+- Optional **site attribute extraction** (tidy table with provenance)
+- Reproducible runs via `renv` + `{targets}`
+
+## Quickstart (local)
+
+1. Restore the R environment:
 
 ```r
 renv::restore(prompt = FALSE)
-source("dependencies.R")
-pak::pkg_install(project_dependencies())
-devtools::document()
-testthat::test_dir("tests/testthat", reporter = "summary")
 ```
 
-Run the pipeline after restoring deps:
+2. Install project dependencies (optional helper):
+
+```r
+source("dependencies.R")
+pak::pkg_install(project_dependencies())
+```
+
+3. Run the pipeline:
 
 ```r
 targets::tar_make()
 ```
 
-Render docs:
+Outputs are written to `outputs/` (ignored by git).
 
-```bash
-quarto render docs/
-```
+## Configuration
 
-Build the pkgdown site (outputs to `docs/pkgdown/`):
+Configuration lives in `config/config.yaml` and supports multiple profiles.
+Typical configuration includes:
 
-```r
-pkgdown::build_site(preview = FALSE)
-```
+* site points input path (CSV/GeoPackage)
+* centroid and AOI size
+* layer/panel definitions
+* output paths and styling
 
-Browse the vignette:
+See:
 
-```r
-utils::browseVignettes(package = "localmap")
-```
+* `docs/product_brief.md`
+* `docs/architecture.md`
+* `docs/roadmap.md`
 
-Key targets available out of the box:
+## Data sources and attribution
 
-- `ala_config`: galah configuration derived from `config/config.yaml`
-- `species_requests`: parsed species query definitions (`metadata/species_requests.csv`)
-- `species_taxa`: resolved species metadata from the Atlas of Living Australia
-- `species_occurrences`: occurrence records retrieved via galah
-- `species_map`: static map image highlighting occurrence points within the
-  configured bounding box
-- `topo_tile_map`: tile-based map (defaults to `Esri.WorldImagery`, with
-  alternatives like `OpenTopoMap`) overlaying species
-  and ancillary points for the configured extent
-- `camera_sites_tile`: basemap tile (WMS or placeholder) for the camera site extent.
-- `camera_sites_map`: effort-scaled wildlife camera map highlighting detections
-  (red) versus non-detections (light grey) and including scale/north markers.
-- `camera_sites_panel`: vertically stacked composite of camera site maps (e.g.,
-  regional variants).
-- `cfg`: configuration list
-- `raw_manifest`: parsed input manifest
-- `input_files`: file paths tracked as dependencies (format = "file")
-- `data_preview`: lightweight preview of CSV inputs
-- `combined_data`: combined tibble across CSV inputs (common columns)
-- `manifest_summary`: counts and distinct file metrics
-- `report`: renders `reports/paper.qmd`
+This project is designed to work with spatial data from Land Tasmania’s “The List” open data services and downloads, as well as other sources.
+You are responsible for ensuring appropriate attribution and usage compliance for any layers you include in your figures.
 
-See `docs/DEVELOPMENT.qmd` for project conventions and additional guidance.
+## Development
 
+Common tasks:
 
-## Wildlife camera deployments
+* Run tests: `make test`
+* Run pipeline: `make pipeline`
+* Run R CMD check: `make check`
 
-Provide wildlife camera effort/observation data via `config/config.yaml` →
-`data$camera_sites`. The CSV is expected to contain `site`, `lat`, `lon`, `rd`
-(run days), and `obs` (detections for the target species). The configuration
-also selects a central site and half-width (km) to build a square bounding box,
-plus an optional WMS provider for basemap tiles. Example:
+See `docs/workflow.md` for the required engineering and artefact-review workflow.
 
-```
-data:
-  camera_sites:
-    path: data/raw/lyr_op.csv
-    central_site: wc_s10_c5
-    bbox_half_km: 20
-    basemap:
-      provider: list_tasveg
-      type: wms
-      url: https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer
-      layers: ["TASVEG_4.017789"]
-      styles: default
-      format: image/png
-      transparent: true
-      width: 2048
-      height: 2048
-      dpi: 96
-      max_scale: 100000
-      legend_path: outputs/tiles/tasveg_camera_sites_legend.png
-      overlays:
-        - name: roads
-          url: https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer
-          layers: ["State_Growth_Roads26192"]
-          opacity: 0.65
-        - name: towns
-          url: https://services.thelist.tas.gov.au/arcgis/services/Public/CadastreAndAdministrative/MapServer/WMSServer
-          layers: ["Localities"]
-          opacity: 0.75
-      output_path: outputs/tiles/tasveg_camera_sites.png
-    map:
-      output_path: outputs/maps/camera_sites.png
-      zero_obs_colour: "#cccccc"
-      positive_obs_colour: "#d73027"
-      show_graticule: true
-      graticule_colour: "#050505"
-      graticule_alpha: 0.4
-      graticule_label_size: 3
-      legend:
-        show: true
-        position: right
-        layout: overlay
-        width_fraction: 0.2
-        margin_fraction: 0.05
-    stack:
-      glob: outputs/maps/camera_sites_*.png
-      input_dir: outputs/maps
-      pattern: camera_sites_.*\\.png$
-      order:
-        - "camera_sites_north"
-        - "camera_sites_central"
-        - "camera_sites_south"
-        - "camera_sites_east"
-        - "camera_sites_west"
-        - "camera_sites_coast"
-      columns: 3    # 3 across × 2 down for six panels
-      rows: 2
-      output_path: outputs/maps/camera_sites_panel.png
-      gap_px: 6
-      labels:
-        values: ["a)", "b)", "c)", "d)", "e)", "f)"]
-        padding_px: 20
-        colour: "#050505"
-```
+## License
 
-The pipeline reads the CSV (`camera_sites_data`), prepares the spatial extent
-(`camera_sites_context`), downloads or fabricates a tile (`camera_sites_tile`),
-and renders the final map (`camera_sites_map`). When multiple site-specific
-maps exist (e.g., different focal centres saved to `outputs/maps/camera_sites_*.png`),
-`camera_sites_panel` deduplicates the matched PNGs and assembles up to nine
-panels. Supply `stack$columns`/`stack$rows` to choose your grid (defaults to a
-single column for ≤3 maps, otherwise 3 columns). The `stack$order` vector is
-evaluated in sequence using regular expressions matched against the PNG
-filenames—use it to force a six-panel layout like `north`, `central`, `south`,
-`east`, `west`, `coast` into a 3×2 grid. Labels (default `a)`–`i)`) render in the
-bottom-right corner and are customisable or optional via `stack$labels`. Update
-the provider details to match your LIST credentials or alternative WMS sources.
-
-If the requested extent, dpi, and image size exceed the service visibility (≈1:100k for TASVEG), `prepare_camera_site_context()` automatically clamps the half-width to keep the request within range and the map warns when a tile would render empty. Graticule styling is configurable via `show_graticule` and related settings.
-
-LIST TASVEG layers only render up to their published visibility scale (≈1:100k). Configure `max_scale` in `config.yaml` and keep the requested extent, image size, and DPI within that limit (e.g., halve `bbox_half_km`, reduce `dpi`, or increase `width`/`height`). When the limit is exceeded the WMS returns a fully transparent PNG, so the helper now warns if the request is out of range. Legend rendering (via WMS `GetLegendGraphic`) is on by default—set `map$legend$show = FALSE` to suppress it, or adjust `legend$layout` (`overlay` vs `sidebar`) and the width/margin fractions to control placement. Optional WMS overlays (e.g., roads or towns) can be declared under `basemap$overlays` using the same URL/layer pattern as the main tile.
-
-## Species occurrence retrieval
-
-Provide species definitions in `metadata/species_requests.csv` with columns
-`species_id`, `common_name`, and `scientific_name` (at least one of the names
-must be supplied). The pipeline resolves those names against the Atlas of Living
-Australia using `{galah}` and stores the results in the `species_occurrences`
-target. Set the `ALA_EMAIL` environment variable (or edit
-`config/config.yaml` → `ala$email`) so galah can authenticate with the API and
-provide a valid `download_reason_id` (defaults to 4, “Scientific research”).
-Configure temporal, jurisdiction, and optional latitude filters under
-`config/config.yaml` → `data$occurrence` (e.g., `min_year`, `state_province`,
-and `min_lat`). To generate maps, set `data$occurrence$map` with a bounding
-box, for example:
-
-```
-data:
-  occurrence:
-    map:
-      basemap: rnaturalearth
-      show_title: false
-      show_legend: false
-      point_colour: "#2171b5"
-      point_size: 1.6
-      additional_points:
-        path: data/raw/lyr_pt.csv
-        colour: "#d73027"
-        size: null
-      # Tile-based target options
-      tile_provider: Esri.WorldImagery  # alternatives include OpenTopoMap
-      tile_zoom: 8
-      tile_outline_colour: "#ffffff"
-      tile_graticule: false
-      topo_output_path: outputs/maps/species_topo.png
-      bounding_box:
-        top_left:
-          lat: -40.2
-          lon: 144.0
-        length_km: 400
-      output_path: outputs/maps/species_occurrences.png
-```
-
-The bounding box approach ensures the map covers Tasmania for the current
-lyrebird case study while remaining configurable for future species. Provide
-optional ancillary locations via `additional_points`; they should include
-`lat`/`lon` columns in the referenced CSV and will render in the configured
-colour (default red). Tile-based backgrounds for the `topo_tile_map` target can
-be adjusted via `tile_provider` (e.g., `Esri.WorldImagery`, `OpenTopoMap`),
-`tile_zoom`, `tile_outline_colour`, and `tile_graticule` (adds labelled degree
-graticules). The rendered file defaults to `outputs/maps/species_topo.png` but
-can be overridden with
-`topo_output_path`.
+MIT (see LICENSE).
