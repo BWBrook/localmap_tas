@@ -8,15 +8,11 @@
 #' @return A tibble with the common columns across all readable CSV files.
 #' @export
 combine_manifest_csvs <- function(manifest) {
-  fn_env <- environment()
-  import::from("readr", read_csv, .into = fn_env)
-  import::from("purrr", map, keep, compact, .into = fn_env)
-  import::from("dplyr", bind_rows, select, intersect, .into = fn_env)
-  import::from("cli", cli_warn, .into = fn_env)
-  import::from("rlang", abort, .into = fn_env)
-
   if (!all(c("path", "abs_path") %in% names(manifest))) {
-    abort("`manifest` must contain path and abs_path columns.", class = "combine_manifest_bad_cols")
+    rlang::abort(
+      "`manifest` must contain path and abs_path columns.",
+      class = "combine_manifest_bad_cols"
+    )
   }
 
   idx <- grepl("\\.csv$", tolower(manifest$path)) & file.exists(manifest$abs_path)

@@ -8,11 +8,6 @@
 #' @return A list with the resolved configuration.
 #' @export
 ala_configure <- function(settings = NULL) {
-  fn_env <- environment()
-  import::from("checkmate", test_string, assert_integerish, .into = fn_env)
-  import::from("galah", galah_config, .into = fn_env)
-  import::from("rlang", abort, .into = fn_env)
-
   if (is.null(settings)) {
     settings <- list()
   } else if (!is.list(settings)) {
@@ -20,11 +15,11 @@ ala_configure <- function(settings = NULL) {
   }
 
   email <- settings$email
-  if (!test_string(email, min.chars = 1)) {
+  if (!checkmate::test_string(email, min.chars = 1)) {
     email <- Sys.getenv("ALA_EMAIL", unset = "")
   }
-  if (!test_string(email, min.chars = 1)) {
-    abort(
+  if (!checkmate::test_string(email, min.chars = 1)) {
+    rlang::abort(
       c(
         "An email address is required to authenticate with the ALA API.",
         i = "Set `cfg$ala$email` or the `ALA_EMAIL` environment variable."
@@ -34,7 +29,7 @@ ala_configure <- function(settings = NULL) {
   }
 
   atlas <- settings$atlas
-  if (!test_string(atlas, min.chars = 1)) {
+  if (!checkmate::test_string(atlas, min.chars = 1)) {
     atlas <- "ALA"
   }
 
@@ -56,11 +51,11 @@ ala_configure <- function(settings = NULL) {
   if (is.null(reason)) {
     reason <- 4L
   } else {
-    assert_integerish(reason, lower = 1L, len = 1L, any.missing = FALSE)
+    checkmate::assert_integerish(reason, lower = 1L, len = 1L, any.missing = FALSE)
     reason <- as.integer(reason)
   }
 
-  galah_config(
+  galah::galah_config(
     atlas = atlas,
     email = email,
     caching = caching,

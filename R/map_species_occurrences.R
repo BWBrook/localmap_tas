@@ -20,48 +20,7 @@
 map_species_occurrences <- function(occurrences,
                                     mapping_settings = NULL,
                                     output_path = NULL) {
-  fn_env <- environment()
-  import::from(
-    "checkmate",
-    assert_data_frame,
-    assert_list,
-    assert_numeric,
-    assert_string,
-    .into = fn_env
-  )
-  import::from("dplyr", mutate, coalesce, .into = fn_env)
-  import::from("geosphere", destPoint, .into = fn_env)
-  import::from(
-    "ggplot2",
-    coord_sf,
-    geom_sf,
-    geom_sf_text,
-    ggplot,
-    ggsave,
-    labs,
-    theme,
-    theme_minimal,
-    .into = fn_env
-  )
-  import::from("here", here, .into = fn_env)
-  import::from("rnaturalearth", ne_states, .into = fn_env)
-  import::from("readr", read_csv, .into = fn_env)
-  import::from("rlang", abort, warn, .into = fn_env)
-  import::from(
-    "sf",
-    st_as_sf,
-    st_bbox,
-    st_crop,
-    st_make_valid,
-    st_polygon,
-    st_sfc,
-    st_within,
-    st_filter,
-    .into = fn_env
-  )
-  import::from("utils", modifyList, .into = fn_env)
-
-  assert_data_frame(occurrences, min.rows = 0L)
+  checkmate::assert_data_frame(occurrences, min.rows = 0L)
 
   mapping_settings <- validate_mapping_settings(mapping_settings)
   defaults <- list(
@@ -75,23 +34,23 @@ map_species_occurrences <- function(occurrences,
       size = NULL
     )
   )
-  mapping_settings <- modifyList(defaults, mapping_settings)
+  mapping_settings <- utils::modifyList(defaults, mapping_settings)
 
-  assert_numeric(mapping_settings$point_size, len = 1L, lower = 0)
-  assert_string(mapping_settings$point_colour, min.chars = 1L)
+  checkmate::assert_numeric(mapping_settings$point_size, len = 1L, lower = 0)
+  checkmate::assert_string(mapping_settings$point_colour, min.chars = 1L)
 
   additional_cfg <- mapping_settings$additional_points
   if (!is.null(additional_cfg$colour)) {
-    assert_string(additional_cfg$colour, min.chars = 1L)
+    checkmate::assert_string(additional_cfg$colour, min.chars = 1L)
   }
   if (!is.null(additional_cfg$size)) {
-    assert_numeric(additional_cfg$size, len = 1L, lower = 0)
+    checkmate::assert_numeric(additional_cfg$size, len = 1L, lower = 0)
   }
   additional_points_sf <- load_additional_points(additional_cfg)
 
   bbox_cfg <- mapping_settings$bounding_box
   if (is.null(bbox_cfg)) {
-    abort(
+    rlang::abort(
       c(
         "A bounding box configuration is required for mapping.",
         i = "Set cfg$data$occurrence$map$bounding_box in config/config.yaml"
@@ -102,7 +61,7 @@ map_species_occurrences <- function(occurrences,
 
   top_left <- bbox_cfg$top_left
   if (is.null(top_left)) {
-    abort(
+    rlang::abort(
       "Bounding box must include a `top_left` coordinate.",
       class = "map_species_occurrences_missing_top_left"
     )
@@ -110,7 +69,7 @@ map_species_occurrences <- function(occurrences,
   top_left_vec <- coerce_top_left(top_left)
 
   length_km <- bbox_cfg$length_km
-  assert_numeric(length_km, len = 1L, lower = 1e-6)
+  checkmate::assert_numeric(length_km, len = 1L, lower = 1e-6)
   side_length <- as.numeric(length_km)
 
   basemap <- mapping_settings$basemap
@@ -125,11 +84,11 @@ map_species_occurrences <- function(occurrences,
   if (is.null(output_path)) {
     output_path <- here::here("outputs", "maps", "species_occurrences.png")
   }
-  assert_string(output_path, min.chars = 1L)
+  checkmate::assert_string(output_path, min.chars = 1L)
 
   coord_cols <- c("longitude", "latitude")
   if (!all(coord_cols %in% names(occurrences))) {
-    abort(
+    rlang::abort(
       c(
         "Occurrence data must contain `longitude` and `latitude` columns.",
         i = "Ensure ala_fetch_occurrences() retains these columns."
@@ -141,14 +100,14 @@ map_species_occurrences <- function(occurrences,
   occurrences <- occurrences[has_coords, , drop = FALSE]
 
   bbox <- build_square_bbox(top_left_vec, side_length)
-  bbox_bb <- st_bbox(bbox)
+  bbox_bb <- sf::st_bbox(bbox)
 
   basemap_sf <- NULL
   if (identical(basemap, "rnaturalearth")) {
     basemap_sf <- get_basemap_tasmania(bbox)
   }
 
-  occurrences_sf <- st_as_sf(
+  occurrences_sf <- sf::st_as_sf(
     occurrences,
     coords = c("longitude", "latitude"),
     crs = 4326,
@@ -156,33 +115,35 @@ map_species_occurrences <- function(occurrences,
   )
 
   if (nrow(occurrences_sf) > 0L) {
-    occurrences_sf <- st_filter(occurrences_sf, bbox, .predicate = st_within)
+    occurrences_sf <- sf::st_filter(occurrences_sf, bbox, .predicate = sf::st_within)
   }
 
   if (!"species_id" %in% names(occurrences_sf)) {
-    warn("`species_id` column missing; colouring by species will fallback to \"occurrence\".")
+    rlang::warn(
+      "`species_id` column missing; colouring by species will fallback to \"occurrence\"."
+    )
     occurrences_sf$species_id <- "occurrence"
   }
 
-  occurrences_sf <- mutate(
+  occurrences_sf <- dplyr::mutate(
     occurrences_sf,
-    species_label = coalesce(
-      matched_common_name,
-      matched_scientific_name,
-      query_scientific_name,
-      query_common_name,
-      species_id
+    species_label = dplyr::coalesce(
+      .data$matched_common_name,
+      .data$matched_scientific_name,
+      .data$query_scientific_name,
+      .data$query_common_name,
+      .data$species_id
     )
   )
 
-  plot_obj <- ggplot()
+  plot_obj <- ggplot2::ggplot()
   if (!is.null(basemap_sf)) {
     plot_obj <- plot_obj +
-      geom_sf(data = basemap_sf, fill = "#f3f3f3", colour = "#b0b0b0", linewidth = 0.3)
+      ggplot2::geom_sf(data = basemap_sf, fill = "#f3f3f3", colour = "#b0b0b0", linewidth = 0.3)
   }
   if (nrow(occurrences_sf) > 0L) {
     plot_obj <- plot_obj +
-      geom_sf(
+      ggplot2::geom_sf(
         data = occurrences_sf,
         colour = mapping_settings$point_colour,
         alpha = 0.8,
@@ -196,7 +157,7 @@ map_species_occurrences <- function(occurrences,
       extra_size <- mapping_settings$point_size
     }
     plot_obj <- plot_obj +
-      geom_sf(
+      ggplot2::geom_sf(
         data = additional_points_sf,
         colour = additional_cfg$colour,
         alpha = 0.9,
@@ -205,17 +166,17 @@ map_species_occurrences <- function(occurrences,
   }
 
   plot_obj <- plot_obj +
-    coord_sf(
+    ggplot2::coord_sf(
       xlim = c(bbox_bb["xmin"], bbox_bb["xmax"]),
       ylim = c(bbox_bb["ymin"], bbox_bb["ymax"]),
       expand = FALSE
     ) +
-    theme_minimal(base_size = 12) +
-    theme(legend.position = if (isTRUE(mapping_settings$show_legend)) "bottom" else "none")
+    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme(legend.position = if (isTRUE(mapping_settings$show_legend)) "bottom" else "none")
 
   if (isTRUE(mapping_settings$show_title)) {
     plot_obj <- plot_obj +
-      labs(
+      ggplot2::labs(
         title = "Species occurrences",
         subtitle = sprintf(
           "Bounding box top-left: (%.3f, %.3f); side: %.0f km",
@@ -227,30 +188,24 @@ map_species_occurrences <- function(occurrences,
         y = "Latitude"
       )
   } else {
-    plot_obj <- plot_obj + labs(x = "Longitude", y = "Latitude")
+    plot_obj <- plot_obj + ggplot2::labs(x = "Longitude", y = "Latitude")
   }
 
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
-  ggsave(filename = output_path, plot = plot_obj, width = 7, height = 7, dpi = 300)
+  ggplot2::ggsave(filename = output_path, plot = plot_obj, width = 7, height = 7, dpi = 300)
 
   output_path
 }
 
 validate_mapping_settings <- function(mapping_settings) {
-  fn_env <- environment()
-  import::from("checkmate", assert_list, .into = fn_env)
-
   if (is.null(mapping_settings)) {
     return(list())
   }
-  assert_list(mapping_settings, any.missing = FALSE)
+  checkmate::assert_list(mapping_settings, any.missing = FALSE)
   mapping_settings
 }
 
 coerce_top_left <- function(value) {
-  fn_env <- environment()
-  import::from("checkmate", assert_numeric, .into = fn_env)
-
   if (is.list(value) && all(c("lat", "lon") %in% names(value))) {
     lat <- as.numeric(value$lat)
     lon <- as.numeric(value$lon)
@@ -258,18 +213,11 @@ coerce_top_left <- function(value) {
   } else {
     coords <- as.numeric(unlist(value, use.names = FALSE))
   }
-  assert_numeric(coords, len = 2L, any.missing = FALSE)
+  checkmate::assert_numeric(coords, len = 2L, any.missing = FALSE)
   c(lat = coords[[1]], lon = coords[[2]])
 }
 
 load_additional_points <- function(cfg) {
-  fn_env <- environment()
-  import::from("checkmate", assert_list, assert_character, assert_string, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from("readr", read_csv, .into = fn_env)
-  import::from("rlang", warn, .into = fn_env)
-  import::from("sf", st_as_sf, .into = fn_env)
-
   if (is.null(cfg) || (!is.list(cfg))) {
     return(NULL)
   }
@@ -279,49 +227,40 @@ load_additional_points <- function(cfg) {
     return(NULL)
   }
 
-  candidate_paths <- unique(c(path, here(path)))
+  candidate_paths <- unique(c(path, here::here(path)))
   resolved <- candidate_paths[file.exists(candidate_paths)][1]
   if (is.na(resolved)) {
-    warn(sprintf("Additional points file not found: %s", path))
+    rlang::warn(sprintf("Additional points file not found: %s", path))
     return(NULL)
   }
 
-  data <- try(read_csv(resolved, show_col_types = FALSE, progress = FALSE), silent = TRUE)
+  data <- try(readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE), silent = TRUE)
   if (inherits(data, "try-error")) {
-    warn(sprintf("Failed to read additional points file: %s", resolved))
+    rlang::warn(sprintf("Failed to read additional points file: %s", resolved))
     return(NULL)
   }
 
   required <- c("lat", "lon")
   missing <- setdiff(required, names(data))
   if (length(missing) > 0L) {
-    warn(sprintf("Additional points file missing columns: %s", paste(missing, collapse = ", ")))
+    rlang::warn(sprintf(
+      "Additional points file missing columns: %s",
+      paste(missing, collapse = ", ")
+    ))
     return(NULL)
   }
 
   data <- data[!is.na(data$lat) & !is.na(data$lon), , drop = FALSE]
   if (nrow(data) == 0L) {
-    warn("Additional points file contains no valid lat/lon rows.")
+    rlang::warn("Additional points file contains no valid lat/lon rows.")
     return(NULL)
   }
 
-  st_as_sf(data, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+  sf::st_as_sf(data, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
 }
 
 create_graticule <- function(bbox) {
-  fn_env <- environment()
-  import::from(
-    "sf",
-    st_as_sf,
-    st_bbox,
-    st_graticule,
-    st_make_valid,
-    st_segmentize,
-    st_transform,
-    .into = fn_env
-  )
-
-  bb <- st_bbox(bbox)
+  bb <- sf::st_bbox(bbox)
   lon_seq <- seq(floor(bb["xmin"]), ceiling(bb["xmax"]), by = 1)
   lat_seq <- seq(floor(bb["ymin"]), ceiling(bb["ymax"]), by = 1)
 
@@ -329,17 +268,17 @@ create_graticule <- function(bbox) {
     return(NULL)
   }
 
-  grid <- st_graticule(
+  grid <- sf::st_graticule(
     lon = lon_seq,
     lat = lat_seq,
     xlim = c(bb["xmin"], bb["xmax"]),
     ylim = c(bb["ymin"], bb["ymax"])
   )
-  grid <- st_segmentize(grid, dfMaxLength = 25 * 1000)
-  grid <- st_make_valid(grid)
-  bbox_sfc <- st_as_sfc(bb)
-  bbox_3857 <- st_transform(bbox_sfc, 3857)
-  grid_3857 <- st_intersection(st_transform(grid, 3857), bbox_3857)
+  grid <- sf::st_segmentize(grid, dfMaxLength = 25 * 1000)
+  grid <- sf::st_make_valid(grid)
+  bbox_sfc <- sf::st_as_sfc(bb)
+  bbox_3857 <- sf::st_transform(bbox_sfc, 3857)
+  grid_3857 <- sf::st_intersection(sf::st_transform(grid, 3857), bbox_3857)
 
   lon_offset <- (bb["xmax"] - bb["xmin"]) * 0.02
   lat_offset <- (bb["ymax"] - bb["ymin"]) * 0.02
@@ -357,7 +296,7 @@ create_graticule <- function(bbox) {
     sprintf("%.1f\u00b0%s", abs(y), dir)
   }
 
-  lon_labels <- st_as_sf(
+  lon_labels <- sf::st_as_sf(
     data.frame(
       lon = lon_seq,
       lat = bb["ymin"] + lat_offset,
@@ -368,7 +307,7 @@ create_graticule <- function(bbox) {
     remove = FALSE
   )
 
-  lat_labels <- st_as_sf(
+  lat_labels <- sf::st_as_sf(
     data.frame(
       lon = bb["xmin"] + lat_label_offset,
       lat = lat_seq,
@@ -380,8 +319,8 @@ create_graticule <- function(bbox) {
   )
 
   labels <- rbind(lon_labels, lat_labels)
-  labels <- st_intersection(labels, bbox_sfc)
-  labels_3857 <- st_transform(labels, 3857)
+  labels <- sf::st_intersection(labels, bbox_sfc)
+  labels_3857 <- sf::st_transform(labels, 3857)
 
   list(lines = grid_3857, labels = labels_3857)
 }
@@ -397,47 +336,7 @@ create_graticule <- function(bbox) {
 generate_topo_tile_map <- function(occurrences,
                                    mapping_settings = NULL,
                                    output_path = NULL) {
-  fn_env <- environment()
-  import::from(
-    "checkmate",
-    assert_data_frame,
-    assert_logical,
-    assert_numeric,
-    assert_string,
-    .into = fn_env
-  )
-  import::from("dplyr", mutate, coalesce, .into = fn_env)
-  import::from(
-    "ggplot2",
-    aes,
-    coord_sf,
-    geom_sf,
-    geom_sf_text,
-    ggplot,
-    ggsave,
-    labs,
-    theme,
-    theme_void,
-    .into = fn_env
-  )
-  import::from("here", here, .into = fn_env)
-  import::from("maptiles", get_tiles, .into = fn_env)
-  import::from("rlang", warn, .into = fn_env)
-  import::from(
-    "sf",
-    st_as_sf,
-    st_bbox,
-    st_crs,
-    st_filter,
-    st_make_valid,
-    st_transform,
-    st_within,
-    .into = fn_env
-  )
-  import::from("tidyterra", geom_spatraster_rgb, .into = fn_env)
-  import::from("utils", modifyList, .into = fn_env)
-
-  assert_data_frame(occurrences, min.rows = 0L)
+  checkmate::assert_data_frame(occurrences, min.rows = 0L)
 
   mapping_settings <- validate_mapping_settings(mapping_settings)
   defaults <- list(
@@ -457,62 +356,64 @@ generate_topo_tile_map <- function(occurrences,
     topo_output_path = NULL,
     tile_graticule = FALSE
   )
-  mapping_settings <- modifyList(defaults, mapping_settings)
+  mapping_settings <- utils::modifyList(defaults, mapping_settings)
 
   enable_tiles <- mapping_settings$enable_topo_tiles
   if (is.null(enable_tiles)) {
     enable_tiles <- TRUE
   }
-  assert_logical(enable_tiles, len = 1L, any.missing = FALSE)
+  checkmate::assert_logical(enable_tiles, len = 1L, any.missing = FALSE)
   if (!isTRUE(enable_tiles)) {
     return(map_species_occurrences(occurrences, mapping_settings, output_path))
   }
 
-  assert_numeric(mapping_settings$point_size, len = 1L, lower = 0)
-  assert_string(mapping_settings$point_colour, min.chars = 1L)
-  assert_string(mapping_settings$tile_provider, min.chars = 1L)
-  assert_numeric(mapping_settings$tile_zoom, len = 1L, lower = 0)
-  assert_string(mapping_settings$tile_outline_colour, min.chars = 1L)
-  assert_logical(mapping_settings$tile_graticule, len = 1L, any.missing = FALSE)
+  checkmate::assert_numeric(mapping_settings$point_size, len = 1L, lower = 0)
+  checkmate::assert_string(mapping_settings$point_colour, min.chars = 1L)
+  checkmate::assert_string(mapping_settings$tile_provider, min.chars = 1L)
+  checkmate::assert_numeric(mapping_settings$tile_zoom, len = 1L, lower = 0)
+  checkmate::assert_string(mapping_settings$tile_outline_colour, min.chars = 1L)
+  checkmate::assert_logical(mapping_settings$tile_graticule, len = 1L, any.missing = FALSE)
 
   additional_cfg <- mapping_settings$additional_points
   if (!is.null(additional_cfg$colour)) {
-    assert_string(additional_cfg$colour, min.chars = 1L)
+    checkmate::assert_string(additional_cfg$colour, min.chars = 1L)
   }
   if (!is.null(additional_cfg$size)) {
-    assert_numeric(additional_cfg$size, len = 1L, lower = 0)
+    checkmate::assert_numeric(additional_cfg$size, len = 1L, lower = 0)
   }
 
   additional_points_sf <- load_additional_points(additional_cfg)
 
   bbox_cfg <- mapping_settings$bounding_box
   if (is.null(bbox_cfg)) {
-    warn("No bounding box configured; falling back to default species map.")
+    rlang::warn("No bounding box configured; falling back to default species map.")
     return(map_species_occurrences(occurrences, mapping_settings, output_path))
   }
 
   top_left <- bbox_cfg$top_left
   if (is.null(top_left)) {
-    warn("Bounding box missing top_left; falling back to default species map.")
+    rlang::warn("Bounding box missing top_left; falling back to default species map.")
     return(map_species_occurrences(occurrences, mapping_settings, output_path))
   }
   top_left_vec <- coerce_top_left(top_left)
 
   length_km <- bbox_cfg$length_km
-  assert_numeric(length_km, len = 1L, lower = 1e-6)
+  checkmate::assert_numeric(length_km, len = 1L, lower = 1e-6)
   side_length <- as.numeric(length_km)
 
   if (is.null(output_path)) {
     output_path <- mapping_settings$topo_output_path
   }
   if (is.null(output_path)) {
-    output_path <- here("outputs", "maps", "species_topo.png")
+    output_path <- here::here("outputs", "maps", "species_topo.png")
   }
-  assert_string(output_path, min.chars = 1L)
+  checkmate::assert_string(output_path, min.chars = 1L)
 
   coord_cols <- c("longitude", "latitude")
   if (!all(coord_cols %in% names(occurrences))) {
-    warn("Occurrence data missing longitude/latitude columns; falling back to default species map.")
+    rlang::warn(
+      "Occurrence data missing longitude/latitude columns; falling back to default species map."
+    )
     return(map_species_occurrences(occurrences, mapping_settings, output_path))
   }
 
@@ -520,32 +421,32 @@ generate_topo_tile_map <- function(occurrences,
   occurrences <- occurrences[has_coords, , drop = FALSE]
 
   bbox <- build_square_bbox(top_left_vec, side_length)
-  bbox_3857 <- st_transform(bbox, 3857)
+  bbox_3857 <- sf::st_transform(bbox, 3857)
 
-  occurrences_sf <- st_as_sf(
+  occurrences_sf <- sf::st_as_sf(
     occurrences,
     coords = c("longitude", "latitude"),
     crs = 4326,
     remove = FALSE
   )
   if (nrow(occurrences_sf) > 0L) {
-    occurrences_sf <- st_filter(occurrences_sf, bbox, .predicate = st_within)
+    occurrences_sf <- sf::st_filter(occurrences_sf, bbox, .predicate = sf::st_within)
   }
-  occurrences_sf <- st_transform(occurrences_sf, 3857)
+  occurrences_sf <- sf::st_transform(occurrences_sf, 3857)
 
   additional_points_sf <- if (!is.null(additional_points_sf) && nrow(additional_points_sf) > 0L) {
-    st_transform(additional_points_sf, 3857)
+    sf::st_transform(additional_points_sf, 3857)
   } else {
     NULL
   }
 
   outline_sf <- get_basemap_tasmania(bbox)
   if (!is.null(outline_sf) && nrow(outline_sf) > 0L) {
-    outline_sf <- st_transform(outline_sf, 3857)
+    outline_sf <- sf::st_transform(outline_sf, 3857)
   }
 
   tiles <- try(
-    get_tiles(
+    maptiles::get_tiles(
       x = bbox_3857,
       provider = mapping_settings$tile_provider,
       zoom = as.integer(mapping_settings$tile_zoom),
@@ -554,19 +455,19 @@ generate_topo_tile_map <- function(occurrences,
     silent = TRUE
   )
   if (inherits(tiles, "try-error")) {
-    warn(sprintf(
+    rlang::warn(sprintf(
       "Failed to retrieve tiles from provider '%s'; falling back to default species map.",
       mapping_settings$tile_provider
     ))
     return(map_species_occurrences(occurrences, mapping_settings, output_path))
   }
 
-  plot_obj <- ggplot() +
+  plot_obj <- ggplot2::ggplot() +
     tidyterra::geom_spatraster_rgb(data = tiles)
 
   if (!is.null(outline_sf) && nrow(outline_sf) > 0L) {
     plot_obj <- plot_obj +
-      geom_sf(
+      ggplot2::geom_sf(
         data = outline_sf,
         fill = NA,
         colour = mapping_settings$tile_outline_colour,
@@ -576,7 +477,7 @@ generate_topo_tile_map <- function(occurrences,
 
   if (nrow(occurrences_sf) > 0L) {
     plot_obj <- plot_obj +
-      geom_sf(
+      ggplot2::geom_sf(
         data = occurrences_sf,
         colour = mapping_settings$point_colour,
         alpha = 0.8,
@@ -590,7 +491,7 @@ generate_topo_tile_map <- function(occurrences,
       extra_size <- mapping_settings$point_size
     }
     plot_obj <- plot_obj +
-      geom_sf(
+      ggplot2::geom_sf(
         data = additional_points_sf,
         colour = additional_cfg$colour,
         alpha = 0.9,
@@ -599,13 +500,13 @@ generate_topo_tile_map <- function(occurrences,
   }
 
   plot_obj <- plot_obj +
-    coord_sf(crs = st_crs(3857), expand = FALSE)
+    ggplot2::coord_sf(crs = sf::st_crs(3857), expand = FALSE)
 
   if (isTRUE(mapping_settings$tile_graticule)) {
     grid <- create_graticule(bbox)
     if (!is.null(grid)) {
       plot_obj <- plot_obj +
-        geom_sf(
+        ggplot2::geom_sf(
           data = grid$lines,
           colour = mapping_settings$tile_outline_colour,
           linewidth = 0.1,
@@ -613,9 +514,9 @@ generate_topo_tile_map <- function(occurrences,
         )
       if (!is.null(grid$labels) && nrow(grid$labels) > 0L) {
         plot_obj <- plot_obj +
-          geom_sf_text(
+          ggplot2::geom_sf_text(
             data = grid$labels,
-            aes(label = label),
+            ggplot2::aes(label = .data$label),
             colour = mapping_settings$tile_outline_colour,
             size = 2.8,
             check_overlap = TRUE
@@ -624,11 +525,11 @@ generate_topo_tile_map <- function(occurrences,
     }
   }
 
-  plot_obj <- plot_obj + theme_void()
+  plot_obj <- plot_obj + ggplot2::theme_void()
 
   if (isTRUE(mapping_settings$show_title)) {
     plot_obj <- plot_obj +
-      labs(
+      ggplot2::labs(
         title = "Species occurrences",
         subtitle = sprintf(
           "Bounding box top-left: (%.3f, %.3f); side: %.0f km",
@@ -640,23 +541,19 @@ generate_topo_tile_map <- function(occurrences,
   }
 
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
-  ggsave(filename = output_path, plot = plot_obj, width = 8, height = 8, dpi = 300)
+  ggplot2::ggsave(filename = output_path, plot = plot_obj, width = 8, height = 8, dpi = 300)
 
   output_path
 }
 
 build_square_bbox <- function(top_left, side_length_km) {
-  fn_env <- environment()
-  import::from("geosphere", destPoint, .into = fn_env)
-  import::from("sf", st_polygon, st_sfc, .into = fn_env)
-
   start <- c(lon = top_left[["lon"]], lat = top_left[["lat"]])
   metres <- side_length_km * 1000
 
   normalize_lonlat <- function(coord) {
     vals <- as.numeric(coord)
     if (length(vals) != 2L || any(is.na(vals))) {
-      abort(
+      rlang::abort(
         "destPoint returned invalid coordinates when constructing bounding box.",
         class = "map_species_occurrences_invalid_bbox"
       )
@@ -664,9 +561,9 @@ build_square_bbox <- function(top_left, side_length_km) {
     structure(vals, names = c("lon", "lat"))
   }
 
-  top_right <- normalize_lonlat(destPoint(start, b = 90, d = metres))
-  bottom_left <- normalize_lonlat(destPoint(start, b = 180, d = metres))
-  bottom_right <- normalize_lonlat(destPoint(bottom_left, b = 90, d = metres))
+  top_right <- normalize_lonlat(geosphere::destPoint(start, b = 90, d = metres))
+  bottom_left <- normalize_lonlat(geosphere::destPoint(start, b = 180, d = metres))
+  bottom_right <- normalize_lonlat(geosphere::destPoint(bottom_left, b = 90, d = metres))
 
   coords <- rbind(
     c(start[["lon"]], start[["lat"]]),
@@ -676,26 +573,13 @@ build_square_bbox <- function(top_left, side_length_km) {
     c(start[["lon"]], start[["lat"]])
   )
 
-  st_sfc(st_polygon(list(coords)), crs = 4326)
+  sf::st_sfc(sf::st_polygon(list(coords)), crs = 4326)
 }
 
 get_basemap_tasmania <- function(bbox) {
-  fn_env <- environment()
-  import::from("rnaturalearth", ne_countries, .into = fn_env)
-  import::from(
-    "sf",
-    st_as_sf,
-    st_as_sfc,
-    st_bbox,
-    st_geometry,
-    st_intersection,
-    st_make_valid,
-    .into = fn_env
-  )
-
-  australia <- ne_countries(scale = 50, country = "australia", returnclass = "sf")
-  australia <- st_make_valid(australia)
-  bbox_sfc <- st_as_sfc(st_bbox(bbox))
-  clipped <- st_intersection(st_geometry(australia), bbox_sfc)
-  st_as_sf(clipped)
+  australia <- rnaturalearth::ne_countries(scale = 50, country = "australia", returnclass = "sf")
+  australia <- sf::st_make_valid(australia)
+  bbox_sfc <- sf::st_as_sfc(sf::st_bbox(bbox))
+  clipped <- sf::st_intersection(sf::st_geometry(australia), bbox_sfc)
+  sf::st_as_sf(clipped)
 }

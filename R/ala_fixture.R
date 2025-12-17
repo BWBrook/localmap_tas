@@ -1,17 +1,13 @@
 # Helpers for running the ALA workflow without network access (demo/CI fixtures).
 
 ala_fixture_taxa <- function(species_requests) {
-  fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_names, .into = fn_env)
-  import::from("tibble", tibble, .into = fn_env)
-
-  assert_data_frame(species_requests, min.rows = 1L)
-  assert_names(
+  checkmate::assert_data_frame(species_requests, min.rows = 1L)
+  checkmate::assert_names(
     colnames(species_requests),
     must.include = c("species_id", "common_name", "scientific_name")
   )
 
-  tibble(
+  tibble::tibble(
     species_id = species_requests$species_id,
     query_common_name = species_requests$common_name,
     query_scientific_name = species_requests$scientific_name,
@@ -30,19 +26,13 @@ ala_fixture_occurrences <- function(
   min_lat = NULL,
   state_province = NULL
 ) {
-  fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_string, test_string, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from("readr", read_csv, .into = fn_env)
-  import::from("rlang", abort, .into = fn_env)
-
-  assert_data_frame(taxa, min.rows = 0L)
+  checkmate::assert_data_frame(taxa, min.rows = 0L)
   if (nrow(taxa) == 0L) {
     return(data.frame())
   }
 
-  if (!test_string(fixture_path, min.chars = 1L)) {
-    abort(
+  if (!checkmate::test_string(fixture_path, min.chars = 1L)) {
+    rlang::abort(
       c(
         "Fixture occurrences path is required when `cfg$ala$use_fixture` is TRUE.",
         i = "Set `cfg$ala$fixture_occurrences` in config/config.yaml (demo profile)."
@@ -51,7 +41,7 @@ ala_fixture_occurrences <- function(
     )
   }
 
-  candidate_paths <- unique(c(fixture_path, here(fixture_path)))
+  candidate_paths <- unique(c(fixture_path, here::here(fixture_path)))
   resolved <- candidate_paths[file.exists(candidate_paths)][1]
 
   if (is.na(resolved)) {
@@ -66,7 +56,7 @@ ala_fixture_occurrences <- function(
   }
 
   if (is.na(resolved)) {
-    abort(
+    rlang::abort(
       c(
         "Fixture occurrences file not found.",
         i = sprintf("fixture_path = %s", fixture_path)
@@ -75,8 +65,8 @@ ala_fixture_occurrences <- function(
     )
   }
 
-  assert_string(resolved, min.chars = 1L)
-  data <- read_csv(resolved, show_col_types = FALSE, progress = FALSE)
+  checkmate::assert_string(resolved, min.chars = 1L)
+  data <- readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE)
 
   required_cols <- c(
     "species_id",
@@ -89,7 +79,7 @@ ala_fixture_occurrences <- function(
   )
   missing <- setdiff(required_cols, names(data))
   if (length(missing) > 0L) {
-    abort(
+    rlang::abort(
       c(
         "Fixture occurrences file missing required columns.",
         i = sprintf("Missing columns: %s", paste(missing, collapse = ", "))

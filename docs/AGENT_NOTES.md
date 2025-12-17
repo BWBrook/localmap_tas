@@ -88,3 +88,19 @@
       - `outputs/maps/demo_camera_sites.png` shows camera sites on placeholder basemap; extent and symbol scaling appear coherent.
       - `outputs/maps/demo_camera_sites_panel.png` renders as expected for a 1×1 panel.
     - Remaining: demo camera basemap intentionally uses a placeholder tile (warnings expected when provider URL is empty).
+
+- 2025-12-17: Refactor away from `{import}`/`import::from()` toward explicit `pkg::fun()` usage.
+  - Removed all `import::from()` blocks and function-local import environments; use explicit namespace qualifiers throughout `R/`.
+  - Dropped `{import}` from `DESCRIPTION` and updated `_targets.R` comments + `docs/DEVELOPMENT.qmd` to reflect the new convention.
+  - Added a minimal roxygen import for `rlang::.data` (`R/imports.R`) so tidy-eval pronouns work correctly without triggering `R CMD check` notes.
+  - Dependency tidy-up: pruned unused `Imports:` (moved pipeline-only deps such as `{targets}`/`{tarchetypes}` to `Suggests:`), re-snapshotted `renv.lock`.
+  - Verification gates (local, 2025-12-17):
+    - `devtools::document()` OK.
+    - `lintr::lint_package()` OK (0 lints).
+    - `devtools::test()` OK (80 passing).
+    - `rcmdcheck::rcmdcheck(args = \"--no-manual\")` OK (0 errors, 0 warnings, 0 notes).
+    - Demo pipeline: `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` completed with expected warning (placeholder WMS tile when URL is empty).
+  - Artefact review (demo outputs, 2025-12-17):
+    - `outputs/maps/demo_species_occurrences.png`: Tasmania outline and occurrence points appear spatially plausible (points clustered in NW TAS; graticule labels plausible).
+    - `outputs/maps/demo_camera_sites.png`: camera site points render within the expected coastal extent; scale bar + north arrow present; placeholder basemap expected in demo.
+    - `outputs/maps/demo_camera_sites_panel.png`: panel renders but contains substantial whitespace (likely config/layout choice); consider tightening demo panel layout in a follow-up.

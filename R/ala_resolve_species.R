@@ -13,26 +13,17 @@
 #'   species metadata.
 #' @export
 ala_resolve_species <- function(species_requests, search_fun = galah::search_taxa) {
-  fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_names, .into = fn_env)
-  import::from("cli", cli_warn, .into = fn_env)
-  import::from("dplyr", filter, mutate, pull, slice_head, .into = fn_env)
-  import::from("purrr", map_dfr, .into = fn_env)
-  import::from("rlang", .data, abort, is_function, .into = fn_env)
-  import::from("stringr", str_to_lower, .into = fn_env)
-  import::from("tibble", as_tibble, tibble, .into = fn_env)
-
-  assert_data_frame(species_requests, min.rows = 1L)
-  assert_names(
+  checkmate::assert_data_frame(species_requests, min.rows = 1L)
+  checkmate::assert_names(
     colnames(species_requests),
     must.include = c("species_id", "common_name", "scientific_name")
   )
-  if (!is_function(search_fun)) {
-    abort("`search_fun` must be a function.", class = "ala_resolve_species_bad_search")
+  if (!rlang::is_function(search_fun)) {
+    rlang::abort("`search_fun` must be a function.", class = "ala_resolve_species_bad_search")
   }
 
   normalise_string <- function(x) {
-    str_to_lower(trimws(x))
+    stringr::str_to_lower(trimws(x))
   }
 
   pick_column <- function(tbl, options) {
@@ -44,22 +35,22 @@ ala_resolve_species <- function(species_requests, search_fun = galah::search_tax
   }
 
   resolve_one <- function(row) {
-    query_terms <- unique(na.omit(c(row$scientific_name, row$common_name)))
-    candidates <- map_dfr(query_terms, function(term) {
+    query_terms <- unique(stats::na.omit(c(row$scientific_name, row$common_name)))
+    candidates <- purrr::map_dfr(query_terms, function(term) {
       result <- search_fun(term)
       if (is.null(result)) {
-        return(tibble())
+        return(tibble::tibble())
       }
-      candidate <- as_tibble(result)
+      candidate <- tibble::as_tibble(result)
       if (nrow(candidate) == 0L) {
-        return(tibble())
+        return(tibble::tibble())
       }
-      mutate(candidate, .search_term = term)
+      dplyr::mutate(candidate, .search_term = term)
     })
 
     if (nrow(candidates) == 0L) {
-      cli_warn("No taxonomic match found for {row$species_id}.")
-      return(tibble(
+      cli::cli_warn("No taxonomic match found for {row$species_id}.")
+      return(tibble::tibble(
         species_id = row$species_id,
         query_common_name = row$common_name,
         query_scientific_name = row$scientific_name,
@@ -74,7 +65,10 @@ ala_resolve_species <- function(species_requests, search_fun = galah::search_tax
     rank_col <- pick_column(candidates, c("rank", "taxonRank"))
     candidates_raw <- candidates
     if (!is.na(rank_col)) {
-      candidates <- filter(candidates, str_to_lower(.data[[rank_col]]) == "species")
+      candidates <- dplyr::filter(
+        candidates,
+        stringr::str_to_lower(.data[[rank_col]]) == "species"
+      )
       if (nrow(candidates) == 0L) {
         candidates <- candidates_raw
       }
@@ -88,7 +82,7 @@ ala_resolve_species <- function(species_requests, search_fun = galah::search_tax
     selection <- candidates
 
     if (!is.na(row$scientific_name) && !is.na(sci_col)) {
-      selection <- filter(
+      selection <- dplyr::filter(
         candidates,
         normalise_string(.data[[sci_col]]) == normalise_string(row$scientific_name)
       )
@@ -98,7 +92,7 @@ ala_resolve_species <- function(species_requests, search_fun = galah::search_tax
     }
 
     if (nrow(selection) == 0L && !is.na(row$common_name) && !is.na(com_col)) {
-      selection <- filter(
+      selection <- dplyr::filter(
         candidates,
         normalise_string(.data[[com_col]]) == normalise_string(row$common_name)
       )
@@ -111,20 +105,20 @@ ala_resolve_species <- function(species_requests, search_fun = galah::search_tax
       selection <- candidates
     }
 
-    chosen <- slice_head(selection, n = 1L)
-    tibble(
+    chosen <- dplyr::slice_head(selection, n = 1L)
+    tibble::tibble(
       species_id = row$species_id,
       query_common_name = row$common_name,
       query_scientific_name = row$scientific_name,
       matched_scientific_name = if (!is.na(sci_col)) chosen[[sci_col]][[1]] else NA_character_,
       matched_common_name = if (!is.na(com_col)) chosen[[com_col]][[1]] else NA_character_,
       taxon_concept_id = if (!is.na(id_col)) chosen[[id_col]][[1]] else NA_character_,
-      search_term = dplyr::pull(chosen, .search_term)[1],
+      search_term = dplyr::pull(chosen, ".search_term")[1],
       match_type = match_type
     )
   }
 
-  map_dfr(seq_len(nrow(species_requests)), function(idx) {
+  purrr::map_dfr(seq_len(nrow(species_requests)), function(idx) {
     resolve_one(species_requests[idx, , drop = FALSE])
   })
 }

@@ -46,3 +46,8 @@ Format:
 **Decision:** Remove placeholder repository URLs from `CITATION.cff` and leave an explicit TODO comment until the canonical repository URL is known.
 **Rationale:** Avoid publishing incorrect metadata; the correct URL depends on where the repo is hosted and may change before v1.0.
 **Status:** Active.
+
+## 2025-12-17 — Package code uses `pkg::fun()` namespaces (no `import::from()`)
+**Decision:** Use explicit namespace qualifiers (`pkg::fun()`) inside functions, avoid `import::from()` and avoid `library()` calls in package code.
+**Rationale:** More idiomatic for typical R users; keeps dependency usage explicit at call sites; avoids check notes driven by the `{import}` package and reduces search-path side effects.
+**Status:** Active.

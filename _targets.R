@@ -2,7 +2,7 @@
 
 targets::tar_option_set(
   seed = 1L,
-  packages = character(0) # we use explicit namespace qualifiers/import::from within functions
+  packages = character(0) # we use explicit namespace qualifiers within functions
 )
 
 # Source helpers

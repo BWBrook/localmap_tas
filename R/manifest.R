@@ -7,18 +7,11 @@
 #' @return A tibble with columns `id`, `path`, and `abs_path`.
 #' @export
 read_manifest <- function(manifest_path) {
-  fn_env <- environment()
-  import::from("here", here, .into = fn_env)
-  import::from("readr", read_csv, .into = fn_env)
-  import::from("dplyr", mutate, .into = fn_env)
-  import::from("tibble", tibble, .into = fn_env)
-  import::from("stringr", str_trim, .into = fn_env)
-  import::from("checkmate", assert_names, .into = fn_env)
-  import::from("cli", cli_warn, cli_inform, .into = fn_env)
-  import::from("rlang", abort, .into = fn_env)
-
   if (!is.character(manifest_path) || length(manifest_path) != 1L) {
-    abort("`manifest_path` must be a single character string.", class = "read_manifest_bad_path")
+    rlang::abort(
+      "`manifest_path` must be a single character string.",
+      class = "read_manifest_bad_path"
+    )
   }
 
   # Allow relative paths
@@ -26,13 +19,13 @@ read_manifest <- function(manifest_path) {
   root_dir <- NULL
   if (!file.exists(csv_path)) {
     # Try resolving under repo root
-    csv_path_here <- here(manifest_path)
+    csv_path_here <- here::here(manifest_path)
     if (file.exists(csv_path_here)) {
       csv_path <- csv_path_here
-      root_dir <- here()
+      root_dir <- here::here()
     }
   } else {
-    root_dir <- tryCatch(here(), error = function(e) NULL)
+    root_dir <- tryCatch(here::here(), error = function(e) NULL)
   }
   if (!file.exists(csv_path)) {
     csv_path_pkg <- system.file(manifest_path, package = "localmap")
@@ -42,7 +35,7 @@ read_manifest <- function(manifest_path) {
     }
   }
   if (!file.exists(csv_path)) {
-    abort(
+    rlang::abort(
       c(
         "Manifest file not found.",
         i = sprintf("Tried: %s and %s", manifest_path, csv_path)
@@ -54,12 +47,12 @@ read_manifest <- function(manifest_path) {
     root_dir <- dirname(csv_path)
   }
 
-  dat <- read_csv(csv_path, show_col_types = FALSE, progress = FALSE)
+  dat <- readr::read_csv(csv_path, show_col_types = FALSE, progress = FALSE)
   # Validate minimal schema
   needed <- c("id", "path")
-  assert_names(colnames(dat), must.include = needed)
-  dat$id <- str_trim(dat$id)
-  dat$path <- str_trim(dat$path)
+  checkmate::assert_names(colnames(dat), must.include = needed)
+  dat$id <- stringr::str_trim(dat$id)
+  dat$path <- stringr::str_trim(dat$path)
 
   resolve_path <- function(p) {
     candidate <- file.path(root_dir, p)
@@ -72,13 +65,13 @@ read_manifest <- function(manifest_path) {
     candidate
   }
 
-  out <- mutate(dat, abs_path = vapply(path, resolve_path, character(1)))
+  out <- dplyr::mutate(dat, abs_path = vapply(.data$path, resolve_path, character(1)))
   # Warn for missing files but do not abort; downstream targets may generate them
   missing <- out[!file.exists(out$abs_path), , drop = FALSE]
   if (nrow(missing) > 0L) {
-    cli_warn(sprintf("%d manifest file(s) do not exist yet.", nrow(missing)))
+    cli::cli_warn(sprintf("%d manifest file(s) do not exist yet.", nrow(missing)))
   } else {
-    cli_inform("All manifest files exist.")
+    cli::cli_inform("All manifest files exist.")
   }
   out
 }

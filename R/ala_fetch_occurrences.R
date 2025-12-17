@@ -34,38 +34,24 @@ ala_fetch_occurrences <- function(taxa,
                                   state_province = NULL,
                                   fetch_fun = NULL,
                                   config = NULL) {
-  fn_env <- environment()
-  import::from(
-    "checkmate",
-    assert_data_frame,
-    assert_names,
-    assert_numeric,
-    assert_string,
-    .into = fn_env
-  )
-  import::from("dplyr", filter, .into = fn_env)
-  import::from("purrr", map_dfr, .into = fn_env)
-  import::from("rlang", is_function, .data, .into = fn_env)
-  import::from("tibble", tibble, as_tibble, .into = fn_env)
-
-  assert_data_frame(taxa, min.rows = 0L)
+  checkmate::assert_data_frame(taxa, min.rows = 0L)
   required <- c(
     "species_id", "matched_scientific_name", "matched_common_name",
     "query_scientific_name", "query_common_name", "match_type"
   )
-  assert_names(colnames(taxa), must.include = required)
+  checkmate::assert_names(colnames(taxa), must.include = required)
 
   if (!is.null(min_year)) {
-    assert_numeric(min_year, lower = 0, upper = Inf, len = 1L, any.missing = FALSE)
+    checkmate::assert_numeric(min_year, lower = 0, upper = Inf, len = 1L, any.missing = FALSE)
   }
 
   if (!is.null(state_province)) {
-    assert_string(state_province, min.chars = 1L)
+    checkmate::assert_string(state_province, min.chars = 1L)
   }
 
   if (is.null(fetch_fun)) {
     fetch_fun <- ala_fetch_occurrences_galah
-  } else if (!is_function(fetch_fun)) {
+  } else if (!rlang::is_function(fetch_fun)) {
     rlang::abort(
       "`fetch_fun` must be a function when supplied.",
       class = "ala_fetch_occurrences_bad_fetch"
@@ -75,13 +61,13 @@ ala_fetch_occurrences <- function(taxa,
   boundary_wkt <- prepare_boundary(boundary, boundary_simplify)
 
   if (nrow(taxa) == 0L) {
-    return(tibble())
+    return(tibble::tibble())
   }
 
-  map_dfr(seq_len(nrow(taxa)), function(idx) {
+  purrr::map_dfr(seq_len(nrow(taxa)), function(idx) {
     row <- taxa[idx, , drop = FALSE]
     if (identical(row$match_type[[1]], "not_found")) {
-      return(tibble())
+      return(tibble::tibble())
     }
     identifier <- row$matched_scientific_name[[1]]
     if (!is.na(identifier) && nzchar(identifier) && grepl("\\(", identifier, fixed = FALSE)) {
@@ -95,7 +81,7 @@ ala_fetch_occurrences <- function(taxa,
       identifier <- row$query_common_name[[1]]
     }
     if (is.na(identifier) || !nzchar(identifier)) {
-      return(tibble())
+      return(tibble::tibble())
     }
     records <- fetch_fun(
       identifier = identifier,
@@ -108,7 +94,7 @@ ala_fetch_occurrences <- function(taxa,
       config = config
     )
     if (is.null(records)) {
-      return(tibble())
+      return(tibble::tibble())
     }
 
     if (is.list(records) && "data" %in% names(records)) {
@@ -116,16 +102,16 @@ ala_fetch_occurrences <- function(taxa,
     }
 
     if (!inherits(records, "data.frame")) {
-      records <- try(as_tibble(records), silent = TRUE)
+      records <- try(tibble::as_tibble(records), silent = TRUE)
       if (inherits(records, "try-error")) {
-        return(tibble())
+        return(tibble::tibble())
       }
     }
 
-    records <- as_tibble(records)
+    records <- tibble::as_tibble(records)
 
     if (NROW(records) == 0L) {
-      return(tibble())
+      return(tibble::tibble())
     }
     records
   })
@@ -141,29 +127,12 @@ ala_fetch_occurrences_galah <- function(
   state_province,
   config
 ) {
-  fn_env <- environment()
-  import::from("dplyr", mutate, rename, .into = fn_env)
-  import::from(
-    "galah",
-    atlas_occurrences,
-    galah_call,
-    galah_config,
-    galah_filter,
-    galah_identify,
-    galah_polygon,
-    galah_select,
-    .into = fn_env
-  )
-  import::from("httr2", resp_body_string, .into = fn_env)
-  import::from("rlang", exec, syms, .into = fn_env)
-  import::from("tibble", as_tibble, .into = fn_env)
-
   if (!is.null(config)) {
-    galah_config(
-      atlas = config$atlas %||% "ALA",
+    galah::galah_config(
+      atlas = if (is.null(config$atlas)) "ALA" else config$atlas,
       email = config$email,
-      verbose = config$verbose %||% FALSE,
-      caching = config$caching %||% TRUE
+      verbose = if (is.null(config$verbose)) FALSE else config$verbose,
+      caching = if (is.null(config$caching)) TRUE else config$caching
     )
   }
 
@@ -210,16 +179,16 @@ ala_fetch_occurrences_galah <- function(
   pipeline_expr <- parse(text = paste(pipeline_steps, collapse = " |>\n    "))
   call <- eval(pipeline_expr)
   if (!is.null(boundary_wkt)) {
-    call <- galah_polygon(call, boundary_wkt)
+    call <- galah::galah_polygon(call, boundary_wkt)
   }
 
   occ <- tryCatch(
-    atlas_occurrences(call),
+    galah::atlas_occurrences(call),
     error = function(err) {
       details <- conditionMessage(err)
       body <- NULL
       if (!is.null(err$resp)) {
-        body <- tryCatch(resp_body_string(err$resp), error = function(e) NULL)
+        body <- tryCatch(httr2::resp_body_string(err$resp), error = function(e) NULL)
       }
       rlang::abort(
         c(
@@ -238,11 +207,11 @@ ala_fetch_occurrences_galah <- function(
   if (is.null(occ)) {
     return(NULL)
   }
-  records <- as_tibble(occ)
+  records <- tibble::as_tibble(occ)
   if (nrow(records) == 0L) {
     return(records)
   }
-  records <- mutate(
+  records <- dplyr::mutate(
     records,
     species_id = species_row$species_id[[1]],
     matched_scientific_name = species_row$matched_scientific_name[[1]],
@@ -251,53 +220,35 @@ ala_fetch_occurrences_galah <- function(
     query_common_name = species_row$query_common_name[[1]]
   )
   if ("decimalLongitude" %in% colnames(records) && "decimalLatitude" %in% colnames(records)) {
-    records <- rename(
+    records <- dplyr::rename(
       records,
-      longitude = decimalLongitude,
-      latitude = decimalLatitude
+      longitude = dplyr::any_of("decimalLongitude"),
+      latitude = dplyr::any_of("decimalLatitude")
     )
   }
   records
 }
 
 prepare_boundary <- function(boundary, simplify) {
-  fn_env <- environment()
-  import::from(
-    "sf",
-    read_sf,
-    st_as_text,
-    st_crs,
-    st_geometry,
-    st_make_valid,
-    st_simplify,
-    st_transform,
-    st_union,
-    .into = fn_env
-  )
-
   if (is.null(boundary)) {
     return(NULL)
   }
 
   geom <- boundary
   if (!inherits(boundary, "sf")) {
-    geom <- read_sf(boundary)
+    geom <- sf::read_sf(boundary)
   }
 
-  geom <- st_make_valid(geom)
-  geom <- st_union(geom)
-  crs <- st_crs(geom)
+  geom <- sf::st_make_valid(geom)
+  geom <- sf::st_union(geom)
+  crs <- sf::st_crs(geom)
   if (is.na(crs)) {
-    geom <- st_transform(geom, 4326)
+    geom <- sf::st_transform(geom, 4326)
   } else if (!is.null(crs$epsg) && crs$epsg != 4326) {
-    geom <- st_transform(geom, 4326)
+    geom <- sf::st_transform(geom, 4326)
   }
   if (!is.null(simplify)) {
-    geom <- st_simplify(geom, dTolerance = simplify)
+    geom <- sf::st_simplify(geom, dTolerance = simplify)
   }
-  st_as_text(st_geometry(geom))[[1]]
-}
-
-`%||%` <- function(lhs, rhs) {
-  if (is.null(lhs)) rhs else lhs
+  sf::st_as_text(sf::st_geometry(geom))[[1]]
 }

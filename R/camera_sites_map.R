@@ -22,19 +22,12 @@ camera_sites_write_placeholder_tile <- function(path) {
 #' @return Tibble with the expected columns.
 #' @keywords internal
 read_camera_sites <- function(path) {
-  fn_env <- environment()
-  import::from("checkmate", assert_character, assert_file_exists, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from("readr", read_csv, .into = fn_env)
-  import::from("rlang", abort, .into = fn_env)
-  import::from("tibble", as_tibble, .into = fn_env)
+  checkmate::assert_character(path, len = 1L, any.missing = FALSE)
 
-  assert_character(path, len = 1L, any.missing = FALSE)
-
-  candidate_paths <- unique(c(path, here(path)))
+  candidate_paths <- unique(c(path, here::here(path)))
   existing <- candidate_paths[file.exists(candidate_paths)]
   if (length(existing) == 0L) {
-    abort(
+    rlang::abort(
       c(
         "Camera site CSV not found.",
         i = sprintf("Checked: %s", paste(candidate_paths, collapse = ", "))
@@ -43,13 +36,13 @@ read_camera_sites <- function(path) {
     )
   }
   resolved <- existing[[1]]
-  assert_file_exists(resolved)
+  checkmate::assert_file_exists(resolved)
 
-  data <- read_csv(resolved, show_col_types = FALSE, progress = FALSE)
+  data <- readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE)
   required <- c("site", "lat", "lon", "rd", "obs")
   missing <- setdiff(required, names(data))
   if (length(missing) > 0L) {
-    abort(
+    rlang::abort(
       c(
         "Camera site CSV missing required columns.",
         i = sprintf("Columns missing: %s", paste(missing, collapse = ", "))
@@ -58,7 +51,7 @@ read_camera_sites <- function(path) {
     )
   }
 
-  as_tibble(data)
+  tibble::as_tibble(data)
 }
 
 #' Build context for camera site mapping
@@ -75,29 +68,12 @@ prepare_camera_site_context <- function(sites,
                                         central_site,
                                         half_width_km,
                                         basemap_cfg = NULL) {
-  fn_env <- environment()
-  import::from("checkmate", assert_data_frame, assert_numeric, assert_string, .into = fn_env)
-  import::from("rlang", abort, warn, .into = fn_env)
-  import::from(
-    "sf",
-    st_as_sf,
-    st_bbox,
-    st_coordinates,
-    st_crs,
-    st_point,
-    st_polygon,
-    st_sfc,
-    st_transform,
-    st_within,
-    .into = fn_env
-  )
-
-  assert_data_frame(sites, min.rows = 1L)
-  assert_string(central_site, min.chars = 1L)
-  assert_numeric(half_width_km, len = 1L, lower = 0)
+  checkmate::assert_data_frame(sites, min.rows = 1L)
+  checkmate::assert_string(central_site, min.chars = 1L)
+  checkmate::assert_numeric(half_width_km, len = 1L, lower = 0)
 
   if (!central_site %in% sites$site) {
-    abort(
+    rlang::abort(
       c(
         "Central site not found in camera site data.",
         i = sprintf("central_site = %s", central_site)
@@ -107,9 +83,9 @@ prepare_camera_site_context <- function(sites,
   }
 
   centre_row <- sites[sites$site == central_site, , drop = FALSE]
-  centre_point <- st_sfc(st_point(c(centre_row$lon, centre_row$lat)), crs = 4326)
-  centre_3857 <- st_transform(centre_point, 3857)
-  coords_3857 <- as.numeric(st_coordinates(centre_3857))
+  centre_point <- sf::st_sfc(sf::st_point(c(centre_row$lon, centre_row$lat)), crs = 4326)
+  centre_3857 <- sf::st_transform(centre_point, 3857)
+  coords_3857 <- as.numeric(sf::st_coordinates(centre_3857))
 
   effective_half_km <- as.numeric(half_width_km)
   clamp_note <- NULL
@@ -145,7 +121,7 @@ prepare_camera_site_context <- function(sites,
     }
   }
   if (!is.null(clamp_note)) {
-    warn(clamp_note)
+    rlang::warn(clamp_note)
   }
   half_m <- effective_half_km * 1000
 
@@ -160,17 +136,17 @@ prepare_camera_site_context <- function(sites,
     byrow = TRUE,
     ncol = 2
   )
-  bbox_3857 <- st_sfc(st_polygon(list(square_coords)), crs = 3857)
-  bbox_4326 <- st_transform(bbox_3857, 4326)
+  bbox_3857 <- sf::st_sfc(sf::st_polygon(list(square_coords)), crs = 3857)
+  bbox_4326 <- sf::st_transform(bbox_3857, 4326)
 
-  sites_sf <- st_as_sf(
+  sites_sf <- sf::st_as_sf(
     sites,
     coords = c("lon", "lat"),
     crs = 4326,
     remove = FALSE
   )
-  within_sf <- sites_sf[st_within(sites_sf, bbox_4326, sparse = FALSE), ]
-  within_sf_3857 <- st_transform(within_sf, 3857)
+  within_sf <- sites_sf[sf::st_within(sites_sf, bbox_4326, sparse = FALSE), ]
+  within_sf_3857 <- sf::st_transform(within_sf, 3857)
 
   list(
     sites = sites_sf,
@@ -191,28 +167,13 @@ prepare_camera_site_context <- function(sites,
 #' @return Path to the tile file, or `NULL` when no provider is configured.
 fetch_camera_wms_tile <- function(bbox_3857,
                                   provider_cfg) {
-  fn_env <- environment()
-  import::from("checkmate", assert_list, assert_string, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from(
-    "httr2",
-    request,
-    req_url_query,
-    req_perform,
-    resp_body_raw,
-    resp_check_status,
-    .into = fn_env
-  )
-  import::from("rlang", warn, .into = fn_env)
-  import::from("sf", st_bbox, st_crs, st_transform, .into = fn_env)
-
-  default_output <- here("outputs", "tiles", "camera_sites_wms.png")
+  default_output <- here::here("outputs", "tiles", "camera_sites_wms.png")
   make_placeholder <- function(path, message, detail = NULL) {
     note <- message
     if (!is.null(detail) && nzchar(detail)) {
       note <- sprintf("%s (%s)", message, detail)
     }
-    warn(note)
+    rlang::warn(note)
     dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
     camera_sites_write_placeholder_tile(path)
   }
@@ -223,20 +184,20 @@ fetch_camera_wms_tile <- function(bbox_3857,
       "No WMS provider configured; creating placeholder tile."
     ))
   }
-  assert_list(provider_cfg, any.missing = FALSE)
+  checkmate::assert_list(provider_cfg, any.missing = FALSE)
 
   output_path <- camera_sites_default(provider_cfg$output_path, default_output)
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
-  assert_string(output_path, min.chars = 1L)
+  checkmate::assert_string(output_path, min.chars = 1L)
 
   url <- provider_cfg$url
   if (is.null(url) || !nzchar(url)) {
     return(make_placeholder(output_path, "No WMS URL provided; creating placeholder tile."))
   }
-  assert_string(url, min.chars = 1L)
+  checkmate::assert_string(url, min.chars = 1L)
 
   version <- camera_sites_default(provider_cfg$version, "1.3.0")
-  assert_string(version, min.chars = 1L)
+  checkmate::assert_string(version, min.chars = 1L)
 
   layers <- provider_cfg$layers
   if (is.null(layers)) {
@@ -255,9 +216,9 @@ fetch_camera_wms_tile <- function(bbox_3857,
 
   styles <- camera_sites_default(provider_cfg$styles, "")
   crs <- camera_sites_default(provider_cfg$crs, "EPSG:3857")
-  assert_string(crs, min.chars = 1L)
+  checkmate::assert_string(crs, min.chars = 1L)
 
-  bbox_target <- st_bbox(st_transform(bbox_3857, st_crs(crs)))
+  bbox_target <- sf::st_bbox(sf::st_transform(bbox_3857, sf::st_crs(crs)))
   bbox_values <- as.numeric(bbox_target[c("xmin", "ymin", "xmax", "ymax")])
   if (utils::compareVersion(version, "1.3.0") >= 0 && startsWith(crs, "EPSG:4326")) {
     bbox_values <- bbox_values[c(2, 1, 4, 3)]
@@ -272,7 +233,7 @@ fetch_camera_wms_tile <- function(bbox_3857,
     transparent <- TRUE
   }
   dpi <- as.numeric(camera_sites_default(provider_cfg$dpi, 96))
-  bbox_original <- st_bbox(bbox_3857)
+  bbox_original <- sf::st_bbox(bbox_3857)
   bbox_width_m <- as.numeric(bbox_original[["xmax"]] - bbox_original[["xmin"]])
   if (
     is.finite(bbox_width_m) &&
@@ -284,7 +245,7 @@ fetch_camera_wms_tile <- function(bbox_3857,
     map_scale <- (bbox_width_m / width) * (dpi / 0.0254)
     max_scale <- camera_sites_default(provider_cfg$max_scale, NA_real_)
     if (isTRUE(!is.na(max_scale)) && map_scale > max_scale) {
-      warn(sprintf(
+      rlang::warn(sprintf(
         paste(
           "Requested WMS scale is approximately 1:%.0f which exceeds the configured",
           "limit (~1:%.0f).",
@@ -296,7 +257,7 @@ fetch_camera_wms_tile <- function(bbox_3857,
     }
   }
 
-  req <- request(url)
+  req <- httr2::request(url)
   param_names <- if (utils::compareVersion(version, "1.3.0") >= 0) {
     list(parameter_crs = "CRS")
   } else {
@@ -320,12 +281,12 @@ fetch_camera_wms_tile <- function(bbox_3857,
     query$dpi <- dpi
   }
 
-  resp <- try(req_url_query(req, !!!query) |> req_perform(), silent = TRUE)
+  resp <- try(httr2::req_url_query(req, !!!query) |> httr2::req_perform(), silent = TRUE)
   if (inherits(resp, "try-error")) {
     return(make_placeholder(output_path, "Failed to fetch WMS tile; using placeholder basemap."))
   }
-  resp_check_status(resp)
-  body <- resp_body_raw(resp)
+  httr2::resp_check_status(resp)
+  body <- httr2::resp_body_raw(resp)
   if (length(body) == 0L) {
     return(make_placeholder(output_path, "WMS response was empty; using placeholder basemap."))
   }
@@ -359,41 +320,27 @@ fetch_camera_wms_tile <- function(bbox_3857,
 #'   cannot be fetched.
 #' @keywords internal
 camera_sites_fetch_legend <- function(basemap_cfg, legend_cfg) {
-  fn_env <- environment()
-  import::from("checkmate", assert_list, assert_string, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from(
-    "httr2",
-    request,
-    req_url_query,
-    req_perform,
-    resp_body_raw,
-    resp_check_status,
-    .into = fn_env
-  )
-  import::from("rlang", warn, .into = fn_env)
-
   if (is.null(legend_cfg) || !isTRUE(legend_cfg$show)) {
     return(NULL)
   }
   if (is.null(basemap_cfg)) {
-    warn("Legend requested but basemap configuration missing; skipping legend fetch.")
+    rlang::warn("Legend requested but basemap configuration missing; skipping legend fetch.")
     return(NULL)
   }
   url <- basemap_cfg$url
   layers <- basemap_cfg$layers
   if (is.null(url) || !nzchar(url) || is.null(layers) || length(layers) == 0L) {
-    warn("Legend requested but WMS URL or layer not supplied; skipping legend fetch.")
+    rlang::warn("Legend requested but WMS URL or layer not supplied; skipping legend fetch.")
     return(NULL)
   }
   layer <- trimws(as.character(layers[[1]]))
   if (!nzchar(layer)) {
-    warn("Legend requested but first WMS layer is empty; skipping legend fetch.")
+    rlang::warn("Legend requested but first WMS layer is empty; skipping legend fetch.")
     return(NULL)
   }
   path <- basemap_cfg$legend_path
   if (is.null(path) || !nzchar(path)) {
-    path <- here("outputs", "tiles", "camera_sites_legend.png")
+    path <- here::here("outputs", "tiles", "camera_sites_legend.png")
   }
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
 
@@ -420,22 +367,25 @@ camera_sites_fetch_legend <- function(basemap_cfg, legend_cfg) {
     query$height <- as.integer(height)
   }
 
-  resp <- try(req_url_query(request(url), !!!query) |> req_perform(), silent = TRUE)
+  resp <- try(
+    httr2::req_url_query(httr2::request(url), !!!query) |> httr2::req_perform(),
+    silent = TRUE
+  )
   if (inherits(resp, "try-error")) {
-    warn("Failed to fetch WMS legend; legend will be omitted.")
+    rlang::warn("Failed to fetch WMS legend; legend will be omitted.")
     return(NULL)
   }
-  resp_check_status(resp)
-  body <- resp_body_raw(resp)
+  httr2::resp_check_status(resp)
+  body <- httr2::resp_body_raw(resp)
   if (length(body) == 0L) {
-    warn("Empty WMS legend response; legend will be omitted.")
+    rlang::warn("Empty WMS legend response; legend will be omitted.")
     return(NULL)
   }
   png_signature <- as.raw(c(0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
   is_png <- length(body) >= length(png_signature) &&
     identical(body[seq_along(png_signature)], png_signature)
   if (!is_png) {
-    warn("Legend response was not a PNG; legend will be omitted.")
+    rlang::warn("Legend response was not a PNG; legend will be omitted.")
     return(NULL)
   }
   writeBin(body, path)
@@ -446,8 +396,6 @@ camera_sites_fetch_legend <- function(basemap_cfg, legend_cfg) {
 camera_sites_fetch_overlay_tiles <- function(bbox_3857,
                                              overlays,
                                              base_cfg) {
-  fn_env <- environment()
-  import::from("here", here, .into = fn_env)
   if (is.null(overlays) || length(overlays) == 0L) {
     return(list())
   }
@@ -499,40 +447,10 @@ camera_sites_fetch_overlay_tiles <- function(bbox_3857,
 render_camera_sites_map <- function(context,
                                     tile_path = NULL,
                                     map_cfg = NULL) {
-  fn_env <- environment()
-  import::from("checkmate", assert_list, .into = fn_env)
-  import::from(
-    "ggplot2",
-    annotation_raster,
-    coord_sf,
-    geom_sf,
-    geom_sf_text,
-    ggplot,
-    ggsave,
-    scale_colour_identity,
-    scale_fill_identity,
-    scale_size_identity,
-    theme_void,
-    .into = fn_env
-  )
-  import::from(
-    "ggspatial",
-    annotation_north_arrow,
-    annotation_scale,
-    north_arrow_orienteering,
-    .into = fn_env
-  )
-  import::from("grid", rasterGrob, gpar, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from("png", readPNG, .into = fn_env)
-  import::from("rlang", warn, .into = fn_env)
-  import::from("sf", st_bbox, st_crs, .into = fn_env)
-  import::from("utils", modifyList, .into = fn_env)
-
-  assert_list(context, any.missing = FALSE)
+  checkmate::assert_list(context, any.missing = FALSE)
 
   defaults <- list(
-    output_path = here("outputs", "maps", "camera_sites.png"),
+    output_path = here::here("outputs", "maps", "camera_sites.png"),
     scale_bar_location = "tl",
     north_arrow_location = "tr",
     point_size_min = 2,
@@ -554,7 +472,7 @@ render_camera_sites_map <- function(context,
       graphic_height = NULL
     )
   )
-  map_cfg <- modifyList(defaults, camera_sites_default(map_cfg, list()))
+  map_cfg <- utils::modifyList(defaults, camera_sites_default(map_cfg, list()))
   legend_cfg <- camera_sites_default(map_cfg$legend, list())
   legend_cfg$show <- isTRUE(camera_sites_default(legend_cfg$show, FALSE))
   legend_cfg$layout <- camera_sites_default(legend_cfg$layout, "overlay")
@@ -562,10 +480,10 @@ render_camera_sites_map <- function(context,
   legend_cfg$width_fraction <- as.numeric(camera_sites_default(legend_cfg$width_fraction, 0.2))
   legend_cfg$margin_fraction <- as.numeric(camera_sites_default(legend_cfg$margin_fraction, 0.05))
 
-  bbox <- st_bbox(context$bbox_3857)
+  bbox <- sf::st_bbox(context$bbox_3857)
   within <- context$within
   if (nrow(within) == 0L) {
-    warn("No camera sites fall within the configured bounding box.")
+    rlang::warn("No camera sites fall within the configured bounding box.")
   }
 
   rd_values <- within$rd
@@ -586,23 +504,23 @@ render_camera_sites_map <- function(context,
   if (isTRUE(legend_cfg$show)) {
     legend_path <- camera_sites_fetch_legend(context$basemap_cfg, legend_cfg)
     if (!is.null(legend_path) && file.exists(legend_path)) {
-      legend_img <- try(readPNG(legend_path), silent = TRUE)
+      legend_img <- try(png::readPNG(legend_path), silent = TRUE)
       if (!inherits(legend_img, "try-error")) {
-        legend_grob <- rasterGrob(legend_img, interpolate = TRUE)
+        legend_grob <- grid::rasterGrob(legend_img, interpolate = TRUE)
         legend_dims <- dim(legend_img)
       } else {
-        warn(sprintf("Failed to read legend image: %s", legend_path))
+        rlang::warn(sprintf("Failed to read legend image: %s", legend_path))
       }
     }
   }
 
-  plot_obj <- ggplot()
+  plot_obj <- ggplot2::ggplot()
 
   if (!is.null(tile_path) && file.exists(tile_path)) {
-    tile_img <- try(readPNG(tile_path), silent = TRUE)
+    tile_img <- try(png::readPNG(tile_path), silent = TRUE)
     if (!inherits(tile_img, "try-error")) {
       plot_obj <- plot_obj +
-        annotation_raster(
+        ggplot2::annotation_raster(
           tile_img,
           xmin = bbox["xmin"],
           xmax = bbox["xmax"],
@@ -611,7 +529,7 @@ render_camera_sites_map <- function(context,
           interpolate = TRUE
         )
     } else {
-      warn(sprintf("Failed to read tile image: %s", tile_path))
+      rlang::warn(sprintf("Failed to read tile image: %s", tile_path))
     }
   }
 
@@ -623,10 +541,10 @@ render_camera_sites_map <- function(context,
   )
   if (length(overlay_tiles) > 0L) {
     for (overlay in overlay_tiles) {
-      overlay_img <- try(readPNG(overlay$path), silent = TRUE)
+      overlay_img <- try(png::readPNG(overlay$path), silent = TRUE)
       if (!inherits(overlay_img, "try-error")) {
         opacity <- camera_sites_default(overlay$opacity, 0.6)
-        overlay_grob <- rasterGrob(
+        overlay_grob <- grid::rasterGrob(
           overlay_img,
           interpolate = TRUE,
           gp = grid::gpar(alpha = opacity)
@@ -640,7 +558,7 @@ render_camera_sites_map <- function(context,
             ymax = bbox["ymax"]
           )
       } else {
-        warn(sprintf("Failed to read overlay image: %s", overlay$path))
+        rlang::warn(sprintf("Failed to read overlay image: %s", overlay$path))
       }
     }
   }
@@ -649,7 +567,7 @@ render_camera_sites_map <- function(context,
     grid <- camera_sites_create_graticule(context$bbox_4326)
     if (!is.null(grid$lines) && nrow(grid$lines) > 0L) {
       plot_obj <- plot_obj +
-        geom_sf(
+        ggplot2::geom_sf(
           data = grid$lines,
           colour = map_cfg$graticule_colour,
           alpha = map_cfg$graticule_alpha,
@@ -659,9 +577,9 @@ render_camera_sites_map <- function(context,
     }
     if (!is.null(grid$labels) && nrow(grid$labels) > 0L) {
       plot_obj <- plot_obj +
-        geom_sf_text(
+        ggplot2::geom_sf_text(
           data = grid$labels,
-          ggplot2::aes(label = label),
+          ggplot2::aes(label = .data$label),
           colour = map_cfg$graticule_colour,
           alpha = map_cfg$graticule_alpha,
           size = map_cfg$graticule_label_size,
@@ -674,15 +592,19 @@ render_camera_sites_map <- function(context,
     within$colour <- ifelse(within$obs > 0, map_cfg$positive_obs_colour, map_cfg$zero_obs_colour)
     within$size <- point_sizes
     plot_obj <- plot_obj +
-      geom_sf(
+      ggplot2::geom_sf(
         data = within,
-        ggplot2::aes(colour = colour, fill = colour, size = size),
+        ggplot2::aes(
+          colour = .data$colour,
+          fill = .data$colour,
+          size = .data$size
+        ),
         alpha = 0.9,
         show.legend = FALSE
       ) +
-      scale_colour_identity() +
-      scale_fill_identity() +
-      scale_size_identity()
+      ggplot2::scale_colour_identity() +
+      ggplot2::scale_fill_identity() +
+      ggplot2::scale_size_identity()
   }
 
   coord_xlim_max <- bbox["xmax"]
@@ -731,13 +653,13 @@ render_camera_sites_map <- function(context,
   }
 
   plot_obj <- plot_obj +
-    coord_sf(
-      crs = st_crs(3857),
+    ggplot2::coord_sf(
+      crs = sf::st_crs(3857),
       xlim = c(bbox["xmin"], coord_xlim_max),
       ylim = c(coord_ylim_min, coord_ylim_max),
       expand = FALSE
     ) +
-    theme_void()
+    ggplot2::theme_void()
 
   if (!is.null(legend_grob) && !is.na(legend_xmin) && !is.na(legend_xmax)) {
     plot_obj <- plot_obj +
@@ -751,19 +673,19 @@ render_camera_sites_map <- function(context,
   }
 
   plot_obj <- plot_obj +
-    annotation_scale(
+    ggspatial::annotation_scale(
       location = map_cfg$scale_bar_location,
       style = "ticks",
       text_cex = 0.7
     ) +
-    annotation_north_arrow(
+    ggspatial::annotation_north_arrow(
       location = map_cfg$north_arrow_location,
       which_north = "true",
-      style = north_arrow_orienteering(text_size = 6)
+      style = ggspatial::north_arrow_orienteering(text_size = 6)
     )
 
   dir.create(dirname(map_cfg$output_path), recursive = TRUE, showWarnings = FALSE)
-  ggsave(filename = map_cfg$output_path, plot = plot_obj, width = 7, height = 7, dpi = 300)
+  ggplot2::ggsave(filename = map_cfg$output_path, plot = plot_obj, width = 7, height = 7, dpi = 300)
   map_cfg$output_path
 }
 
@@ -779,32 +701,14 @@ camera_sites_pick_step <- function(range_deg) {
       return(step)
     }
   }
-  tail(steps, 1)
+  utils::tail(steps, 1)
 }
 
 camera_sites_create_graticule <- function(bbox_4326) {
-  fn_env <- environment()
-  import::from(
-    "sf",
-    st_as_sf,
-    st_as_sfc,
-    st_bbox,
-    st_geometry,
-    st_graticule,
-    st_intersection,
-    st_intersects,
-    st_make_valid,
-    st_segmentize,
-    st_set_agr,
-    st_transform,
-    .into = fn_env
-  )
-  import::from("rlang", warn, .into = fn_env)
-
   if (is.null(bbox_4326)) {
     return(list(lines = NULL, labels = NULL))
   }
-  bb <- st_bbox(bbox_4326)
+  bb <- sf::st_bbox(bbox_4326)
   lon_range <- bb["xmax"] - bb["xmin"]
   lat_range <- bb["ymax"] - bb["ymin"]
   lon_step <- camera_sites_pick_step(lon_range)
@@ -825,7 +729,7 @@ camera_sites_create_graticule <- function(bbox_4326) {
     return(list(lines = NULL, labels = NULL))
   }
 
-  grid <- st_graticule(
+  grid <- sf::st_graticule(
     lon = lon_seq,
     lat = lat_seq,
     xlim = c(bb["xmin"], bb["xmax"]),
@@ -834,10 +738,10 @@ camera_sites_create_graticule <- function(bbox_4326) {
 
   has_lwgeom <- requireNamespace("lwgeom", quietly = TRUE)
   if (isTRUE(has_lwgeom)) {
-    grid <- st_segmentize(grid, dfMaxLength = 25 * 1000)
-    grid <- st_make_valid(grid)
+    grid <- sf::st_segmentize(grid, dfMaxLength = 25 * 1000)
+    grid <- sf::st_make_valid(grid)
   } else {
-    warn(
+    rlang::warn(
       paste(
         "Package 'lwgeom' is not installed; skipping graticule densification.",
         "Install lwgeom for smoother graticules in geographic coordinates."
@@ -850,14 +754,14 @@ camera_sites_create_graticule <- function(bbox_4326) {
   xmax <- as.numeric(bb[["xmax"]])
   ymin <- as.numeric(bb[["ymin"]])
   ymax <- as.numeric(bb[["ymax"]])
-  bbox_sfc <- st_as_sfc(bb)
-  bbox_3857 <- st_transform(bbox_sfc, 3857)
-  grid_3857 <- st_transform(grid, 3857)
-  grid_geom <- st_geometry(grid_3857)
-  grid_clipped <- st_intersection(grid_geom, bbox_3857)
-  grid_sf <- st_as_sf(grid_clipped)
+  bbox_sfc <- sf::st_as_sfc(bb)
+  bbox_3857 <- sf::st_transform(bbox_sfc, 3857)
+  grid_3857 <- sf::st_transform(grid, 3857)
+  grid_geom <- sf::st_geometry(grid_3857)
+  grid_clipped <- sf::st_intersection(grid_geom, bbox_3857)
+  grid_sf <- sf::st_as_sf(grid_clipped)
   grid_sf$id <- seq_len(nrow(grid_sf))
-  grid_sf <- st_set_agr(grid_sf, "constant")
+  grid_sf <- sf::st_set_agr(grid_sf, "constant")
   row.names(grid_sf) <- NULL
 
   format_lon <- function(x) {
@@ -874,7 +778,7 @@ camera_sites_create_graticule <- function(bbox_4326) {
   if (!is.finite(lon_offset) || lon_offset <= 0) lon_offset <- 0.02
   if (!is.finite(lat_offset) || lat_offset <= 0) lat_offset <- 0.02
 
-  lon_labels <- st_as_sf(
+  lon_labels <- sf::st_as_sf(
     data.frame(
       lon = lon_seq,
       lat = rep(ymin + lat_offset, length(lon_seq)),
@@ -885,7 +789,7 @@ camera_sites_create_graticule <- function(bbox_4326) {
     remove = FALSE
   )
 
-  lat_labels <- st_as_sf(
+  lat_labels <- sf::st_as_sf(
     data.frame(
       lon = rep(xmax - lon_offset, length(lat_seq)),
       lat = lat_seq,
@@ -897,15 +801,15 @@ camera_sites_create_graticule <- function(bbox_4326) {
   )
 
   labels <- rbind(lon_labels, lat_labels)
-  inside <- st_intersects(labels, bbox_sfc, sparse = FALSE)
+  inside <- sf::st_intersects(labels, bbox_sfc, sparse = FALSE)
   if (!is.null(dim(inside))) {
     inside <- inside[, 1]
   }
   labels <- labels[inside, , drop = FALSE]
-  labels_3857 <- st_transform(labels, 3857)
-  labels_3857 <- st_as_sf(labels_3857)
+  labels_3857 <- sf::st_transform(labels, 3857)
+  labels_3857 <- sf::st_as_sf(labels_3857)
   labels_3857$id <- seq_len(nrow(labels_3857))
-  labels_3857 <- st_set_agr(labels_3857, "constant")
+  labels_3857 <- sf::st_set_agr(labels_3857, "constant")
   row.names(labels_3857) <- NULL
 
   list(lines = grid_sf, labels = labels_3857)
@@ -914,39 +818,24 @@ camera_sites_create_graticule <- function(bbox_4326) {
 
 camera_sites_stack_maps <- function(stack_cfg,
                                     prerequisites = NULL) {
-  fn_env <- environment()
-  import::from(
-    "checkmate",
-    assert_character,
-    assert_list,
-    assert_numeric,
-    assert_string,
-    .into = fn_env
-  )
-  import::from("grDevices", col2rgb, dev.off, png, .into = fn_env)
-  import::from("grid", gpar, grid.newpage, grid.raster, grid.text, unit, .into = fn_env)
-  import::from("here", here, .into = fn_env)
-  import::from("png", readPNG, writePNG, .into = fn_env)
-  import::from("rlang", abort, warn, .into = fn_env)
-
   force(prerequisites)
 
   if (is.null(stack_cfg)) {
-    abort(
+    rlang::abort(
       "Stack configuration is required to assemble camera site panels.",
       class = "camera_sites_stack_missing_config"
     )
   }
   if (!is.list(stack_cfg)) {
-    abort(
+    rlang::abort(
       "Camera site stack configuration must be a list or mapping from config.yaml.",
       class = "camera_sites_stack_invalid_config"
     )
   }
 
   normalise_output_path <- function(path) {
-    assert_string(path, min.chars = 1L)
-    candidates <- unique(c(path, here(path)))
+    checkmate::assert_string(path, min.chars = 1L)
+    candidates <- unique(c(path, here::here(path)))
     candidates[[1L]]
   }
 
@@ -959,10 +848,10 @@ camera_sites_stack_maps <- function(stack_cfg,
       if (is.null(p) || !nzchar(p)) {
         next
       }
-      candidates <- unique(c(p, here(p)))
+      candidates <- unique(c(p, here::here(p)))
       existing <- candidates[file.exists(candidates)]
       if (length(existing) == 0L) {
-        warn(sprintf("Camera site panel path not found: %s", p))
+        rlang::warn(sprintf("Camera site panel path not found: %s", p))
       } else {
         resolved <- c(resolved, existing)
       }
@@ -979,11 +868,11 @@ camera_sites_stack_maps <- function(stack_cfg,
       if (is.null(pat) || !nzchar(pat)) {
         next
       }
-      candidates <- unique(c(pat, here(pat)))
+      candidates <- unique(c(pat, here::here(pat)))
       matches <- unlist(lapply(candidates, Sys.glob), use.names = FALSE)
       matches <- matches[file.exists(matches)]
       if (length(matches) == 0L) {
-        warn(sprintf("Camera site panel glob matched no files: %s", pat))
+        rlang::warn(sprintf("Camera site panel glob matched no files: %s", pat))
       } else {
         resolved <- c(resolved, matches)
       }
@@ -1000,7 +889,7 @@ camera_sites_stack_maps <- function(stack_cfg,
       if (is.null(dir_candidate) || !nzchar(dir_candidate)) {
         next
       }
-      candidates <- unique(c(dir_candidate, here(dir_candidate)))
+      candidates <- unique(c(dir_candidate, here::here(dir_candidate)))
       for (cand in candidates) {
         if (!dir.exists(cand)) {
           next
@@ -1008,7 +897,7 @@ camera_sites_stack_maps <- function(stack_cfg,
         matches <- list.files(cand, pattern = pattern, full.names = TRUE)
         matches <- matches[file.exists(matches)]
         if (length(matches) == 0L) {
-          warn(sprintf("Camera site panel directory yielded no matches: %s", cand))
+          rlang::warn(sprintf("Camera site panel directory yielded no matches: %s", cand))
         } else {
           resolved <- c(resolved, matches)
         }
@@ -1048,7 +937,7 @@ camera_sites_stack_maps <- function(stack_cfg,
   collected_paths <- unique(collected_paths)
 
   if (length(collected_paths) == 0L) {
-    abort(
+    rlang::abort(
       "No camera site map images found for stacking.",
       class = "camera_sites_stack_missing_inputs"
     )
@@ -1080,10 +969,10 @@ camera_sites_stack_maps <- function(stack_cfg,
   }
 
   max_panels <- camera_sites_default(stack_cfg$max_panels, 9L)
-  assert_numeric(max_panels, len = 1L, lower = 1, upper = 9)
+  checkmate::assert_numeric(max_panels, len = 1L, lower = 1, upper = 9)
   max_panels <- as.integer(round(max_panels))
   if (length(collected_paths) > max_panels) {
-    warn(sprintf(
+    rlang::warn(sprintf(
       "Camera site stack limited to first %d panels (of %d found).",
       max_panels,
       length(collected_paths)
@@ -1093,20 +982,20 @@ camera_sites_stack_maps <- function(stack_cfg,
 
   output_path <- camera_sites_default(
     stack_cfg$output_path,
-    here("outputs", "maps", "camera_sites_panel.png")
+    here::here("outputs", "maps", "camera_sites_panel.png")
   )
   output_path <- normalise_output_path(output_path)
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
 
   gap_px <- camera_sites_default(stack_cfg$gap_px, 6)
-  assert_numeric(gap_px, len = 1L, lower = 0)
+  checkmate::assert_numeric(gap_px, len = 1L, lower = 0)
   gap_px <- as.integer(round(gap_px))
 
   background <- camera_sites_default(stack_cfg$background, "#ffffff")
-  assert_character(background, len = 1L, pattern = "^#|^[A-Za-z]", any.missing = FALSE)
-  bg_rgb <- try(col2rgb(background) / 255, silent = TRUE)
+  checkmate::assert_character(background, len = 1L, pattern = "^#|^[A-Za-z]", any.missing = FALSE)
+  bg_rgb <- try(grDevices::col2rgb(background) / 255, silent = TRUE)
   if (inherits(bg_rgb, "try-error")) {
-    abort(
+    rlang::abort(
       sprintf("Invalid background colour for camera site panel: %s", background),
       class = "camera_sites_stack_invalid_colour"
     )
@@ -1121,7 +1010,7 @@ camera_sites_stack_maps <- function(stack_cfg,
   } else if (is.character(label_cfg_raw)) {
     label_cfg <- list(values = label_cfg_raw)
   } else {
-    abort(
+    rlang::abort(
       "labels configuration must be NULL, a character vector, or a list with `values`.",
       class = "camera_sites_stack_invalid_labels"
     )
@@ -1141,9 +1030,9 @@ camera_sites_stack_maps <- function(stack_cfg,
   label_font_face <- camera_sites_default(label_cfg$font_face, "bold")
 
   read_rgba <- function(path) {
-    img <- try(readPNG(path), silent = TRUE)
+    img <- try(png::readPNG(path), silent = TRUE)
     if (inherits(img, "try-error")) {
-      abort(
+      rlang::abort(
         sprintf("Failed to read PNG for camera site panel: %s", path),
         class = "camera_sites_stack_read_failed"
       )
@@ -1175,7 +1064,7 @@ camera_sites_stack_maps <- function(stack_cfg,
       arr[, , 4] <- img[, , 2]
       return(arr)
     }
-    abort(
+    rlang::abort(
       sprintf("Unsupported channel count (%d) for camera site panel: %s", channels, path),
       class = "camera_sites_stack_invalid_channels"
     )
@@ -1188,28 +1077,33 @@ camera_sites_stack_maps <- function(stack_cfg,
     height <- dim(img)[1]
     width <- dim(img)[2]
     tmp <- tempfile(fileext = ".png")
-    png(filename = tmp, width = width, height = height, bg = "transparent")
-    grid.newpage()
-    grid.raster(img, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
+    grDevices::png(filename = tmp, width = width, height = height, bg = "transparent")
+    grid::grid.newpage()
+    grid::grid.raster(
+      img,
+      width = grid::unit(1, "npc"),
+      height = grid::unit(1, "npc"),
+      interpolate = TRUE
+    )
     padding_x <- max(0, min(label_padding, width))
     padding_y <- max(0, min(label_padding, height))
-    x_pos <- unit(1 - (padding_x / width), "npc")
-    y_pos <- unit(padding_y / height, "npc")
-    grid.text(
+    x_pos <- grid::unit(1 - (padding_x / width), "npc")
+    y_pos <- grid::unit(padding_y / height, "npc")
+    grid::grid.text(
       label_text,
       x = x_pos,
       y = y_pos,
       just = c("right", "bottom"),
-      gp = gpar(
+      gp = grid::gpar(
         col = label_colour,
         fontsize = label_font_size,
         fontface = label_font_face,
         fontfamily = label_font_family
       )
     )
-    dev.off()
+    grDevices::dev.off()
     on.exit(unlink(tmp), add = TRUE)
-    readPNG(tmp)
+    png::readPNG(tmp)
   }
 
   images <- lapply(seq_along(collected_paths), function(idx) {
@@ -1225,7 +1119,7 @@ camera_sites_stack_maps <- function(stack_cfg,
 
   channel_counts <- vapply(images, function(img) dim(img)[3], integer(1))
   if (length(unique(channel_counts)) != 1L) {
-    abort("Camera site panel image channels are inconsistent after conversion.")
+    rlang::abort("Camera site panel image channels are inconsistent after conversion.")
   }
   channels <- channel_counts[[1]]
 
@@ -1242,7 +1136,9 @@ camera_sites_stack_maps <- function(stack_cfg,
     rows <- max(1L, as.integer(round(rows_cfg)))
     if (columns * rows < total_panels) {
       rows <- ceiling(total_panels / columns)
-      warn("Specified columns/rows insufficient for panels; rows increased to fit all panels.")
+      rlang::warn(
+        "Specified columns/rows insufficient for panels; rows increased to fit all panels."
+      )
     }
     layout <- determine_layout(columns, rows)
   } else if (!is.null(columns_cfg)) {
@@ -1297,7 +1193,7 @@ camera_sites_stack_maps <- function(stack_cfg,
     panel[row_range, col_range, ] <- img
   }
 
-  writePNG(panel, target = output_path)
+  png::writePNG(panel, target = output_path)
   structure(
     output_path,
     panel_paths = collected_paths,

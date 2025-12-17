@@ -10,21 +10,17 @@
 #' @export
 cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
                      config_path = NULL) {
-  fn_env <- environment()
-  import::from("here", here, .into = fn_env)
-  import::from("rlang", abort, .into = fn_env)
-
   if (is.null(config_path)) {
     installed <- system.file("config", "config.yaml", package = "localmap")
     if (nzchar(installed) && file.exists(installed)) {
       config_path <- installed
     } else {
-      config_path <- here("config", "config.yaml")
+      config_path <- here::here("config", "config.yaml")
     }
   }
   path <- config_path
   if (!file.exists(path)) {
-    abort(
+    rlang::abort(
       c(
         "Configuration file not found.",
         i = sprintf("Expected at: %s", path)
@@ -35,7 +31,7 @@ cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
 
   cfg <- config::get(file = path, config = profile)
   if (!is.list(cfg)) {
-    abort("Config must resolve to a list.", class = "cfg_read_invalid_config")
+    rlang::abort("Config must resolve to a list.", class = "cfg_read_invalid_config")
   }
   cfg
 }
