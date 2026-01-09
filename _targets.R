@@ -111,6 +111,56 @@ list(
     description = "AOI polygon and derived bounding boxes."
   ),
   targets::tar_target(
+    coverage_zone,
+    build_coverage_zone(
+      sites = camera_sites_data,
+      coverage_cfg = cfg$data$coverage,
+      analysis_crs = aoi$crs
+    ),
+    description = "Coverage zone polygon derived from site points."
+  ),
+  targets::tar_target(
+    coverage_summary,
+    write_coverage_summary(
+      coverage = coverage_zone,
+      output_path = if (is.null(cfg$data$coverage)) NULL else cfg$data$coverage$summary_path
+    ),
+    format = "file",
+    description = "Coverage zone summary table (area and metadata)."
+  ),
+  targets::tar_target(
+    layer_registry,
+    validate_layer_registry(cfg$data$layers),
+    description = "Validated registry of imagery layers."
+  ),
+  targets::tar_target(
+    layer_outputs,
+    fetch_layer_registry(layer_registry, aoi = aoi),
+    description = "Imagery layers fetched from registry."
+  ),
+  targets::tar_target(
+    layer_output_paths,
+    stats::setNames(layer_outputs$path, layer_outputs$id),
+    description = "Named vector of layer output paths."
+  ),
+  targets::tar_target(
+    layer_provenance_paths,
+    stats::setNames(layer_outputs$provenance_path, layer_outputs$id),
+    description = "Named vector of layer provenance paths."
+  ),
+  targets::tar_target(
+    layer_files,
+    layer_outputs$path,
+    format = "file",
+    description = "Layer imagery files from the registry."
+  ),
+  targets::tar_target(
+    layer_provenance_files,
+    layer_outputs$provenance_path,
+    format = "file",
+    description = "Layer provenance sidecars."
+  ),
+  targets::tar_target(
     camera_sites_context,
     prepare_camera_site_context(
       sites = camera_sites_data,
@@ -150,6 +200,18 @@ list(
     description = "Camera site map with effort-scaled symbols and observation highlighting."
   ),
   targets::tar_target(
+    overview_map,
+    render_overview_map(
+      aoi = aoi,
+      sites = camera_sites_data,
+      coverage = coverage_zone,
+      layers = layer_outputs,
+      map_cfg = cfg$data$overview_map
+    ),
+    format = "file",
+    description = "Overview map with AOI, sites, and optional coverage polygon."
+  ),
+  targets::tar_target(
     camera_sites_panel,
     camera_sites_stack_maps(
       stack_cfg = cfg$data$camera_sites$stack,
@@ -157,6 +219,26 @@ list(
     ),
     format = "file",
     description = "Vertically stacked panel of camera site maps."
+  ),
+  targets::tar_target(
+    panel_figure,
+    assemble_panel_figure(
+      panel_cfg = cfg$data$panel_figure,
+      prerequisites = list(overview_map, species_map, camera_sites_map, topo_tile_map)
+    ),
+    description = "Multi-panel figure assembly (PNG + PDF)."
+  ),
+  targets::tar_target(
+    panel_figure_png,
+    panel_figure$png,
+    format = "file",
+    description = "Multi-panel figure PNG output."
+  ),
+  targets::tar_target(
+    panel_figure_pdf,
+    panel_figure$pdf,
+    format = "file",
+    description = "Multi-panel figure PDF output."
   ),
 
   targets::tar_target(
@@ -181,7 +263,15 @@ list(
         camera_sites_map = camera_sites_map,
         camera_sites_panel = camera_sites_panel,
         camera_sites_tile = camera_sites_tile,
-        aoi_debug_plot = aoi_debug_plot
+        aoi_debug_plot = aoi_debug_plot,
+        coverage_summary = coverage_summary,
+        wms_layer = layer_output_paths[["tasveg_wms"]],
+        wms_layer_provenance = layer_provenance_paths[["tasveg_wms"]],
+        arcgis_layer = layer_output_paths[["topography_arcgis"]],
+        arcgis_layer_provenance = layer_provenance_paths[["topography_arcgis"]],
+        overview_map = overview_map,
+        panel_figure_png = panel_figure_png,
+        panel_figure_pdf = panel_figure_pdf
       )
     ),
     description = "Validated output schema manifest (v1) for produced artefacts."

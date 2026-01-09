@@ -83,6 +83,7 @@ Fix and repeat until coherent.
 - Remote layers must be cached deterministically.
 - Remote failures must be explicit (warnings/errors) and never silently produce empty maps.
 - Network-dependent tests must be gated (off by default).
+- See `docs/layers_guide.md` for adding WMS/ArcGIS/file layers via the registry.
 
 ## 5) When to ask the human
 

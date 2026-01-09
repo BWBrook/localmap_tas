@@ -96,3 +96,8 @@ Format:
 **Decision:** Add `data.aoi.mode = "auto"` to derive AOI size from site bounds plus a buffer, where the default buffer is the median nearest-neighbour distance between sites (scaled and bounded by optional min/max).
 **Rationale:** Provides a sensible, camera-scale default extent without hard-coding sizes, while allowing explicit AOI sizes to override the heuristic.
 **Status:** Active.
+
+## 2026-01-09 — Imagery caching + provenance sidecars
+**Decision:** Remote imagery (WMS and ArcGIS export) writes cached PNGs under `data/cache/` with deterministic keys and a `.yml` provenance sidecar alongside each output.
+**Rationale:** Enables reproducible imagery panels, auditability, and offline-safe runs with placeholders.
+**Status:** Active.

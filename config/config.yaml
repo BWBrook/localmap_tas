@@ -186,6 +186,80 @@ demo:
           padding_px: 12
           colour: "#ffffff"
           font_size: 28
+    coverage:
+      enabled: true
+      buffer_m: 250
+      summary_path: "outputs/tables/demo_coverage_summary.csv"
+    layers:
+      - id: "tasveg_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.0_Groups55513"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/demo_tasveg_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG"
+      - id: "topography_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/demo_topography_arcgis.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Topography"
+    overview_map:
+      output_path: "outputs/maps/demo_overview_map.png"
+      width: 7
+      height: 7
+      dpi: 300
+      base_layer_id: "tasveg_wms"
+      overlays:
+        - id: "topography_arcgis"
+          opacity: 0.35
+      show_labels: false
+      point_colour: "#2171b5"
+      point_size: 2
+      aoi_colour: "#d95f0e"
+      coverage_colour: "#2ca25f"
+      coverage_alpha: 0.15
+      scale_bar_location: "bl"
+      north_arrow_location: "tr"
+    panel_figure:
+      paths:
+        - "outputs/maps/demo_overview_map.png"
+        - "outputs/maps/demo_species_occurrences.png"
+        - "outputs/maps/demo_camera_sites.png"
+        - "outputs/maps/demo_species_topo.png"
+      order:
+        - "demo_overview_map"
+        - "demo_species_occurrences"
+        - "demo_camera_sites"
+        - "demo_species_topo"
+      columns: 2
+      rows: 2
+      output_path: "outputs/maps/demo_panel_figure.png"
+      output_pdf: "outputs/maps/demo_panel_figure.pdf"
+      gap_px: 8
+      labels:
+        values: ["a)", "b)", "c)", "d)"]
+        padding_px: 16
+        colour: "#050505"
+        font_size: 28
 
 jc:
   inherits: default
@@ -199,6 +273,80 @@ jc:
       buffer_multiplier: 1
       min_buffer_km: 0.1
       rotation_deg: 0
+    coverage:
+      enabled: true
+      buffer_m: 50
+      summary_path: "outputs/tables/jc_coverage_summary.csv"
+    layers:
+      - id: "tasveg_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.0_Groups55513"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc_tasveg_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG"
+      - id: "topography_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc_topography_arcgis.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Topography"
+    overview_map:
+      output_path: "outputs/maps/jc_overview_map.png"
+      width: 7
+      height: 7
+      dpi: 300
+      base_layer_id: "tasveg_wms"
+      overlays:
+        - id: "topography_arcgis"
+          opacity: 0.35
+      show_labels: false
+      point_colour: "#2171b5"
+      point_size: 2
+      aoi_colour: "#d95f0e"
+      coverage_colour: "#2ca25f"
+      coverage_alpha: 0.15
+      scale_bar_location: "bl"
+      north_arrow_location: "tr"
+    panel_figure:
+      paths:
+        - "outputs/maps/jc_overview_map.png"
+        - "outputs/maps/species_occurrences.png"
+        - "outputs/maps/camera_sites.png"
+        - "outputs/maps/species_topo.png"
+      order:
+        - "jc_overview_map"
+        - "species_occurrences"
+        - "camera_sites"
+        - "species_topo"
+      columns: 2
+      rows: 2
+      output_path: "outputs/maps/jc_panel_figure.png"
+      output_pdf: "outputs/maps/jc_panel_figure.pdf"
+      gap_px: 8
+      labels:
+        values: ["a)", "b)", "c)", "d)"]
+        padding_px: 16
+        colour: "#050505"
+        font_size: 28
     camera_sites:
       source: "jc"
       jc:

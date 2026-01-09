@@ -24,6 +24,10 @@ Required:
   - JC profile uses `metadata/species_requests_jc.csv` (species codes from `jc_obs.csv`).
 - `occurrence` (list): occurrence settings.
 - `camera_sites` (list): camera-site settings.
+- `coverage` (list, optional): coverage polygon settings.
+- `layers` (list, optional): registry of imagery layers (WMS/ArcGIS/file).
+- `overview_map` (list, optional): overview map rendering settings.
+- `panel_figure` (list, optional): multi-panel figure assembly settings.
 
 ### `data.aoi`
 
@@ -170,3 +174,63 @@ Derived fields:
 
 Profiles can `inherit` from `default` and override keys (e.g., `demo`, `ci`).
 Always keep `schema_version` in the active profile (inherited from `default` if not overridden).
+### `data.coverage`
+
+Coverage polygons describe the monitored region derived from site points.
+
+- `enabled` (logical, default: `false`): whether to compute the coverage polygon.
+- `buffer_m` (numeric, default: `0`): buffer distance in metres applied to the convex hull.
+- `site_ids` (character vector, optional): restrict coverage to specific sites.
+- `summary_path` (string, optional): output CSV path for coverage summary.
+
+### `data.layers`
+
+Layer registry entries define imagery sources and attribution metadata.
+
+Required fields per layer:
+- `id` (string): unique layer ID.
+- `type` (string): `wms`, `arcgis_export`, or `file`.
+- `attribution` (list): attribution metadata (at least `source`).
+
+WMS fields:
+- `url` (string): WMS endpoint.
+- `layers` (string or list): WMS layer names.
+- `styles` (string, optional), `crs` (string, optional), `width`/`height` (integer px), `format` (string).
+- `offline` (logical, optional): skip network fetch and generate a placeholder.
+
+ArcGIS export fields:
+- `url` (string): ArcGIS REST export endpoint.
+- `crs` (string, optional), `width`/`height` (integer px), `format` (string).
+- `offline` (logical, optional): skip network fetch and generate a placeholder.
+
+File fields:
+- `path` (string): path to a local image file.
+
+Attribution fields (per layer):
+- `source` (string, required).
+- `license` (string, optional).
+- `credit` (string, optional).
+
+### `data.overview_map`
+
+- `output_path` (string, optional): output PNG path.
+- `width`/`height` (numeric, inches): figure size.
+- `dpi` (numeric): output resolution.
+- `base_layer_id` (string, optional): layer ID to use as basemap.
+- `overlays` (list, optional): overlay layers with `id` and `opacity`.
+- `show_labels` (logical, default `false`): draw site labels.
+- `label_field` (string, default `site`): site label column.
+- `label_size` (numeric): label size.
+- `point_colour`/`point_size`: site marker styling.
+- `aoi_colour`/`coverage_colour`: outline and fill styling.
+- `scale_bar_location`/`north_arrow_location`: positions for cartographic annotations.
+
+### `data.panel_figure`
+
+- `paths` (list): panel image paths.
+- `order` (list, optional): ordering patterns for panel filenames.
+- `columns`/`rows` (integer): panel grid layout.
+- `output_path` (string): PNG output path.
+- `output_pdf` (string, optional): PDF output path.
+- `gap_px` (integer, optional): padding between panels.
+- `labels` (list, optional): label values + style (see camera-sites stack config).

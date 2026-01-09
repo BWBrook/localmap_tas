@@ -10,6 +10,12 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - AOI auto mode to derive extents from site bounds with a buffered heuristic (median nearest-neighbour distance).
 - `jc` camera-sites source to derive effort (`rd`) and observations (`obs`) from Judbury camera study inputs.
 - JC fixture occurrences (`inst/extdata/occurrences_jc.csv`) and species list (`metadata/species_requests_jc.csv`) for local camera-scale demo maps.
+- Coverage zone polygons (convex hull + buffer) with summary tables.
+- WMS imagery fetch with caching, provenance, and offline placeholders.
+- ArcGIS export imagery fetch with caching, provenance, and offline placeholders.
+- Layer registry v1 with config-driven imagery definitions and `docs/layers_guide.md`.
+- Overview map renderer with AOI/sites/coverage and cartographic annotations.
+- Multi-panel figure assembler with PNG + PDF outputs.
 - `camera_sites_panel` target and stacking helper to combine multiple camera
   site map PNGs into a vertically aligned comparison panel.
 - Panel stacking now deduplicates glob/dir matches, supports up to nine panes in

@@ -399,6 +399,9 @@ generate_topo_tile_map <- function(occurrences,
     enable_tiles <- TRUE
   }
   checkmate::assert_logical(enable_tiles, len = 1L, any.missing = FALSE)
+  if (is.null(output_path)) {
+    output_path <- mapping_settings$topo_output_path
+  }
   if (!isTRUE(enable_tiles)) {
     return(map_species_occurrences(occurrences, mapping_settings, aoi = aoi, output_path))
   }
@@ -426,9 +429,6 @@ generate_topo_tile_map <- function(occurrences,
     return(map_species_occurrences(occurrences, mapping_settings, aoi = aoi, output_path))
   }
 
-  if (is.null(output_path)) {
-    output_path <- mapping_settings$topo_output_path
-  }
   if (is.null(output_path)) {
     output_path <- here::here("outputs", "maps", "species_topo.png")
   }

@@ -4,3 +4,11 @@ camera_sites_map,map,Camera sites basemap map,outputs/maps/demo_camera_sites.png
 camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo_camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
 camera_sites_tile,basemap,Placeholder camera basemap tile,outputs/tiles/demo_camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
 aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
+coverage_summary,table,Coverage zone summary table,outputs/tables/demo_coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
+wms_layer,basemap,Demo WMS layer imagery,outputs/layers/demo_tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
+wms_layer_provenance,provenance,Demo WMS layer provenance,outputs/layers/demo_tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
+arcgis_layer,basemap,Demo ArcGIS export imagery,outputs/layers/demo_topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,Demo ArcGIS export provenance,outputs/layers/demo_topography_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
+overview_map,map,Overview map panel,outputs/maps/demo_overview_map.png,png,EPSG:3857,demo,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/demo_panel_figure.png,png,EPSG:3857,demo,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/demo_panel_figure.pdf,pdf,EPSG:3857,demo,assemble_panel_figure

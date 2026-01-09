@@ -158,3 +158,10 @@
   - Enabled AOI auto mode (sites bbox + buffered extent) for the JC profile and regenerated JC AOI debug + occurrence maps.
   - Validation: `devtools::test()` OK (108 pass), `devtools::document()` updated AOI docs.
   - AOI debug plots now omit the centroid dot by default (optional plus marker available).
+
+- 2026-01-09: Line 0.4 completion work (WP-008–WP-013).
+  - Added coverage zone polygons + summary table outputs.
+  - Implemented WMS and ArcGIS imagery fetch with caching/provenance and offline placeholders.
+  - Added layer registry + overview map renderer + panel figure assembler.
+  - Generated canonical run artefacts for WP-008 through WP-013 and recorded logs in `docs/log/`.
+  - Validation: `devtools::test()` OK (134 pass), `lintr::lint_package()` clean; demo pipeline run `targets::tar_make()` completed.

@@ -100,12 +100,12 @@ Every WP must create or update:
 
 ### Line 0.4.x — Core spatial primitives + imagery panels (publication-first)
 - [x] **WP-007:** AOI builder v1 (centroid/extent/rotation) with tests + documented assumptions (completed 2026-01-09; evidence: docs/log/WP-007_2026-01-09_aoi-builder.md; canonical run: outputs/canonical_runs/WP-007_2026-01-09_aoi-builder)  
-- [ ] **WP-008:** Coverage zone polygon v1 (convex hull + buffer) with tests + optional config  
-- [ ] **WP-009:** WMS imagery fetch v1 (GetMap) with caching + provenance + offline fallback  
-- [ ] **WP-010:** ArcGIS export imagery fetch v1 with caching + provenance + offline fallback  
-- [ ] **WP-011:** Layer registry v1 (config-driven) + “add a layer” guide  
-- [ ] **WP-012:** Overview map renderer v1 (sites + AOI + scale/north + optional overlays)  
-- [ ] **WP-013:** Multi-panel figure assembler v1 (labels, layout, PNG+PDF outputs)
+- [x] **WP-008:** Coverage zone polygon v1 (convex hull + buffer) with tests + optional config (completed 2026-01-09; evidence: docs/log/WP-008_2026-01-09_coverage-zone.md; canonical run: outputs/canonical_runs/WP-008_2026-01-09_coverage-zone)  
+- [x] **WP-009:** WMS imagery fetch v1 (GetMap) with caching + provenance + offline fallback (completed 2026-01-09; evidence: docs/log/WP-009_2026-01-09_wms-imagery.md; canonical run: outputs/canonical_runs/WP-009_2026-01-09_wms-imagery)  
+- [x] **WP-010:** ArcGIS export imagery fetch v1 with caching + provenance + offline fallback (completed 2026-01-09; evidence: docs/log/WP-010_2026-01-09_arcgis-imagery.md; canonical run: outputs/canonical_runs/WP-010_2026-01-09_arcgis-imagery)  
+- [x] **WP-011:** Layer registry v1 (config-driven) + “add a layer” guide (completed 2026-01-09; evidence: docs/log/WP-011_2026-01-09_layer-registry.md; canonical run: outputs/canonical_runs/WP-011_2026-01-09_layer-registry)  
+- [x] **WP-012:** Overview map renderer v1 (sites + AOI + scale/north + optional overlays) (completed 2026-01-09; evidence: docs/log/WP-012_2026-01-09_overview-map.md; canonical run: outputs/canonical_runs/WP-012_2026-01-09_overview-map)  
+- [x] **WP-013:** Multi-panel figure assembler v1 (labels, layout, PNG+PDF outputs) (completed 2026-01-09; evidence: docs/log/WP-013_2026-01-09_panel-figure.md; canonical run: outputs/canonical_runs/WP-013_2026-01-09_panel-figure)
 
 ### Line 0.5.x — Analysis-grade layers (clipped data, not just imagery)
 - [ ] **WP-014:** Vector acquisition v1 (AOI-clipped) + cached GeoPackage + provenance  

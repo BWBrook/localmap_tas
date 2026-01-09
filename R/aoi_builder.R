@@ -78,7 +78,7 @@ resolve_aoi_mode <- function(aoi_cfg) {
   mode <- aoi_cfg$mode
   if (is.null(mode)) {
     if (is.null(aoi_cfg$size_km) &&
-      (is.null(aoi_cfg$width_km) || is.null(aoi_cfg$height_km))) {
+          (is.null(aoi_cfg$width_km) || is.null(aoi_cfg$height_km))) {
       return("auto")
     }
     return("fixed")

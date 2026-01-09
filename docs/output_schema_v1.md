@@ -25,6 +25,14 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `camera_sites_map` → `outputs/maps/demo_camera_sites.png`
 - `camera_sites_panel` → `outputs/maps/demo_camera_sites_panel.png`
 - `camera_sites_tile` → `outputs/tiles/demo_camera_sites_tile.png`
+- `coverage_summary` → `outputs/tables/demo_coverage_summary.csv`
+- `wms_layer` → `outputs/layers/demo_tasveg_wms.png`
+- `wms_layer_provenance` → `outputs/layers/demo_tasveg_wms.png.yml`
+- `arcgis_layer` → `outputs/layers/demo_topography_arcgis.png`
+- `arcgis_layer_provenance` → `outputs/layers/demo_topography_arcgis.png.yml`
+- `overview_map` → `outputs/maps/demo_overview_map.png`
+- `panel_figure_png` → `outputs/maps/demo_panel_figure.png`
+- `panel_figure_pdf` → `outputs/maps/demo_panel_figure.pdf`
 
 ### Default profile entries
 

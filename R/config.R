@@ -146,7 +146,7 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
   mode <- aoi_cfg$mode
   if (is.null(mode)) {
     if (is.null(aoi_cfg$size_km) &&
-      (is.null(aoi_cfg$width_km) || is.null(aoi_cfg$height_km))) {
+          (is.null(aoi_cfg$width_km) || is.null(aoi_cfg$height_km))) {
       mode <- "auto"
     } else {
       mode <- "fixed"
@@ -311,6 +311,76 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     cfg_require_string(jc_cfg$obs_path, "data$camera_sites$jc$obs_path")
   } else {
     cfg_require_string(camera_cfg$path, "data$camera_sites$path")
+  }
+
+  coverage_cfg <- data_cfg$coverage
+  if (!is.null(coverage_cfg)) {
+    if (!is.list(coverage_cfg)) {
+      rlang::abort(
+        "`data$coverage` must be a list if provided.",
+        class = "cfg_coverage_invalid"
+      )
+    }
+    if (!is.null(coverage_cfg$enabled)) {
+      checkmate::assert_logical(coverage_cfg$enabled, len = 1L, any.missing = FALSE)
+    }
+    if (!is.null(coverage_cfg$buffer_m)) {
+      checkmate::assert_numeric(coverage_cfg$buffer_m, len = 1L, lower = 0, any.missing = FALSE)
+    }
+    if (!is.null(coverage_cfg$site_ids)) {
+      checkmate::assert_character(
+        as.character(unlist(coverage_cfg$site_ids, use.names = FALSE)),
+        min.len = 1L,
+        any.missing = FALSE
+      )
+    }
+    if (!is.null(coverage_cfg$summary_path)) {
+      checkmate::assert_string(coverage_cfg$summary_path, min.chars = 1L)
+    }
+  }
+
+  layers_cfg <- data_cfg$layers
+  if (!is.null(layers_cfg)) {
+    validate_layer_registry(layers_cfg)
+  }
+
+  overview_cfg <- data_cfg$overview_map
+  if (!is.null(overview_cfg)) {
+    if (!is.list(overview_cfg)) {
+      rlang::abort(
+        "`data$overview_map` must be a list if provided.",
+        class = "cfg_overview_map_invalid"
+      )
+    }
+    if (!is.null(overview_cfg$output_path)) {
+      checkmate::assert_string(overview_cfg$output_path, min.chars = 1L)
+    }
+    if (!is.null(overview_cfg$base_layer_id)) {
+      checkmate::assert_string(overview_cfg$base_layer_id, min.chars = 1L)
+    }
+    if (!is.null(overview_cfg$overlays)) {
+      checkmate::assert_list(overview_cfg$overlays, any.missing = FALSE)
+    }
+  }
+
+  panel_cfg <- data_cfg$panel_figure
+  if (!is.null(panel_cfg)) {
+    if (!is.list(panel_cfg)) {
+      rlang::abort(
+        "`data$panel_figure` must be a list if provided.",
+        class = "cfg_panel_figure_invalid"
+      )
+    }
+    if (!is.null(panel_cfg$paths)) {
+      checkmate::assert_character(
+        as.character(unlist(panel_cfg$paths, use.names = FALSE)),
+        min.len = 1L,
+        any.missing = FALSE
+      )
+    }
+    if (!is.null(panel_cfg$output_path)) {
+      checkmate::assert_string(panel_cfg$output_path, min.chars = 1L)
+    }
   }
   cfg_require_string(camera_cfg$central_site, "data$camera_sites$central_site")
   checkmate::assert_numeric(camera_cfg$bbox_half_km, len = 1L, lower = 0, any.missing = FALSE)
