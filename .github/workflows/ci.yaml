@@ -23,7 +23,47 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v2
 
+      - name: Prepare CI artifacts
+        run: mkdir -p ci_artifacts
+
       - name: Lint
         run: Rscript -e 'if (!requireNamespace(\"lintr\", quietly = TRUE)) install.packages(\"lintr\"); l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) }'
 
+      - name: Unit tests
+        run: >-
+          Rscript -e 'if (!requireNamespace("pkgload", quietly = TRUE)) install.packages("pkgload");
+          if (!requireNamespace("testthat", quietly = TRUE)) install.packages("testthat");
+          pkgload::load_all();
+          results <- testthat::test_dir("tests/testthat", stop_on_failure = FALSE);
+          summary <- as.data.frame(results);
+          totals <- c(
+            sprintf("tests: %s", nrow(summary)),
+            sprintf("expectations_passed: %s", sum(summary$passed, na.rm = TRUE)),
+            sprintf("expectations_failed: %s", sum(summary$failed, na.rm = TRUE)),
+            sprintf("warnings: %s", sum(summary$warning, na.rm = TRUE)),
+            sprintf("errors: %s", sum(summary$error, na.rm = TRUE)),
+            sprintf("skipped: %s", sum(summary$skipped, na.rm = TRUE))
+          );
+          writeLines(totals, "ci_artifacts/test_summary.txt");
+          if (sum(summary$failed, na.rm = TRUE) > 0 || sum(summary$error, na.rm = TRUE) > 0) quit(status = 1)'
+
+      - name: Demo pipeline (offline)
+        env:
+          R_CONFIG_ACTIVE: demo
+          TARGETS_PROFILE: ci
+        run: Rscript -e 'if (!requireNamespace(\"targets\", quietly = TRUE)) install.packages(\"targets\"); targets::tar_make()'
+
+      - name: Collect demo artifacts
+        run: |
+          mkdir -p ci_artifacts/demo
+          cp outputs/maps/demo_*.png ci_artifacts/demo/
+          cp outputs/tiles/demo_*.png ci_artifacts/demo/
+
       - uses: r-lib/actions/check-r-package@v2
+
+      - name: Upload CI artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-artifacts
+          path: ci_artifacts

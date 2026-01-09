@@ -30,7 +30,12 @@ read_species_requests <- function(path) {
     )
   }
 
-  raw <- readr::read_csv(path_resolved, show_col_types = FALSE, progress = FALSE)
+  raw <- readr::read_csv(
+    path_resolved,
+    show_col_types = FALSE,
+    progress = FALSE,
+    num_threads = 1
+  )
   required <- c("common_name", "scientific_name")
   missing_cols <- setdiff(required, colnames(raw))
   if (length(missing_cols) > 0L) {

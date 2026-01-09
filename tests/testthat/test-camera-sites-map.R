@@ -1,7 +1,7 @@
 test_that("read_camera_sites validates and loads data", {
   tmp <- tempfile(fileext = ".csv")
   on.exit(unlink(tmp), add = TRUE)
-  readr::write_csv(
+  utils::write.csv(
     tibble::tibble(
       site = c("centre", "inside"),
       lat = c(-41.0, -41.05),
@@ -9,7 +9,8 @@ test_that("read_camera_sites validates and loads data", {
       rd = c(100, 50),
       obs = c(1, 0)
     ),
-    tmp
+    tmp,
+    row.names = FALSE
   )
   data <- localmap:::read_camera_sites(tmp)
   expect_s3_class(data, "tbl_df")

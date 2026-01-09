@@ -133,10 +133,30 @@ list(
     camera_sites_panel,
     camera_sites_stack_maps(
       stack_cfg = cfg$data$camera_sites$stack,
-      prerequisites = camera_sites_map
+      prerequisites = list(camera_sites_map, species_map)
     ),
     format = "file",
     description = "Vertically stacked panel of camera site maps."
+  ),
+
+  targets::tar_target(
+    output_manifest,
+    readr::read_csv("inst/extdata/output_manifest_v1.csv", show_col_types = FALSE, num_threads = 1),
+    description = "Output schema manifest (v1) defining expected outputs."
+  ),
+
+  targets::tar_target(
+    output_schema_v1,
+    validate_output_manifest(
+      manifest = output_manifest,
+      expected_outputs = list(
+        species_map = species_map,
+        camera_sites_map = camera_sites_map,
+        camera_sites_panel = camera_sites_panel,
+        camera_sites_tile = camera_sites_tile
+      )
+    ),
+    description = "Validated output schema manifest (v1) for produced artefacts."
   ),
 
 

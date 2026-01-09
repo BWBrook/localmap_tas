@@ -9,7 +9,7 @@ testthat::test_that("read_species_requests loads species definitions", {
 testthat::test_that("read_species_requests validates schema", {
   tmp <- tempfile(fileext = ".csv")
   on.exit(unlink(tmp), add = TRUE)
-  readr::write_lines("species_id\nmissing", file = tmp)
+  writeLines("species_id\nmissing", con = tmp)
   testthat::expect_error(
     localmap::read_species_requests(tmp),
     class = "read_species_requests_schema"
@@ -19,7 +19,7 @@ testthat::test_that("read_species_requests validates schema", {
 testthat::test_that("read_species_requests requires a query term", {
   tmp <- tempfile(fileext = ".csv")
   on.exit(unlink(tmp), add = TRUE)
-  readr::write_lines("species_id,common_name,scientific_name\nsp1,,", file = tmp)
+  writeLines("species_id,common_name,scientific_name\nsp1,,", con = tmp)
   testthat::expect_error(
     localmap::read_species_requests(tmp),
     class = "read_species_requests_no_query"

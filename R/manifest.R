@@ -47,7 +47,12 @@ read_manifest <- function(manifest_path) {
     root_dir <- dirname(csv_path)
   }
 
-  dat <- readr::read_csv(csv_path, show_col_types = FALSE, progress = FALSE)
+  dat <- readr::read_csv(
+    csv_path,
+    show_col_types = FALSE,
+    progress = FALSE,
+    num_threads = 1
+  )
   # Validate minimal schema
   needed <- c("id", "path")
   checkmate::assert_names(colnames(dat), must.include = needed)

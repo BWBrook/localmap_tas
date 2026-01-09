@@ -234,7 +234,10 @@ load_additional_points <- function(cfg) {
     return(NULL)
   }
 
-  data <- try(readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE), silent = TRUE)
+  data <- try(
+    readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE, num_threads = 1),
+    silent = TRUE
+  )
   if (inherits(data, "try-error")) {
     rlang::warn(sprintf("Failed to read additional points file: %s", resolved))
     return(NULL)

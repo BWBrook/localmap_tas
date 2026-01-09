@@ -104,3 +104,33 @@
     - `outputs/maps/demo_species_occurrences.png`: Tasmania outline and occurrence points appear spatially plausible (points clustered in NW TAS; graticule labels plausible).
     - `outputs/maps/demo_camera_sites.png`: camera site points render within the expected coastal extent; scale bar + north arrow present; placeholder basemap expected in demo.
     - `outputs/maps/demo_camera_sites_panel.png`: panel renders but contains substantial whitespace (likely config/layout choice); consider tightening demo panel layout in a follow-up.
+
+- 2026-01-09: WP-001 logging + evidence conventions.
+  - Added `docs/log/README.md` and documented naming conventions in `docs/workflow.md`.
+  - Created example log `docs/log/WP-001_2026-01-09_logging-evidence.md` and placeholder canonical run folder under `outputs/canonical_runs/`.
+  - Decision recorded in `docs/decisions.md` for log/run naming.
+
+- 2026-01-09: WP-002 config schema v1 + validation + reference.
+  - Added `schema_version: 1` to config profiles and implemented `cfg_validate()` in `cfg_read()`.
+  - Documented schema in `docs/config_reference.md` and linked from README.
+  - Moved camera-site legend config under `data.camera_sites.map.legend` to match renderer expectations.
+  - Validation tests added in `tests/testthat/test_config.R` (missing schema, missing required keys, unsupported version).
+
+- 2026-01-09: WP-003 demo profile offline maps/panels.
+  - Demo stack now produces a 2-panel figure combining species overview + camera-sites map.
+  - Added normalization for mixed RGB/RGBA panel inputs; placeholder WMS tile handled as expected.
+  - Canonical run saved under `outputs/canonical_runs/WP-003_2026-01-09_demo-offline` with inspected artefacts.
+
+- 2026-01-09: WP-004 output schema v1 + regression tests.
+  - Added `inst/extdata/output_manifest_v1.csv`, `docs/output_schema_v1.md`, and `output_schema_v1` target to validate declared outputs.
+  - New validation helper `validate_output_manifest()` plus tests in `tests/testthat/test_output_manifest.R`.
+
+- 2026-01-09: WP-005 packaging hygiene.
+  - Ran `devtools::document()` + `rcmdcheck::rcmdcheck(args = "--no-manual")` with 0 errors/warnings/notes.
+  - Canonical run folder recorded under `outputs/canonical_runs/WP-005_2026-01-09_packaging-hygiene`.
+
+- 2026-01-09: WP-006 CI gates v1.
+  - Added CI steps for lint, unit tests, demo pipeline run, and artifact uploads (test summary + demo PNGs).
+  - Fixed output schema target to read the manifest via `readr::read_csv()` for pipeline validation.
+  - Demo pipeline rerun (`R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()`), outputs inspected and captured under `outputs/canonical_runs/WP-006_2026-01-09_ci-gates-v1`.
+  - Verification gates rerun: `renv::restore()`/`renv::status()` OK, `lintr::lint_package()` OK, `devtools::test()` OK (87 pass), `rcmdcheck::rcmdcheck(args = "--no-manual")` OK.

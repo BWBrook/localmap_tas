@@ -24,6 +24,8 @@ This workflow is mandatory for the Codex CLI engineer and is also recommended fo
 5. Document:
    - Update README and relevant docs when behavior/config changes.
    - Add changelog entries for user-facing changes.
+   - Record WP evidence in `docs/log/` and create canonical run folders under
+     `outputs/canonical_runs/` (see `docs/log/README.md`).
 
 ## 2) Artefact Review Cycle (maps are “results”)
 
@@ -50,6 +52,11 @@ Add a short section to `docs/AGENT_NOTES.md`:
 - what the map shows
 - what looks wrong
 - what you will change next
+
+Also add a WP log entry in `docs/log/` with:
+- artefacts inspected,
+- sanity/interpretation notes,
+- canonical run folder path.
 
 ### 2.4 Iterate
 Fix and repeat until coherent.

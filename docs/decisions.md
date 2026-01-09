@@ -51,3 +51,23 @@ Format:
 **Decision:** Use explicit namespace qualifiers (`pkg::fun()`) inside functions, avoid `import::from()` and avoid `library()` calls in package code.
 **Rationale:** More idiomatic for typical R users; keeps dependency usage explicit at call sites; avoids check notes driven by the `{import}` package and reduces search-path side effects.
 **Status:** Active.
+
+## 2026-01-09 — WP log and canonical run naming convention
+**Decision:** WP logs live in `docs/log/` named `WP-###_YYYY-MM-DD_short-slug.md`; canonical run folders live in `outputs/canonical_runs/WP-###_YYYY-MM-DD_short-slug/`.
+**Rationale:** A consistent, sortable naming scheme makes PI review easier and keeps evidence bundled with each WP.
+**Status:** Active.
+
+## 2026-01-09 — Config schema v1 with explicit validation
+**Decision:** Introduce `schema_version: 1` and validate required config keys at `cfg_read()` time.
+**Rationale:** Configuration is a public interface; failing fast with clear errors reduces silent misconfiguration.
+**Status:** Active.
+
+## 2026-01-09 — Camera-site legend config lives under `data.camera_sites.map.legend`
+**Decision:** Store legend display settings inside the camera-site map config block.
+**Rationale:** The renderer consumes `map_cfg$legend`; keeping legend settings co-located avoids unused config keys.
+**Status:** Active.
+
+## 2026-01-09 — Output schema v1 manifest
+**Decision:** Track expected artefacts in a manifest CSV (`inst/extdata/output_manifest_v1.csv`) and validate via `output_schema_v1` target.
+**Rationale:** Makes output contracts explicit and testable, reducing silent output drift.
+**Status:** Active.

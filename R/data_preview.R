@@ -43,7 +43,8 @@ preview_manifest <- function(manifest, n_max = 100L) {
         p,
         n_max = n_max,
         show_col_types = FALSE,
-        progress = FALSE
+        progress = FALSE,
+        num_threads = 1
       ),
       silent = TRUE
     )

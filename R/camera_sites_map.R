@@ -38,7 +38,12 @@ read_camera_sites <- function(path) {
   resolved <- existing[[1]]
   checkmate::assert_file_exists(resolved)
 
-  data <- readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE)
+  data <- readr::read_csv(
+    resolved,
+    show_col_types = FALSE,
+    progress = FALSE,
+    num_threads = 1
+  )
   required <- c("site", "lat", "lon", "rd", "obs")
   missing <- setdiff(required, names(data))
   if (length(missing) > 0L) {
@@ -1029,14 +1034,7 @@ camera_sites_stack_maps <- function(stack_cfg,
   label_font_family <- camera_sites_default(label_cfg$font_family, "")
   label_font_face <- camera_sites_default(label_cfg$font_face, "bold")
 
-  read_rgba <- function(path) {
-    img <- try(png::readPNG(path), silent = TRUE)
-    if (inherits(img, "try-error")) {
-      rlang::abort(
-        sprintf("Failed to read PNG for camera site panel: %s", path),
-        class = "camera_sites_stack_read_failed"
-      )
-    }
+  normalize_rgba <- function(img, path = NULL) {
     dims <- dim(img)
     if (length(dims) == 2L) {
       arr <- array(1, dim = c(dims[1], dims[2], 4))
@@ -1068,6 +1066,17 @@ camera_sites_stack_maps <- function(stack_cfg,
       sprintf("Unsupported channel count (%d) for camera site panel: %s", channels, path),
       class = "camera_sites_stack_invalid_channels"
     )
+  }
+
+  read_rgba <- function(path) {
+    img <- try(png::readPNG(path), silent = TRUE)
+    if (inherits(img, "try-error")) {
+      rlang::abort(
+        sprintf("Failed to read PNG for camera site panel: %s", path),
+        class = "camera_sites_stack_read_failed"
+      )
+    }
+    normalize_rgba(img, path = path)
   }
 
   annotate_label <- function(img, label_text) {
@@ -1103,7 +1112,7 @@ camera_sites_stack_maps <- function(stack_cfg,
     )
     grDevices::dev.off()
     on.exit(unlink(tmp), add = TRUE)
-    png::readPNG(tmp)
+    normalize_rgba(png::readPNG(tmp), path = tmp)
   }
 
   images <- lapply(seq_along(collected_paths), function(idx) {

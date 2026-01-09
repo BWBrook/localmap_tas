@@ -66,7 +66,12 @@ ala_fixture_occurrences <- function(
   }
 
   checkmate::assert_string(resolved, min.chars = 1L)
-  data <- readr::read_csv(resolved, show_col_types = FALSE, progress = FALSE)
+  data <- readr::read_csv(
+    resolved,
+    show_col_types = FALSE,
+    progress = FALSE,
+    num_threads = 1
+  )
 
   required_cols <- c(
     "species_id",

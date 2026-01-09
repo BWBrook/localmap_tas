@@ -47,6 +47,8 @@ See:
 
 * `docs/product_brief.md`
 * `docs/architecture.md`
+* `docs/config_reference.md`
+* `docs/output_schema_v1.md`
 * `docs/roadmap.md`
 
 ## Data sources and attribution

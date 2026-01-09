@@ -91,12 +91,12 @@ Every WP must create or update:
 > Codex must always take the **first unchecked** WP below.
 
 ### Line 0.3.x — Baseline autonomy contracts + reproducible demo
-- [ ] **WP-001:** Logging + evidence conventions (docs/log + canonical run standard)  
-- [ ] **WP-002:** Config schema v1 + validation + config reference doc  
-- [ ] **WP-003:** Demo profile produces coherent maps/figures offline (placeholders allowed)  
-- [ ] **WP-004:** Output schema v1 (maps/figures/tables/provenance) + regression tests  
-- [ ] **WP-005:** Packaging hygiene (MIT license consistency, clean check)  
-- [ ] **WP-006:** CI gates v1 (check/test/lint + demo smoke run artefact)
+- [x] **WP-001:** Logging + evidence conventions (docs/log + canonical run standard) (completed 2026-01-09; evidence: docs/log/WP-001_2026-01-09_logging-evidence.md; canonical run: outputs/canonical_runs/WP-001_2026-01-09_logging-evidence)  
+- [x] **WP-002:** Config schema v1 + validation + config reference doc (completed 2026-01-09; evidence: docs/log/WP-002_2026-01-09_config-schema-v1.md; canonical run: outputs/canonical_runs/WP-002_2026-01-09_config-schema-v1)  
+- [x] **WP-003:** Demo profile produces coherent maps/figures offline (placeholders allowed) (completed 2026-01-09; evidence: docs/log/WP-003_2026-01-09_demo-offline.md; canonical run: outputs/canonical_runs/WP-003_2026-01-09_demo-offline)  
+- [x] **WP-004:** Output schema v1 (maps/figures/tables/provenance) + regression tests (completed 2026-01-09; evidence: docs/log/WP-004_2026-01-09_output-schema-v1.md; canonical run: outputs/canonical_runs/WP-004_2026-01-09_output-schema-v1)  
+- [x] **WP-005:** Packaging hygiene (MIT license consistency, clean check) (completed 2026-01-09; evidence: docs/log/WP-005_2026-01-09_packaging-hygiene.md; canonical run: outputs/canonical_runs/WP-005_2026-01-09_packaging-hygiene)  
+- [x] **WP-006:** CI gates v1 (check/test/lint + demo smoke run artefact) (completed 2026-01-09; evidence: docs/log/WP-006_2026-01-09_ci-gates-v1.md; canonical run: outputs/canonical_runs/WP-006_2026-01-09_ci-gates-v1)
 
 ### Line 0.4.x — Core spatial primitives + imagery panels (publication-first)
 - [ ] **WP-007:** AOI builder v1 (centroid/extent/rotation) with tests + documented assumptions  
