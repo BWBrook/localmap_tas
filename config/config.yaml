@@ -191,11 +191,13 @@ jc:
   inherits: default
   ala:
     use_fixture: true
-    fixture_occurrences: "inst/extdata/occurrences_demo.csv"
+    fixture_occurrences: "inst/extdata/occurrences_jc.csv"
   data:
+    species_requests: "metadata/species_requests_jc.csv"
     aoi:
-      centroid_site: "jc_cen"
-      size_km: 5
+      mode: "auto"
+      buffer_multiplier: 1
+      min_buffer_km: 0.1
       rotation_deg: 0
     camera_sites:
       source: "jc"

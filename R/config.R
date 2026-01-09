@@ -143,24 +143,57 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
   if (is.null(aoi_cfg) || !is.list(aoi_cfg)) {
     rlang::abort("`data$aoi` must be a list in the config.", class = "cfg_aoi_missing")
   }
-  if (!is.null(aoi_cfg$centroid_site)) {
-    checkmate::assert_string(aoi_cfg$centroid_site, min.chars = 1L)
-  } else {
-    centroid <- aoi_cfg$centroid
-    if (is.null(centroid) || !is.list(centroid) || !all(c("lat", "lon") %in% names(centroid))) {
-      rlang::abort(
-        "`data$aoi$centroid` must include lat/lon when centroid_site is not set.",
-        class = "cfg_aoi_centroid_missing"
-      )
+  mode <- aoi_cfg$mode
+  if (is.null(mode)) {
+    if (is.null(aoi_cfg$size_km) &&
+      (is.null(aoi_cfg$width_km) || is.null(aoi_cfg$height_km))) {
+      mode <- "auto"
+    } else {
+      mode <- "fixed"
     }
-    checkmate::assert_numeric(as.numeric(centroid$lat), len = 1L, any.missing = FALSE)
-    checkmate::assert_numeric(as.numeric(centroid$lon), len = 1L, any.missing = FALSE)
   }
-  if (!is.null(aoi_cfg$size_km)) {
-    checkmate::assert_numeric(aoi_cfg$size_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+  checkmate::assert_string(mode, min.chars = 1L)
+  mode <- tolower(mode)
+  if (!mode %in% c("fixed", "auto")) {
+    rlang::abort(
+      sprintf("Unsupported AOI mode '%s'.", mode),
+      class = "cfg_aoi_mode_invalid"
+    )
+  }
+
+  if (identical(mode, "fixed")) {
+    if (!is.null(aoi_cfg$centroid_site)) {
+      checkmate::assert_string(aoi_cfg$centroid_site, min.chars = 1L)
+    } else {
+      centroid <- aoi_cfg$centroid
+      if (is.null(centroid) || !is.list(centroid) || !all(c("lat", "lon") %in% names(centroid))) {
+        rlang::abort(
+          "`data$aoi$centroid` must include lat/lon when centroid_site is not set.",
+          class = "cfg_aoi_centroid_missing"
+        )
+      }
+      checkmate::assert_numeric(as.numeric(centroid$lat), len = 1L, any.missing = FALSE)
+      checkmate::assert_numeric(as.numeric(centroid$lon), len = 1L, any.missing = FALSE)
+    }
+    if (!is.null(aoi_cfg$size_km)) {
+      checkmate::assert_numeric(aoi_cfg$size_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+    } else {
+      checkmate::assert_numeric(aoi_cfg$width_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+      checkmate::assert_numeric(aoi_cfg$height_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+    }
   } else {
-    checkmate::assert_numeric(aoi_cfg$width_km, len = 1L, lower = 1e-6, any.missing = FALSE)
-    checkmate::assert_numeric(aoi_cfg$height_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+    if (!is.null(aoi_cfg$buffer_km)) {
+      checkmate::assert_numeric(aoi_cfg$buffer_km, len = 1L, lower = 0, any.missing = FALSE)
+    }
+    if (!is.null(aoi_cfg$buffer_multiplier)) {
+      checkmate::assert_numeric(aoi_cfg$buffer_multiplier, len = 1L, lower = 0, any.missing = FALSE)
+    }
+    if (!is.null(aoi_cfg$min_buffer_km)) {
+      checkmate::assert_numeric(aoi_cfg$min_buffer_km, len = 1L, lower = 0, any.missing = FALSE)
+    }
+    if (!is.null(aoi_cfg$max_buffer_km)) {
+      checkmate::assert_numeric(aoi_cfg$max_buffer_km, len = 1L, lower = 0, any.missing = FALSE)
+    }
   }
   if (!is.null(aoi_cfg$rotation_deg)) {
     checkmate::assert_numeric(aoi_cfg$rotation_deg, len = 1L, any.missing = FALSE)

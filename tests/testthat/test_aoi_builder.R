@@ -42,3 +42,40 @@ testthat::test_that("build_aoi_from_config applies rotation", {
   testthat::expect_gt(unique_x, 2)
   testthat::expect_gt(unique_y, 2)
 })
+
+testthat::test_that("build_aoi_from_config auto sizes from sites", {
+  cfg <- list(
+    mode = "auto",
+    buffer_km = 0.3,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  sites <- data.frame(
+    site = c("a", "b"),
+    lat = c(-42.0, -42.001),
+    lon = c(146.0, 146.002)
+  )
+  aoi <- localmap::build_aoi_from_config(cfg, sites = sites)
+
+  sites_sf <- sf::st_as_sf(sites, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+  sites_proj <- sf::st_transform(sites_sf, 28355)
+  site_bbox <- sf::st_bbox(sites_proj)
+
+  expected_width <- as.numeric((site_bbox["xmax"] - site_bbox["xmin"]) / 1000) + 2 * cfg$buffer_km
+  expected_height <- as.numeric((site_bbox["ymax"] - site_bbox["ymin"]) / 1000) + 2 * cfg$buffer_km
+
+  bbox <- sf::st_bbox(aoi$aoi)
+  width_km <- as.numeric((bbox["xmax"] - bbox["xmin"]) / 1000)
+  height_km <- as.numeric((bbox["ymax"] - bbox["ymin"]) / 1000)
+
+  testthat::expect_equal(width_km, expected_width, tolerance = 1e-3)
+  testthat::expect_equal(height_km, expected_height, tolerance = 1e-3)
+})
+
+testthat::test_that("build_aoi_from_config auto requires sites", {
+  cfg <- list(mode = "auto", buffer_km = 0.2)
+  testthat::expect_error(
+    localmap::build_aoi_from_config(cfg),
+    class = "aoi_auto_missing_sites"
+  )
+})

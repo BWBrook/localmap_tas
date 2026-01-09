@@ -4,7 +4,14 @@
 \alias{render_aoi_debug_plot}
 \title{Render a debug plot for the current AOI}
 \usage{
-render_aoi_debug_plot(aoi, sites = NULL, output_path = NULL)
+render_aoi_debug_plot(
+  aoi,
+  sites = NULL,
+  output_path = NULL,
+  show_centroid = FALSE,
+  centroid_shape = 3,
+  centroid_size = 2
+)
 }
 \arguments{
 \item{aoi}{List returned by \code{build_aoi_from_config()} or an \code{sf} polygon.}
@@ -12,6 +19,12 @@ render_aoi_debug_plot(aoi, sites = NULL, output_path = NULL)
 \item{sites}{Optional data.frame with \code{lat} and \code{lon} columns to overlay.}
 
 \item{output_path}{Output PNG path.}
+
+\item{show_centroid}{Logical; whether to plot a centroid marker.}
+
+\item{centroid_shape}{Point shape for centroid marker (defaults to a plus).}
+
+\item{centroid_size}{Size for the centroid marker.}
 }
 \value{
 Path to the rendered PNG file.

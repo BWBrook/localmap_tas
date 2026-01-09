@@ -148,3 +148,13 @@
   - Added JC dataset derivation (`derive_camera_sites_from_jc`) and `jc` profile config to produce `data/interim/jc_camera_sites.csv`.
   - Demo pipeline rebuilt after `targets::tar_destroy()`; outputs inspected and logged in `docs/log/WP-007_2026-01-09_aoi-builder.md`.
   - Validation: `lintr::lint_package()` OK, `devtools::test()` OK (104 pass), `rcmdcheck::rcmdcheck(args = "--no-manual")` OK.
+
+- 2026-01-09: JC AOI rescaled to camera-region extent.
+  - Updated the `jc` profile AOI size to 4 km and regenerated AOI debug + species occurrence maps in the JC extent.
+  - Added `aoi_debug_jc.png` and `species_occurrences_jc.png` to the WP-007 canonical run folder; logged the sanity notes.
+
+- 2026-01-09: JC fixture occurrences + tighter AOI.
+  - Added `inst/extdata/occurrences_jc.csv` and `metadata/species_requests_jc.csv` to render JC points in the species map.
+  - Enabled AOI auto mode (sites bbox + buffered extent) for the JC profile and regenerated JC AOI debug + occurrence maps.
+  - Validation: `devtools::test()` OK (108 pass), `devtools::document()` updated AOI docs.
+  - AOI debug plots now omit the centroid dot by default (optional plus marker available).

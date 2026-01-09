@@ -91,3 +91,8 @@ Format:
 **Decision:** Derive `rd` (recording days) from unique observation dates and `obs` from summed counts (or row counts if counts missing) when building a JC-compatible camera site table.
 **Rationale:** JC observations are the only guaranteed source in the local dataset; this yields a deterministic effort metric without requiring operational logs.
 **Status:** Active.
+
+## 2026-01-09 — AOI auto sizing heuristic
+**Decision:** Add `data.aoi.mode = "auto"` to derive AOI size from site bounds plus a buffer, where the default buffer is the median nearest-neighbour distance between sites (scaled and bounded by optional min/max).
+**Rationale:** Provides a sensible, camera-scale default extent without hard-coding sizes, while allowing explicit AOI sizes to override the heuristic.
+**Status:** Active.

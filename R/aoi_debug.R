@@ -3,10 +3,16 @@
 #' @param aoi List returned by `build_aoi_from_config()` or an `sf` polygon.
 #' @param sites Optional data.frame with `lat` and `lon` columns to overlay.
 #' @param output_path Output PNG path.
+#' @param show_centroid Logical; whether to plot a centroid marker.
+#' @param centroid_shape Point shape for centroid marker (defaults to a plus).
+#' @param centroid_size Size for the centroid marker.
 #' @return Path to the rendered PNG file.
 render_aoi_debug_plot <- function(aoi,
                                   sites = NULL,
-                                  output_path = NULL) {
+                                  output_path = NULL,
+                                  show_centroid = FALSE,
+                                  centroid_shape = 3,
+                                  centroid_size = 2) {
   if (is.null(aoi)) {
     rlang::abort("`aoi` is required.", class = "aoi_debug_invalid_aoi")
   }
@@ -26,6 +32,9 @@ render_aoi_debug_plot <- function(aoi,
     output_path <- here::here("outputs", "maps", "aoi_debug.png")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
+  checkmate::assert_logical(show_centroid, len = 1L, any.missing = FALSE)
+  checkmate::assert_numeric(centroid_shape, len = 1L, any.missing = FALSE)
+  checkmate::assert_numeric(centroid_size, len = 1L, any.missing = FALSE)
   outline_sf <- get_basemap_tasmania(bbox_4326)
 
   sites_sf <- NULL
@@ -40,11 +49,21 @@ render_aoi_debug_plot <- function(aoi,
     }
   }
 
-  centroid <- sf::st_centroid(aoi_4326)
   plot_obj <- ggplot2::ggplot() +
     ggplot2::geom_sf(data = outline_sf, fill = "grey95", colour = "grey70", linewidth = 0.4) +
-    ggplot2::geom_sf(data = aoi_4326, fill = NA, colour = "#d95f0e", linewidth = 0.7) +
-    ggplot2::geom_sf(data = centroid, colour = "#d95f0e", size = 2)
+    ggplot2::geom_sf(data = aoi_4326, fill = NA, colour = "#d95f0e", linewidth = 0.7)
+
+  if (isTRUE(show_centroid)) {
+    centroid <- sf::st_centroid(aoi_4326)
+    plot_obj <- plot_obj +
+      ggplot2::geom_sf(
+        data = centroid,
+        colour = "#d95f0e",
+        shape = centroid_shape,
+        size = centroid_size,
+        stroke = 0.8
+      )
+  }
 
   if (!is.null(sites_sf) && nrow(sites_sf) > 0L) {
     plot_obj <- plot_obj +

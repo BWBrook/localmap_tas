@@ -75,7 +75,8 @@ Fix and repeat until coherent.
 - The Judbury camera study example lives at `data/jc_camera_study/`.
 - Use profile `jc` to derive a compatible camera-site table at `data/interim/jc_camera_sites.csv`.
 - Minimal JC run:
-  - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\"))'`
+  - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\",\"species_map\"))'`
+  - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
 
 ## 4) Data acquisition rules
 

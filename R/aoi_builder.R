@@ -1,6 +1,7 @@
 #' Build an AOI polygon from configuration
 #'
 #' @param aoi_cfg List describing the AOI definition (centroid, size, rotation).
+#'   Set `mode = "auto"` to derive the AOI from site bounds plus a buffer.
 #' @param sites Optional data.frame with `site`, `lat`, `lon` columns for
 #'   resolving `centroid_site`.
 #' @return List containing the AOI polygon and derived bounding boxes.
@@ -14,17 +15,25 @@ build_aoi_from_config <- function(aoi_cfg, sites = NULL) {
   }
   checkmate::assert_string(analysis_crs, min.chars = 1L)
 
-  centroid <- resolve_aoi_centroid(aoi_cfg, sites = sites)
-  size <- resolve_aoi_size(aoi_cfg)
+  mode <- resolve_aoi_mode(aoi_cfg)
   rotation <- aoi_cfg$rotation_deg
   if (is.null(rotation)) {
     rotation <- 0
   }
   checkmate::assert_numeric(rotation, len = 1L, any.missing = FALSE)
 
-  centroid_sf <- sf::st_sfc(sf::st_point(c(centroid$lon, centroid$lat)), crs = 4326)
-  centroid_proj <- sf::st_transform(centroid_sf, sf::st_crs(analysis_crs))
-  centroid_xy <- sf::st_coordinates(centroid_proj)[1, ]
+  if (identical(mode, "auto")) {
+    auto <- resolve_aoi_from_sites(aoi_cfg, sites = sites, analysis_crs = analysis_crs)
+    size <- list(width_km = auto$width_km, height_km = auto$height_km)
+    centroid_sf <- auto$centroid_4326
+    centroid_xy <- auto$centroid_xy
+  } else {
+    centroid <- resolve_aoi_centroid(aoi_cfg, sites = sites)
+    size <- resolve_aoi_size(aoi_cfg)
+    centroid_sf <- sf::st_sfc(sf::st_point(c(centroid$lon, centroid$lat)), crs = 4326)
+    centroid_proj <- sf::st_transform(centroid_sf, sf::st_crs(analysis_crs))
+    centroid_xy <- sf::st_coordinates(centroid_proj)[1, ]
+  }
 
   half_width <- size$width_km * 1000 / 2
   half_height <- size$height_km * 1000 / 2
@@ -63,6 +72,26 @@ build_aoi_from_config <- function(aoi_cfg, sites = NULL) {
     bbox_3857 = bbox_3857,
     crs = analysis_crs
   )
+}
+
+resolve_aoi_mode <- function(aoi_cfg) {
+  mode <- aoi_cfg$mode
+  if (is.null(mode)) {
+    if (is.null(aoi_cfg$size_km) &&
+      (is.null(aoi_cfg$width_km) || is.null(aoi_cfg$height_km))) {
+      return("auto")
+    }
+    return("fixed")
+  }
+  checkmate::assert_string(mode, min.chars = 1L)
+  mode <- tolower(mode)
+  if (!mode %in% c("fixed", "auto")) {
+    rlang::abort(
+      sprintf("Unsupported AOI mode '%s'.", mode),
+      class = "aoi_mode_invalid"
+    )
+  }
+  mode
 }
 
 resolve_aoi_centroid <- function(aoi_cfg, sites = NULL) {
@@ -104,6 +133,94 @@ resolve_aoi_centroid <- function(aoi_cfg, sites = NULL) {
   checkmate::assert_numeric(lat, len = 1L, any.missing = FALSE)
   checkmate::assert_numeric(lon, len = 1L, any.missing = FALSE)
   list(lat = lat, lon = lon)
+}
+
+resolve_aoi_from_sites <- function(aoi_cfg, sites, analysis_crs) {
+  if (is.null(sites)) {
+    rlang::abort(
+      "AOI auto mode requires a sites table with lat/lon.",
+      class = "aoi_auto_missing_sites"
+    )
+  }
+  checkmate::assert_data_frame(sites, min.rows = 1L)
+  if (!all(c("lat", "lon") %in% names(sites))) {
+    rlang::abort(
+      "Sites table missing required columns (lat, lon) for AOI auto mode.",
+      class = "aoi_auto_sites_missing_columns"
+    )
+  }
+
+  sites_sf <- sf::st_as_sf(sites, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+  sites_proj <- sf::st_transform(sites_sf, sf::st_crs(analysis_crs))
+  bbox <- sf::st_bbox(sites_proj)
+
+  buffer_km <- resolve_aoi_buffer_km(aoi_cfg, sites_proj = sites_proj)
+  width_km <- as.numeric((bbox["xmax"] - bbox["xmin"]) / 1000) + 2 * buffer_km
+  height_km <- as.numeric((bbox["ymax"] - bbox["ymin"]) / 1000) + 2 * buffer_km
+
+  if (!is.finite(width_km) || !is.finite(height_km)) {
+    rlang::abort(
+      "AOI auto mode could not derive a finite size from sites.",
+      class = "aoi_auto_size_invalid"
+    )
+  }
+
+  centroid_proj <- sf::st_centroid(sf::st_as_sfc(bbox))
+  centroid_xy <- sf::st_coordinates(centroid_proj)[1, ]
+  centroid_4326 <- sf::st_transform(centroid_proj, 4326)
+
+  list(
+    width_km = width_km,
+    height_km = height_km,
+    centroid_xy = centroid_xy,
+    centroid_4326 = centroid_4326
+  )
+}
+
+resolve_aoi_buffer_km <- function(aoi_cfg, sites_proj) {
+  if (!is.null(aoi_cfg$buffer_km)) {
+    buffer_km <- as.numeric(aoi_cfg$buffer_km)
+    checkmate::assert_numeric(buffer_km, len = 1L, lower = 0)
+    return(buffer_km)
+  }
+
+  multiplier <- aoi_cfg$buffer_multiplier
+  if (is.null(multiplier)) {
+    multiplier <- 1
+  }
+  checkmate::assert_numeric(multiplier, len = 1L, lower = 0)
+
+  min_buffer_km <- aoi_cfg$min_buffer_km
+  if (is.null(min_buffer_km)) {
+    min_buffer_km <- 0.25
+  }
+  checkmate::assert_numeric(min_buffer_km, len = 1L, lower = 0)
+
+  max_buffer_km <- aoi_cfg$max_buffer_km
+  if (!is.null(max_buffer_km)) {
+    checkmate::assert_numeric(max_buffer_km, len = 1L, lower = 0)
+  }
+
+  n_sites <- nrow(sites_proj)
+  if (n_sites < 2L) {
+    buffer_km <- min_buffer_km
+  } else {
+    dist_mat <- sf::st_distance(sites_proj)
+    dist_mat <- matrix(as.numeric(dist_mat), nrow = n_sites)
+    diag(dist_mat) <- NA_real_
+    nearest <- apply(dist_mat, 1, min, na.rm = TRUE)
+    buffer_km <- stats::median(nearest, na.rm = TRUE) / 1000
+    if (!is.finite(buffer_km)) {
+      buffer_km <- min_buffer_km
+    }
+    buffer_km <- buffer_km * multiplier
+  }
+
+  buffer_km <- max(buffer_km, min_buffer_km)
+  if (!is.null(max_buffer_km)) {
+    buffer_km <- min(buffer_km, max_buffer_km)
+  }
+  buffer_km
 }
 
 resolve_aoi_size <- function(aoi_cfg) {

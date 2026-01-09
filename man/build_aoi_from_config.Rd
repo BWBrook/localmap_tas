@@ -7,7 +7,8 @@
 build_aoi_from_config(aoi_cfg, sites = NULL)
 }
 \arguments{
-\item{aoi_cfg}{List describing the AOI definition (centroid, size, rotation).}
+\item{aoi_cfg}{List describing the AOI definition (centroid, size, rotation).
+Set \code{mode = "auto"} to derive the AOI from site bounds plus a buffer.}
 
 \item{sites}{Optional data.frame with \code{site}, \code{lat}, \code{lon} columns for
 resolving \code{centroid_site}.}

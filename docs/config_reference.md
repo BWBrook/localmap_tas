@@ -21,6 +21,7 @@ Required:
 - `aoi` (list, required): area of interest definition.
 - `manifest` (string): CSV manifest path (e.g., `metadata/data_manifest.csv`).
 - `species_requests` (string): species query CSV path (e.g., `metadata/species_requests.csv`).
+  - JC profile uses `metadata/species_requests_jc.csv` (species codes from `jc_obs.csv`).
 - `occurrence` (list): occurrence settings.
 - `camera_sites` (list): camera-site settings.
 
@@ -32,16 +33,24 @@ The AOI (Area of Interest) standardizes map extents and data acquisition.
   - `lat` (numeric, degrees).
   - `lon` (numeric, degrees).
 - `centroid_site` (string, optional): site ID to use as centroid (from camera sites table).
+- `mode` (string, optional): `fixed` (default when size is provided) or `auto` to derive AOI from site bounds.
 - `width_km`/`height_km` (numeric, km): AOI width/height (total size).
 - `size_km` (numeric, km): square AOI size (overrides width/height).
 - `rotation_deg` (numeric, default 0): clockwise from geographic north.
 - `crs` (string, default `"EPSG:28355"`): analysis CRS for AOI geometry.
+- `buffer_km` (numeric, optional): AOI auto-mode buffer (km) added to all sides.
+- `buffer_multiplier` (numeric, optional): scale factor applied to the auto buffer (default 1.0).
+- `min_buffer_km` (numeric, optional): minimum auto buffer (default 0.25 km).
+- `max_buffer_km` (numeric, optional): maximum auto buffer (no cap if omitted).
 
 Notes:
 - **Analysis CRS:** AOI geometry is built in EPSG:28355 (GDA94 / MGA Zone 55).
 - **Centroid inputs:** lat/lon centroid coordinates are interpreted as EPSG:4326.
 - **Dimensions:** `width_km`/`height_km` define total AOI size (not half-widths).
 - **Rotation:** `rotation_deg` is clockwise from geographic north, applied after projection to EPSG:28355.
+- **Auto mode:** when `mode: auto`, the AOI size is derived from site bounds plus a buffer; centroid/centroid_site are ignored.
+- **Mode default:** if `mode` is omitted and no size/width/height is provided, `auto` is assumed.
+- **Auto buffer heuristic:** default buffer is the median nearest-neighbour distance between sites (in the AOI CRS), scaled by `buffer_multiplier` and bounded by `min_buffer_km`/`max_buffer_km`.
 
 ### `data.occurrence`
 

@@ -63,6 +63,31 @@ testthat::test_that("cfg_read migrates schema v1 to v2", {
   testthat::expect_equal(cfg$data$aoi$size_km, 10)
 })
 
+testthat::test_that("cfg_read accepts auto AOI without explicit size", {
+  tmp <- tempfile(fileext = ".yaml")
+  writeLines(c(
+    "default:",
+    "  schema_version: 2",
+    "  data:",
+    "    aoi:",
+    "      mode: auto",
+    "    manifest: \"metadata/data_manifest.csv\"",
+    "    species_requests: \"metadata/species_requests.csv\"",
+    "    occurrence:",
+    "      fields: [decimalLatitude]",
+    "      map: {}",
+    "    camera_sites:",
+    "      path: \"data/raw/lyr_op.csv\"",
+    "      central_site: \"centre\"",
+    "      bbox_half_km: 10",
+    "  ala:",
+    "    email: \"test@example.com\"",
+    "    download_reason_id: 4"
+  ), tmp)
+  cfg <- localmap::cfg_read(config_path = tmp)
+  testthat::expect_equal(tolower(cfg$data$aoi$mode), "auto")
+})
+
 testthat::test_that("cfg_read fails on unsupported schema_version", {
   tmp <- tempfile(fileext = ".yaml")
   writeLines(c(
