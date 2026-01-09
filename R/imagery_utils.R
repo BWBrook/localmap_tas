@@ -13,16 +13,24 @@ imagery_cache_key <- function(params) {
     params <- list()
   }
   flat <- unlist(params, recursive = TRUE, use.names = TRUE)
+  name_vec <- names(flat)
   if (length(flat) == 0L) {
     flat <- character()
   }
   flat <- as.character(flat)
+  if (!is.null(name_vec)) {
+    names(flat) <- name_vec
+  }
   name_vec <- names(flat)
   if (is.null(name_vec)) {
     name_vec <- rep("", length(flat))
   }
   flat <- flat[order(name_vec)]
-  key_text <- paste(sprintf("%s=%s", names(flat), flat), collapse = "&")
+  name_vec <- names(flat)
+  if (is.null(name_vec)) {
+    name_vec <- rep("", length(flat))
+  }
+  key_text <- paste(sprintf("%s=%s", name_vec, flat), collapse = "&")
   tmp <- tempfile(fileext = ".txt")
   on.exit(unlink(tmp), add = TRUE)
   writeLines(key_text, tmp, useBytes = TRUE)
@@ -58,7 +66,11 @@ imagery_write_provenance <- function(path, metadata) {
     metadata$timestamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   }
   flat <- unlist(metadata, recursive = TRUE, use.names = TRUE)
+  name_vec <- names(flat)
   flat <- as.character(flat)
+  if (!is.null(name_vec)) {
+    names(flat) <- name_vec
+  }
   lines <- sprintf("%s: %s", names(flat), flat)
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   writeLines(lines, path, useBytes = TRUE)

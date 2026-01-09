@@ -4,15 +4,15 @@ Date: 2026-01-09
 
 ## Summary
 - Implemented ArcGIS REST export imagery fetch with deterministic caching and provenance.
-- Offline mode generates placeholder imagery with warnings.
+- JC profile now exercises live ArcGIS imagery using explicit layer IDs.
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-010_2026-01-09_arcgis-imagery/`
-  - `demo_topography_arcgis.png`
-  - `demo_topography_arcgis.png.yml`
+  - `jc_topography_arcgis.png`
+  - `jc_topography_arcgis.png.yml`
 
 ## Sanity checks
-- Placeholder imagery produced for offline demo profile (layer set to `offline: true`).
+- Live ArcGIS imagery downloaded for the JC AOI using `layers=show:65` (Elevation Bands).
 - Provenance sidecar records request metadata and cache path.
 
 ## Notes

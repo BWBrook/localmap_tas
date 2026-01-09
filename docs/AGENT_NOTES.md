@@ -165,3 +165,33 @@
   - Added layer registry + overview map renderer + panel figure assembler.
   - Generated canonical run artefacts for WP-008 through WP-013 and recorded logs in `docs/log/`.
   - Validation: `devtools::test()` OK (134 pass), `lintr::lint_package()` clean; demo pipeline run `targets::tar_make()` completed.
+
+- 2026-01-09: WP-008 canonical run switched to JC sites.
+  - Rebuilt coverage zone + overview map with `R_CONFIG_ACTIVE=jc` to exercise the JC dataset.
+  - Updated `outputs/canonical_runs/WP-008_2026-01-09_coverage-zone/overview_map.png` and `coverage_summary.csv`.
+  - Logged new coverage area (≈0.426 km², 13 sites, 50 m buffer) in `docs/log/WP-008_2026-01-09_coverage-zone.md`.
+
+- 2026-01-09: Overview map aspect ratio fix (WP-008).
+  - Enabled AOI aspect-matching by default in `render_overview_map()` to remove transparent padding bands.
+  - Regenerated the JC overview map and canonical WP-008 artefacts with the corrected aspect ratio.
+
+- 2026-01-09: WP-009 WMS imagery re-run for JC profile.
+  - Fixed provenance writer to preserve field names (`imagery_write_provenance`).
+  - Fixed cache key generation to preserve parameter names (`imagery_cache_key`).
+  - Set JC WMS layer to `offline: false` and regenerated live TASVEG imagery + provenance sidecar.
+  - Updated WP-009 canonical run artefacts and log to use JC outputs.
+
+- 2026-01-09: WP-010 ArcGIS imagery re-run for JC profile.
+  - Added ArcGIS `layers` support (using `layers=show:65` for Elevation Bands).
+  - Set JC ArcGIS layer to `offline: false` and regenerated live topography imagery + provenance sidecar.
+  - Updated WP-010 canonical run artefacts and log to use JC outputs.
+
+- 2026-01-09: Re-aligned early WP artefacts to JC examples + CI fixes.
+  - Switched JC profile to emit `jc_*` output paths for species, camera-site maps, tiles, and panels.
+  - Rebuilt WP-003/WP-006 canonical runs using JC artefacts; updated logs.
+  - Regenerated `aoi_debug.png` + `aoi_debug_rotated.png` from JC AOI for WP-007.
+  - Fixed CI lint/test steps to rely on renv-installed packages and added a placeholder artifact file.
+
+- 2026-01-09: CI + layer registry alignment for JC.
+  - Added `jc_ci` profile (offline-safe JC outputs) and CI step to collect JC artefacts alongside demo outputs.
+  - Regenerated JC overview + panel figures and updated WP-011–WP-013 canonical runs/logs to use JC imagery.

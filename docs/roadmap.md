@@ -90,22 +90,22 @@ Every WP must create or update:
 
 > Codex must always take the **first unchecked** WP below.
 
-### Line 0.3.x — Baseline autonomy contracts + reproducible demo
+### Line 0.3.x — Baseline autonomy contracts + reproducible JC example
 - [x] **WP-001:** Logging + evidence conventions (docs/log + canonical run standard) (completed 2026-01-09; evidence: docs/log/WP-001_2026-01-09_logging-evidence.md; canonical run: outputs/canonical_runs/WP-001_2026-01-09_logging-evidence)  
 - [x] **WP-002:** Config schema v1 + validation + config reference doc (completed 2026-01-09; evidence: docs/log/WP-002_2026-01-09_config-schema-v1.md; canonical run: outputs/canonical_runs/WP-002_2026-01-09_config-schema-v1)  
-- [x] **WP-003:** Demo profile produces coherent maps/figures offline (placeholders allowed) (completed 2026-01-09; evidence: docs/log/WP-003_2026-01-09_demo-offline.md; canonical run: outputs/canonical_runs/WP-003_2026-01-09_demo-offline)  
+- [x] **WP-003:** JC profile produces coherent maps/figures offline (placeholders allowed) (completed 2026-01-09; evidence: docs/log/WP-003_2026-01-09_demo-offline.md; canonical run: outputs/canonical_runs/WP-003_2026-01-09_demo-offline — JC artefacts)  
 - [x] **WP-004:** Output schema v1 (maps/figures/tables/provenance) + regression tests (completed 2026-01-09; evidence: docs/log/WP-004_2026-01-09_output-schema-v1.md; canonical run: outputs/canonical_runs/WP-004_2026-01-09_output-schema-v1)  
 - [x] **WP-005:** Packaging hygiene (MIT license consistency, clean check) (completed 2026-01-09; evidence: docs/log/WP-005_2026-01-09_packaging-hygiene.md; canonical run: outputs/canonical_runs/WP-005_2026-01-09_packaging-hygiene)  
-- [x] **WP-006:** CI gates v1 (check/test/lint + demo smoke run artefact) (completed 2026-01-09; evidence: docs/log/WP-006_2026-01-09_ci-gates-v1.md; canonical run: outputs/canonical_runs/WP-006_2026-01-09_ci-gates-v1)
+- [x] **WP-006:** CI gates v1 (check/test/lint + JC smoke run artefact) (completed 2026-01-09; evidence: docs/log/WP-006_2026-01-09_ci-gates-v1.md; canonical run: outputs/canonical_runs/WP-006_2026-01-09_ci-gates-v1 — JC artefacts)
 
 ### Line 0.4.x — Core spatial primitives + imagery panels (publication-first)
 - [x] **WP-007:** AOI builder v1 (centroid/extent/rotation) with tests + documented assumptions (completed 2026-01-09; evidence: docs/log/WP-007_2026-01-09_aoi-builder.md; canonical run: outputs/canonical_runs/WP-007_2026-01-09_aoi-builder)  
 - [x] **WP-008:** Coverage zone polygon v1 (convex hull + buffer) with tests + optional config (completed 2026-01-09; evidence: docs/log/WP-008_2026-01-09_coverage-zone.md; canonical run: outputs/canonical_runs/WP-008_2026-01-09_coverage-zone)  
 - [x] **WP-009:** WMS imagery fetch v1 (GetMap) with caching + provenance + offline fallback (completed 2026-01-09; evidence: docs/log/WP-009_2026-01-09_wms-imagery.md; canonical run: outputs/canonical_runs/WP-009_2026-01-09_wms-imagery)  
 - [x] **WP-010:** ArcGIS export imagery fetch v1 with caching + provenance + offline fallback (completed 2026-01-09; evidence: docs/log/WP-010_2026-01-09_arcgis-imagery.md; canonical run: outputs/canonical_runs/WP-010_2026-01-09_arcgis-imagery)  
-- [x] **WP-011:** Layer registry v1 (config-driven) + “add a layer” guide (completed 2026-01-09; evidence: docs/log/WP-011_2026-01-09_layer-registry.md; canonical run: outputs/canonical_runs/WP-011_2026-01-09_layer-registry)  
-- [x] **WP-012:** Overview map renderer v1 (sites + AOI + scale/north + optional overlays) (completed 2026-01-09; evidence: docs/log/WP-012_2026-01-09_overview-map.md; canonical run: outputs/canonical_runs/WP-012_2026-01-09_overview-map)  
-- [x] **WP-013:** Multi-panel figure assembler v1 (labels, layout, PNG+PDF outputs) (completed 2026-01-09; evidence: docs/log/WP-013_2026-01-09_panel-figure.md; canonical run: outputs/canonical_runs/WP-013_2026-01-09_panel-figure)
+- [x] **WP-011:** Layer registry v1 (config-driven) + “add a layer” guide (completed 2026-01-09; evidence: docs/log/WP-011_2026-01-09_layer-registry.md; canonical run: outputs/canonical_runs/WP-011_2026-01-09_layer-registry — JC imagery)  
+- [x] **WP-012:** Overview map renderer v1 (sites + AOI + scale/north + optional overlays) (completed 2026-01-09; evidence: docs/log/WP-012_2026-01-09_overview-map.md; canonical run: outputs/canonical_runs/WP-012_2026-01-09_overview-map — JC)  
+- [x] **WP-013:** Multi-panel figure assembler v1 (labels, layout, PNG+PDF outputs) (completed 2026-01-09; evidence: docs/log/WP-013_2026-01-09_panel-figure.md; canonical run: outputs/canonical_runs/WP-013_2026-01-09_panel-figure — JC)
 
 ### Line 0.5.x — Analysis-grade layers (clipped data, not just imagery)
 - [ ] **WP-014:** Vector acquisition v1 (AOI-clipped) + cached GeoPackage + provenance  
@@ -123,7 +123,7 @@ Every WP must create or update:
 ### Line 0.7.x — Hardening, portability, and realism
 - [ ] **WP-023:** Offline-first contract + network-gated tests (explicit, documented)  
 - [ ] **WP-024:** Cache correctness audit (deterministic keys; cache hit guarantees)  
-- [ ] **WP-025 (Large):** Container parity (Docker and/or Apptainer demo run) + docs  
+- [ ] **WP-025 (Large):** Container parity (Docker and/or Apptainer JC run) + docs  
 - [ ] **WP-026:** “Tasmania canonical example” layer set (Orthophoto + TASVEG + DEM) runs end-to-end
 
 ### Line 1.0.x — Release readiness
@@ -204,24 +204,24 @@ Make configuration a stable public interface: versioned, validated, and document
 
 ---
 
-### WP-003 — Demo profile produces coherent maps/figures offline (placeholders allowed)
+### WP-003 — JC profile produces coherent maps/figures offline (placeholders allowed)
 **Outcome**  
-A clean clone can run a demo profile end-to-end without manual downloads, producing coherent map outputs suitable for testing, CI smoke runs, and PI review.
+A clean clone can run the JC profile end-to-end without manual downloads, producing coherent map outputs suitable for testing, CI smoke runs, and PI review.
 
 **Scope**
 - In scope:
-  - A committed demo site points dataset (small, under `inst/extdata/`).
-  - A demo config profile that produces:
+  - A committed JC fixture dataset (small, under `inst/extdata/`).
+  - A JC config profile (plus `jc_ci` for offline CI) that produces:
     - an overview map,
     - at least a 2-panel figure.
   - Offline-safe behavior:
     - if remote imagery is unavailable, produce placeholders with warnings (not failure).
 - Out of scope:
-  - Full fidelity Tasmania layers for the demo (those come later).
+  - Full fidelity Tasmania layers for the JC profile (those come later).
   - Network-dependent tests enabled by default.
 
 **Acceptance criteria**
-- Demo profile completes end-to-end on a clean environment with no manual data downloads.
+- JC profile completes end-to-end on a clean environment with no manual data downloads.
 - Outputs are coherent:
   - sites appear within AOI frame,
   - scale/north and basic annotations are present,
@@ -230,17 +230,18 @@ A clean clone can run a demo profile end-to-end without manual downloads, produc
 - A minimal Artefact Review Cycle is performed and logged.
 
 **Artefact evidence**
-- `inst/extdata/` contains demo site points (CSV or GeoPackage).
-- Canonical run folder exists: `outputs/canonical_runs/WP-003_*` containing:
-  - `overview_map.png` (or agreed filename),
-  - `panel_figure.png` (or agreed filename),
-  - any placeholder imagery artefacts used.
+- `inst/extdata/` contains JC fixtures (CSV or GeoPackage).
+- Canonical run folder exists: `outputs/canonical_runs/WP-003_*` containing JC outputs:
+  - `jc_species_occurrences.png`,
+  - `jc_camera_sites.png`,
+  - `jc_camera_sites_panel.png`,
+  - `jc_camera_sites_tile.png`.
 - `docs/log/WP-003_*.md` includes:
   - which outputs were inspected,
   - sanity-check notes (alignment, extent, legibility).
 
 **Stop condition**
-- Stop once the demo run reliably produces the required outputs and the artefacts are visually coherent.
+- Stop once the JC run reliably produces the required outputs and the artefacts are visually coherent.
 
 ---
 
@@ -266,7 +267,7 @@ Define and enforce stable output contracts (paths, filenames, minimal metadata).
   - where provenance lives,
   - expected image resolution constraints (e.g., DPI or pixel dimensions).
 - Output schema is versioned (explicit version value recorded somewhere stable).
-- Tests verify, for the demo profile:
+- Tests verify, for the JC profile:
   - required output files exist,
   - image outputs are non-empty and meet minimum dimension constraints,
   - provenance file(s) exist.
@@ -274,7 +275,7 @@ Define and enforce stable output contracts (paths, filenames, minimal metadata).
 **Artefact evidence**
 - `docs/output_schema.md` exists and is referenced from README or docs index.
 - Test coverage exists for output presence and minimal sanity.
-- Canonical run folder: `outputs/canonical_runs/WP-004_*` contains the demo outputs matching the schema.
+- Canonical run folder: `outputs/canonical_runs/WP-004_*` contains the JC outputs matching the schema.
 - `docs/log/WP-004_*.md` records any changes and includes a short “schema rationale”.
 
 **Stop condition**
@@ -311,7 +312,7 @@ Make the project behave like a reliable, distributable R package: correct licens
 
 ---
 
-### WP-006 — CI gates v1 (check/test/lint + demo smoke run artefact)
+### WP-006 — CI gates v1 (check/test/lint + JC smoke run artefact)
 **Outcome**  
 Establish CI that enforces correctness and produces artifacts that can be inspected when things break.
 
@@ -321,17 +322,17 @@ Establish CI that enforces correctness and produces artifacts that can be inspec
     - package check,
     - unit tests,
     - linting,
-    - demo smoke run (offline-safe).
-  - CI stores key artefacts (test reports and/or demo outputs) as build artefacts.
+    - JC smoke run (offline-safe via `jc_ci`).
+  - CI stores key artefacts (test reports and/or JC outputs) as build artefacts.
 - Out of scope:
   - Network-dependent integration tests enabled by default.
 
 **Acceptance criteria**
 - CI is present and green on default branch.
-- CI runs include a demo smoke run that is offline-safe.
+- CI runs include a JC smoke run that is offline-safe.
 - CI uploads artefacts that include at least:
   - a test summary,
-  - demo output images or a small provenance summary.
+  - JC output images or a small provenance summary.
 
 **Artefact evidence**
 - CI configuration exists in repo (workflows).
@@ -524,8 +525,9 @@ Users can add/modify layers and panels via config without editing code, using a 
 **Artefact evidence**
 - `docs/layers_guide.md` (or equivalent) exists and is referenced.
 - Canonical run: `outputs/canonical_runs/WP-011_*` includes:
-  - at least two panels from two registry-defined layers.
-- Log includes: “added/validated registry model; verified by demo panels”.
+  - `jc_tasveg_wms.png`,
+  - `jc_topography_arcgis.png`.
+- Log includes: “added/validated registry model; verified by JC imagery outputs”.
 
 **Stop condition**
 - Stop when layers are configurable without code edits and the guide is unambiguous.
@@ -549,13 +551,13 @@ Produce a publication-ready single “overview” map panel: basemap + sites + o
   - Complex cartographic styling or custom typography beyond baseline.
 
 **Acceptance criteria**
-- Overview map output exists for demo and is visually coherent.
+- Overview map output exists for JC and is visually coherent.
 - Baseline cartographic elements present (scale + north).
 - Labels are legible and configurable (on/off, size, offset).
 - Artefact Review Cycle includes a sanity inspection of alignment and legibility.
 
 **Artefact evidence**
-- Canonical run: `outputs/canonical_runs/WP-012_*` includes `overview_map.png` (and optionally PDF).
+- Canonical run: `outputs/canonical_runs/WP-012_*` includes `overview_map.png` (JC profile).
 - Output schema tests (from WP-004) pass for the overview map.
 - Log includes at least:
   - a bullet on label legibility,
@@ -563,7 +565,7 @@ Produce a publication-ready single “overview” map panel: basemap + sites + o
   - a bullet on any known limitations.
 
 **Stop condition**
-- Stop when overview map meets acceptance criteria and is stable under demo config.
+- Stop when overview map meets acceptance criteria and is stable under JC config.
 
 ---
 
@@ -590,8 +592,8 @@ Generate a multi-panel figure suitable for manuscripts, with deterministic layou
 
 **Artefact evidence**
 - Canonical run: `outputs/canonical_runs/WP-013_*` includes:
-  - `panel_figure.png`,
-  - `panel_figure.pdf` (if supported).
+  - `panel_figure.png` (JC profile),
+  - `panel_figure.pdf` (JC profile).
 - Log includes:
   - sanity check that labels correspond to intended panels,
   - quick note on whether legends overlap or clutter.
@@ -881,7 +883,7 @@ Provide a single end-to-end narrative example showing how to configure, run, and
     - shows generated overview map and panel figure,
     - shows extracted attributes table (preview),
     - explains provenance and attribution outputs.
-  - The doc must be reproducible under the demo profile.
+  - The doc must be reproducible under the JC profile.
 - Out of scope:
   - Multiple vignettes; keep to one canonical example.
 
@@ -920,7 +922,7 @@ Make offline behavior explicit, predictable, and tested. Network functionality m
   - Guaranteeing remote service uptime.
 
 **Acceptance criteria**
-- Offline mode is the default behavior for CI and demo runs.
+- Offline mode is the default behavior for CI and JC runs.
 - When network fetch is enabled:
   - remote imagery/vector acquisition can be verified manually,
   - results are recorded in a log.
@@ -972,19 +974,19 @@ Ensure that caching is correct, deterministic, and testable—so repeated runs d
 
 ---
 
-### WP-025 (Large) — Container parity (Docker and/or Apptainer demo run) + docs
+### WP-025 (Large) — Container parity (Docker and/or Apptainer JC run) + docs
 **Outcome**  
 Demonstrate that the workflow can run reproducibly in a container environment suitable for collaborators, CI, or HPC contexts.
 
 **Scope**
 - In scope:
-  - Container run for the demo profile produces the same required outputs.
+  - Container run for the JC profile produces the same required outputs.
   - Container docs explain how to run and where outputs appear.
 - Out of scope:
   - Optimising container size or multi-arch builds unless required.
 
 **Acceptance criteria**
-- At least one container pathway (Docker or Apptainer) runs the demo workflow end-to-end and produces:
+- At least one container pathway (Docker or Apptainer) runs the JC workflow end-to-end and produces:
   - overview map,
   - panel figure,
   - provenance outputs.
@@ -999,7 +1001,7 @@ Demonstrate that the workflow can run reproducibly in a container environment su
   - any limitations.
 
 **Stop condition**
-- Stop when one container pathway is validated and documented for the demo workflow.
+- Stop when one container pathway is validated and documented for the JC workflow.
 
 ---
 
@@ -1056,12 +1058,12 @@ Make the package feel “real” to external users: stable exported API, clean d
 
 **Acceptance criteria**
 - Exported API surface is explicitly documented and stable.
-- README quickstart works against demo config/profile.
+- README quickstart works against JC config/profile.
 - Docs site or docs index is coherent and cross-linked.
 - Changelog entries exist for user-visible behavior changes up to this point.
 
 **Artefact evidence**
-- Canonical run: `outputs/canonical_runs/WP-027_*` includes at least the demo outputs and the rendered documentation artefact (if applicable).
+- Canonical run: `outputs/canonical_runs/WP-027_*` includes at least the JC outputs and the rendered documentation artefact (if applicable).
 - Log includes:
   - list of exported functions (names only),
   - sanity check that docs match actual behavior.

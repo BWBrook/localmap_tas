@@ -8,12 +8,12 @@ Date: 2026-01-09
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-011_2026-01-09_layer-registry/`
-  - `demo_tasveg_wms.png`
-  - `demo_topography_arcgis.png`
+  - `jc_tasveg_wms.png`
+  - `jc_topography_arcgis.png`
 
 ## Sanity checks
 - Layer registry validated on config load; missing fields produce actionable errors.
-- Demo layers produce placeholder imagery under offline mode.
+- JC layers return live imagery for the camera-scale AOI.
 
 ## Notes
 - Registry supports `wms`, `arcgis_export`, and `file` layers.

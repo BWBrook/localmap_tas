@@ -42,6 +42,23 @@ arcgis_build_query <- function(arc_cfg, bbox) {
     transparent = if (isTRUE(transparent)) "true" else "false",
     dpi = dpi
   )
+  layers <- arc_cfg$layers
+  if (!is.null(layers)) {
+    layers <- as.character(unlist(layers, use.names = FALSE))
+    layers <- trimws(layers)
+    layers <- layers[nzchar(layers)]
+    if (length(layers) > 0L) {
+      mode <- arc_cfg$layers_mode %||% "show"
+      mode <- tolower(as.character(mode))
+      if (!mode %in% c("show", "hide", "include", "exclude")) {
+        rlang::abort(
+          "ArcGIS layers_mode must be show/hide/include/exclude.",
+          class = "arcgis_layers_mode_invalid"
+        )
+      }
+      query$layers <- paste0(mode, ":", paste(layers, collapse = ","))
+    }
+  }
 
   list(url = url, query = query, bbox_param = bbox_param)
 }

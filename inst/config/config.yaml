@@ -211,6 +211,8 @@ demo:
       - id: "topography_arcgis"
         type: "arcgis_export"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
+        layers:
+          - 65
         crs: "EPSG:3857"
         format: "png"
         width: 1600
@@ -268,6 +270,10 @@ jc:
     fixture_occurrences: "inst/extdata/occurrences_jc.csv"
   data:
     species_requests: "metadata/species_requests_jc.csv"
+    occurrence:
+      map:
+        output_path: "outputs/maps/jc_species_occurrences.png"
+        topo_output_path: "outputs/maps/jc_species_topo.png"
     aoi:
       mode: "auto"
       buffer_multiplier: 1
@@ -290,7 +296,7 @@ jc:
         height: 1600
         dpi: 96
         output_path: "outputs/layers/jc_tasveg_wms.png"
-        offline: true
+        offline: false
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -298,13 +304,15 @@ jc:
       - id: "topography_arcgis"
         type: "arcgis_export"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
+        layers:
+          - 65
         crs: "EPSG:3857"
         format: "png"
         width: 1600
         height: 1600
         dpi: 96
         output_path: "outputs/layers/jc_topography_arcgis.png"
-        offline: true
+        offline: false
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -329,14 +337,14 @@ jc:
     panel_figure:
       paths:
         - "outputs/maps/jc_overview_map.png"
-        - "outputs/maps/species_occurrences.png"
-        - "outputs/maps/camera_sites.png"
-        - "outputs/maps/species_topo.png"
+        - "outputs/maps/jc_species_occurrences.png"
+        - "outputs/maps/jc_camera_sites.png"
+        - "outputs/maps/jc_species_topo.png"
       order:
         - "jc_overview_map"
-        - "species_occurrences"
-        - "camera_sites"
-        - "species_topo"
+        - "jc_species_occurrences"
+        - "jc_camera_sites"
+        - "jc_species_topo"
       columns: 2
       rows: 2
       output_path: "outputs/maps/jc_panel_figure.png"
@@ -356,3 +364,68 @@ jc:
       path: "data/interim/jc_camera_sites.csv"
       central_site: "jc_cen"
       bbox_half_km: 2
+      basemap:
+        output_path: "outputs/tiles/jc_camera_sites_tile.png"
+      map:
+        output_path: "outputs/maps/jc_camera_sites.png"
+      stack:
+        paths:
+          - "outputs/maps/jc_species_occurrences.png"
+          - "outputs/maps/jc_camera_sites.png"
+        glob: []
+        input_dir: []
+        columns: 1
+        rows: 2
+        output_path: "outputs/maps/jc_camera_sites_panel.png"
+        gap_px: 8
+        labels:
+          values: ["a)", "b)"]
+          padding_px: 12
+          colour: "#050505"
+          font_size: 28
+
+jc_ci:
+  inherits: jc
+  data:
+    occurrence:
+      map:
+        enable_topo_tiles: false
+    layers:
+      - id: "tasveg_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.0_Groups55513"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc_tasveg_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG"
+      - id: "topography_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
+        layers:
+          - 65
+        crs: "EPSG:3857"
+        format: "png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc_topography_arcgis.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Topography"
+    camera_sites:
+      basemap:
+        url: ""
+        layers: []
+        overlays: []

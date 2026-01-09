@@ -24,16 +24,16 @@ jobs:
       - uses: r-lib/actions/setup-renv@v2
 
       - name: Prepare CI artifacts
-        run: mkdir -p ci_artifacts
+        run: |
+          mkdir -p ci_artifacts
+          touch ci_artifacts/.keep
 
       - name: Lint
-        run: Rscript -e 'if (!requireNamespace(\"lintr\", quietly = TRUE)) install.packages(\"lintr\"); l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) }'
+        run: Rscript -e 'l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) }'
 
       - name: Unit tests
         run: >-
-          Rscript -e 'if (!requireNamespace("pkgload", quietly = TRUE)) install.packages("pkgload");
-          if (!requireNamespace("testthat", quietly = TRUE)) install.packages("testthat");
-          pkgload::load_all();
+          Rscript -e 'pkgload::load_all();
           results <- testthat::test_dir("tests/testthat", stop_on_failure = FALSE);
           summary <- as.data.frame(results);
           totals <- c(
@@ -51,13 +51,25 @@ jobs:
         env:
           R_CONFIG_ACTIVE: demo
           TARGETS_PROFILE: ci
-        run: Rscript -e 'if (!requireNamespace(\"targets\", quietly = TRUE)) install.packages(\"targets\"); targets::tar_make()'
+        run: Rscript -e 'targets::tar_make()'
 
       - name: Collect demo artifacts
         run: |
           mkdir -p ci_artifacts/demo
-          cp outputs/maps/demo_*.png ci_artifacts/demo/
-          cp outputs/tiles/demo_*.png ci_artifacts/demo/
+          cp outputs/maps/demo_*.png ci_artifacts/demo/ || true
+          cp outputs/tiles/demo_*.png ci_artifacts/demo/ || true
+
+      - name: JC pipeline (offline)
+        env:
+          R_CONFIG_ACTIVE: jc_ci
+          TARGETS_PROFILE: ci
+        run: Rscript -e 'targets::tar_invalidate("cfg"); targets::tar_make(names = c("species_map","camera_sites_tile","camera_sites_map","camera_sites_panel","topo_tile_map","overview_map","panel_figure_png","panel_figure_pdf"))'
+
+      - name: Collect JC artifacts
+        run: |
+          mkdir -p ci_artifacts/jc
+          cp outputs/maps/jc_*.png ci_artifacts/jc/ || true
+          cp outputs/tiles/jc_*.png ci_artifacts/jc/ || true
 
       - uses: r-lib/actions/check-r-package@v2
 

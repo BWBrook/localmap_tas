@@ -5,6 +5,7 @@ Date: 2026-01-09
 ## Summary
 - Added panel figure assembly using existing stacking logic with PNG + PDF outputs.
 - Panel order controlled by config patterns for determinism.
+- Canonical run now uses JC outputs for the panel composition.
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-013_2026-01-09_panel-figure/`
@@ -14,7 +15,7 @@ Date: 2026-01-09
 ## Sanity checks
 - Panel labels align with the intended panels (a–d).
 - Layout is deterministic and panel spacing matches config.
- - Overview map panel shows AOI/coverage with cartographic elements intact.
+- Overview map panel shows AOI/coverage with cartographic elements intact.
 
 ## Notes
 - PDF export uses raster embedding for fidelity with PNG panels.

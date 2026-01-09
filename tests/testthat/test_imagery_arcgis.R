@@ -42,4 +42,5 @@ testthat::test_that("fetch_arcgis_imagery writes placeholder and provenance offl
   res <- localmap::fetch_arcgis_imagery(cfg, bbox, offline = TRUE, cache_dir = tempfile())
   testthat::expect_true(file.exists(res$path))
   testthat::expect_true(file.exists(res$provenance_path))
+  testthat::expect_gt(file.info(res$provenance_path)$size, 0)
 })

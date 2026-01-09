@@ -77,6 +77,8 @@ Fix and repeat until coherent.
 - Minimal JC run:
   - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\",\"species_map\"))'`
   - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
+- Offline JC run for CI:
+  - `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"species_map\",\"camera_sites_map\",\"camera_sites_panel\"))'`
 
 ## 4) Data acquisition rules
 

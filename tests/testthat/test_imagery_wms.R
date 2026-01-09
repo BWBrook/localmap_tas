@@ -46,4 +46,13 @@ testthat::test_that("fetch_wms_imagery writes placeholder and provenance offline
   res <- localmap::fetch_wms_imagery(cfg, bbox, offline = TRUE, cache_dir = tempfile())
   testthat::expect_true(file.exists(res$path))
   testthat::expect_true(file.exists(res$provenance_path))
+  testthat::expect_gt(file.info(res$provenance_path)$size, 0)
+})
+
+testthat::test_that("imagery_cache_key changes with bbox", {
+  params_a <- list(url = "https://example.com/wms", BBOX = "1,2,3,4", width = 256)
+  params_b <- list(url = "https://example.com/wms", BBOX = "5,6,7,8", width = 256)
+  key_a <- localmap:::imagery_cache_key(params_a)
+  key_b <- localmap:::imagery_cache_key(params_b)
+  testthat::expect_false(identical(key_a, key_b))
 })

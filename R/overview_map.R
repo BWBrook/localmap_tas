@@ -22,6 +22,7 @@ render_overview_map <- function(aoi,
     width = 7,
     height = 7,
     dpi = 300,
+    match_aspect = TRUE,
     base_layer_id = NULL,
     overlays = list(),
     show_labels = FALSE,
@@ -47,6 +48,37 @@ render_overview_map <- function(aoi,
 
   aoi_3857 <- sf::st_transform(aoi$aoi, 3857)
   bbox <- sf::st_bbox(aoi_3857)
+
+  width_in <- map_cfg$width
+  height_in <- map_cfg$height
+  match_aspect <- map_cfg$match_aspect
+  if (is.null(match_aspect)) {
+    match_aspect <- TRUE
+  }
+  if (isTRUE(match_aspect)) {
+    xspan <- as.numeric(bbox["xmax"] - bbox["xmin"])
+    yspan <- as.numeric(bbox["ymax"] - bbox["ymin"])
+    if (is.finite(xspan) && is.finite(yspan) && xspan > 0 && yspan > 0) {
+      ratio <- xspan / yspan
+      if (is.null(width_in) && is.null(height_in)) {
+        width_in <- 7
+      }
+      if (!is.null(width_in)) {
+        width_in <- as.numeric(width_in)
+        height_in <- width_in / ratio
+      } else {
+        height_in <- as.numeric(height_in)
+        width_in <- height_in * ratio
+      }
+    }
+  }
+
+  if (is.null(width_in) || !is.finite(width_in) || width_in <= 0) {
+    width_in <- 7
+  }
+  if (is.null(height_in) || !is.finite(height_in) || height_in <= 0) {
+    height_in <- 7
+  }
 
   sites_sf <- NULL
   if (nrow(sites) > 0L && all(c("lat", "lon") %in% names(sites))) {
@@ -206,8 +238,8 @@ render_overview_map <- function(aoi,
   ggplot2::ggsave(
     filename = output_path,
     plot = plot_obj,
-    width = map_cfg$width,
-    height = map_cfg$height,
+    width = width_in,
+    height = height_in,
     dpi = map_cfg$dpi
   )
   output_path

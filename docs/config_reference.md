@@ -174,6 +174,7 @@ Derived fields:
 
 Profiles can `inherit` from `default` and override keys (e.g., `demo`, `ci`).
 Always keep `schema_version` in the active profile (inherited from `default` if not overridden).
+The `jc_ci` profile inherits `jc` but forces offline-safe settings for CI runs.
 ### `data.coverage`
 
 Coverage polygons describe the monitored region derived from site points.
@@ -200,6 +201,8 @@ WMS fields:
 
 ArcGIS export fields:
 - `url` (string): ArcGIS REST export endpoint.
+- `layers` (list, optional): layer IDs to draw (sent as `layers=show:...`).
+- `layers_mode` (string, optional): `show` (default), `hide`, `include`, or `exclude`.
 - `crs` (string, optional), `width`/`height` (integer px), `format` (string).
 - `offline` (logical, optional): skip network fetch and generate a placeholder.
 
@@ -216,6 +219,7 @@ Attribution fields (per layer):
 - `output_path` (string, optional): output PNG path.
 - `width`/`height` (numeric, inches): figure size.
 - `dpi` (numeric): output resolution.
+- `match_aspect` (logical, default `true`): adjust width/height to match AOI aspect ratio.
 - `base_layer_id` (string, optional): layer ID to use as basemap.
 - `overlays` (list, optional): overlay layers with `id` and `opacity`.
 - `show_labels` (logical, default `false`): draw site labels.
