@@ -101,3 +101,13 @@ Format:
 **Decision:** Remote imagery (WMS and ArcGIS export) writes cached PNGs under `data/cache/` with deterministic keys and a `.yml` provenance sidecar alongside each output.
 **Rationale:** Enables reproducible imagery panels, auditability, and offline-safe runs with placeholders.
 **Status:** Active.
+
+## 2026-01-09 — Analysis raster resampling policy
+**Decision:** Analysis rasters default to nearest-neighbor resampling for categorical layers and bilinear resampling for continuous layers, unless explicitly overridden.
+**Rationale:** Preserves class integrity for categorical data while smoothing continuous surfaces appropriately.
+**Status:** Active.
+
+## 2026-01-09 — Run-level provenance + attribution outputs
+**Decision:** Each canonical run writes a machine-readable run manifest (`outputs/provenance/run_manifest.yml`) and a human-readable attribution report (`outputs/provenance/attribution.md`), alongside a combined layer provenance table.
+**Rationale:** Provides traceable, publication-ready metadata for reproducibility and attribution requirements.
+**Status:** Active.

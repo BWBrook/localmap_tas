@@ -13,6 +13,7 @@ default:
       crs: "EPSG:28355"
     manifest: "metadata/data_manifest.csv"
     species_requests: "metadata/species_requests.csv"
+    analysis_layers: []
     occurrence:
       min_year: 2000
       min_lat: null
@@ -383,6 +384,65 @@ jc:
           padding_px: 12
           colour: "#050505"
           font_size: 28
+    analysis_layers:
+      - id: "jc_habitats"
+        type: "vector_file"
+        path: "inst/extdata/jc_habitats.gpkg"
+        layer: "habitats"
+        output_path: "outputs/analysis/vector/jc_habitats.gpkg"
+        attribution:
+          source: "JC fixture"
+          license: "CC BY 4.0"
+          credit: "Judbury camera study"
+      - id: "jc_dem"
+        type: "raster_file"
+        path: "inst/extdata/jc_dem.tif"
+        output_path: "outputs/analysis/raster/jc_dem.tif"
+        categorical: false
+        attribution:
+          source: "JC fixture"
+          license: "CC BY 4.0"
+          credit: "Synthetic DEM"
+      - id: "jc_multiband"
+        type: "raster_file"
+        path: "inst/extdata/jc_multiband.tif"
+        output_path: "outputs/analysis/raster/jc_multiband.tif"
+        categorical: false
+        attribution:
+          source: "JC fixture"
+          license: "CC BY 4.0"
+          credit: "Synthetic multiband"
+      - id: "jc_slope"
+        type: "derived_slope"
+        source_id: "jc_dem"
+        output_path: "outputs/analysis/raster/jc_slope.tif"
+        units: "degrees"
+        attribution:
+          source: "Derived from jc_dem"
+          license: "CC BY 4.0"
+          credit: "Slope"
+      - id: "jc_ndvi"
+        type: "derived_ndvi"
+        source_id: "jc_multiband"
+        bands:
+          red: 1
+          nir: 2
+        output_path: "outputs/analysis/raster/jc_ndvi.tif"
+        attribution:
+          source: "Derived from jc_multiband"
+          license: "CC BY 4.0"
+          credit: "NDVI"
+      - id: "jc_nbr"
+        type: "derived_nbr"
+        source_id: "jc_multiband"
+        bands:
+          nir: 2
+          swir2: 3
+        output_path: "outputs/analysis/raster/jc_nbr.tif"
+        attribution:
+          source: "Derived from jc_multiband"
+          license: "CC BY 4.0"
+          credit: "NBR"
 
 jc_ci:
   inherits: jc

@@ -30,7 +30,8 @@ Imports:
     maptiles,
     png,
     rnaturalearth,
-    tidyterra
+    tidyterra,
+    terra
 Suggests:
     targets,
     tarchetypes,

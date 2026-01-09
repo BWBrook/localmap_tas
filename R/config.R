@@ -344,6 +344,17 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     validate_layer_registry(layers_cfg)
   }
 
+  analysis_layers_cfg <- data_cfg$analysis_layers
+  if (!is.null(analysis_layers_cfg)) {
+    if (!is.list(analysis_layers_cfg)) {
+      rlang::abort(
+        "`data$analysis_layers` must be a list if provided.",
+        class = "cfg_analysis_layers_invalid"
+      )
+    }
+    validate_analysis_layers(analysis_layers_cfg)
+  }
+
   overview_cfg <- data_cfg$overview_map
   if (!is.null(overview_cfg)) {
     if (!is.list(overview_cfg)) {

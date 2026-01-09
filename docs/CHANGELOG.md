@@ -6,6 +6,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Added
+- Analysis-layer pipeline for AOI-clipped vector/raster data with cached GeoPackage/GeoTIFF outputs and provenance sidecars.
+- Derived raster products (slope from DEM, NDVI/NBR from multiband rasters) with JC fixtures in `inst/extdata/`.
+- Run-level provenance outputs (`analysis_layers.csv`, `attribution.md`, `run_manifest.yml`) for publication-ready attribution.
 - AOI builder (`build_aoi_from_config`) with centroid/size/rotation and AOI debug plots (`aoi_debug_plot` target).
 - AOI auto mode to derive extents from site bounds with a buffered heuristic (median nearest-neighbour distance).
 - `jc` camera-sites source to derive effort (`rd`) and observations (`obs`) from Judbury camera study inputs.

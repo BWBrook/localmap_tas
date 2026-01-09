@@ -83,9 +83,12 @@ Expected targets (new branch, names may evolve):
 - `site_points_file` → `site_points`
 - `aoi`
 - `layers` (dynamic branching where appropriate)
+- `analysis_layers`
 - `panel_maps` → `panel_figure`
 - `site_attributes` (optional)
-- `provenance_summary`
+- `analysis_provenance`
+- `run_manifest`
+- `attribution_report`
 
 ## Repository layout
 

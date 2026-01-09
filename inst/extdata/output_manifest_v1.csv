@@ -1,14 +1,29 @@
 output_id,type,description,path,format,crs,profile,producer
-species_map,map,Species occurrence overview map,outputs/maps/demo_species_occurrences.png,png,EPSG:4326,demo,map_species_occurrences
-camera_sites_map,map,Camera sites basemap map,outputs/maps/demo_camera_sites.png,png,EPSG:3857,demo,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo_camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
-camera_sites_tile,basemap,Placeholder camera basemap tile,outputs/tiles/demo_camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
+species_map,map,Species occurrence overview map,outputs/maps/jc_species_occurrences.png,png,EPSG:4326,jc,map_species_occurrences
+camera_sites_map,map,Camera sites basemap map,outputs/maps/jc_camera_sites.png,png,EPSG:3857,jc,render_camera_sites_map
+camera_sites_panel,figure,Stacked panel of JC maps,outputs/maps/jc_camera_sites_panel.png,png,EPSG:3857,jc,camera_sites_stack_maps
+camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/jc_camera_sites_tile.png,png,EPSG:3857,jc,fetch_camera_wms_tile
 aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/demo_coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
-wms_layer,basemap,Demo WMS layer imagery,outputs/layers/demo_tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
-wms_layer_provenance,provenance,Demo WMS layer provenance,outputs/layers/demo_tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
-arcgis_layer,basemap,Demo ArcGIS export imagery,outputs/layers/demo_topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
-arcgis_layer_provenance,provenance,Demo ArcGIS export provenance,outputs/layers/demo_topography_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
-overview_map,map,Overview map panel,outputs/maps/demo_overview_map.png,png,EPSG:3857,demo,render_overview_map
-panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/demo_panel_figure.png,png,EPSG:3857,demo,assemble_panel_figure
-panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/demo_panel_figure.pdf,pdf,EPSG:3857,demo,assemble_panel_figure
+coverage_summary,table,Coverage zone summary table,outputs/tables/jc_coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary
+wms_layer,basemap,WMS layer imagery,outputs/layers/jc_tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/jc_tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/jc_topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/jc_topography_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+overview_map,map,Overview map panel,outputs/maps/jc_overview_map.png,png,EPSG:3857,jc,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/jc_panel_figure.png,png,EPSG:3857,jc,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/jc_panel_figure.pdf,pdf,EPSG:3857,jc,assemble_panel_figure
+vector_habitats,vector,JC habitat polygons (clipped),outputs/analysis/vector/jc_habitats.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_habitats_provenance,provenance,JC habitat provenance,outputs/analysis/vector/jc_habitats.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_dem,raster,JC DEM (clipped),outputs/analysis/raster/jc_dem.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_dem_provenance,provenance,JC DEM provenance,outputs/analysis/raster/jc_dem.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_multiband,raster,JC multiband raster (clipped),outputs/analysis/raster/jc_multiband.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_multiband_provenance,provenance,JC multiband provenance,outputs/analysis/raster/jc_multiband.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_slope,raster,JC slope derived raster,outputs/analysis/raster/jc_slope.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_slope_provenance,provenance,JC slope provenance,outputs/analysis/raster/jc_slope.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_ndvi,raster,JC NDVI derived raster,outputs/analysis/raster/jc_ndvi.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_ndvi_provenance,provenance,JC NDVI provenance,outputs/analysis/raster/jc_ndvi.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_nbr,raster,JC NBR derived raster,outputs/analysis/raster/jc_nbr.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_nbr_provenance,provenance,JC NBR provenance,outputs/analysis/raster/jc_nbr.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+analysis_provenance,provenance,Combined layer provenance table,outputs/provenance/analysis_layers.csv,csv,NA,jc,build_layer_provenance
+attribution_report,provenance,Layer attribution report,outputs/provenance/attribution.md,md,NA,jc,write_attribution_report
+run_manifest,provenance,Run manifest metadata,outputs/provenance/run_manifest.yml,yml,NA,jc,write_run_manifest

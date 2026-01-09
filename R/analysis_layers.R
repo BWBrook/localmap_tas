@@ -1,0 +1,466 @@
+#' Analysis-grade vector and raster layer acquisition
+#'
+#' Helpers for validating, fetching, and caching analysis-grade vector/raster
+#' layers clipped to the AOI, including derived rasters.
+
+# Analysis-grade vector and raster layer acquisition.
+
+analysis_layer_types <- c(
+  "vector_file",
+  "vector_arcgis",
+  "raster_file",
+  "derived_slope",
+  "derived_ndvi",
+  "derived_nbr"
+)
+
+analysis_default <- function(value, fallback) {
+  if (is.null(value)) fallback else value
+}
+
+analysis_normalize_path <- function(path, default_path) {
+  if (is.null(path) || !nzchar(path)) {
+    path <- default_path
+  }
+  candidates <- unique(c(path, here::here(path)))
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) > 0L) {
+    return(existing[[1L]])
+  }
+  installed <- path
+  if (startsWith(installed, "inst/")) {
+    installed <- sub("^inst/", "", installed)
+  }
+  pkg_path <- system.file(installed, package = "localmap")
+  if (nzchar(pkg_path) && file.exists(pkg_path)) {
+    return(pkg_path)
+  }
+  candidates[[1L]]
+}
+
+#' Validate analysis layer configuration
+#'
+#' @param layers List of analysis layer definitions (from config).
+#' @return Normalized list of layer definitions.
+#' @export
+validate_analysis_layers <- function(layers) {
+  if (is.null(layers)) {
+    return(list())
+  }
+  if (!is.list(layers)) {
+    rlang::abort(
+      "`data$analysis_layers` must be a list.",
+      class = "analysis_layers_invalid"
+    )
+  }
+
+  normalized <- lapply(layers, function(layer) {
+    if (!is.list(layer)) {
+      rlang::abort("Each analysis layer must be a list.", class = "analysis_layer_invalid")
+    }
+    layer
+  })
+
+  ids <- vapply(normalized, function(layer) {
+    id <- layer$id
+    if (is.null(id) || !nzchar(id)) {
+      return(NA_character_)
+    }
+    as.character(id)
+  }, character(1))
+  if (anyNA(ids)) {
+    rlang::abort(
+      "Each analysis layer must define a non-empty `id`.",
+      class = "analysis_layer_missing_id"
+    )
+  }
+  if (any(duplicated(ids))) {
+    rlang::abort("Analysis layer IDs must be unique.", class = "analysis_layer_duplicate_id")
+  }
+
+  normalized <- Map(function(layer, id) {
+    layer$id <- id
+    type <- layer$type
+    if (is.null(type) || !nzchar(type)) {
+      rlang::abort(
+        sprintf("Analysis layer '%s' missing `type`.", id),
+        class = "analysis_layer_missing_type"
+      )
+    }
+    type <- tolower(as.character(type))
+    if (!type %in% analysis_layer_types) {
+      rlang::abort(
+        sprintf("Analysis layer '%s' has unsupported type '%s'.", id, type),
+        class = "analysis_layer_invalid_type"
+      )
+    }
+    layer$type <- type
+
+    if (type %in% c("vector_file", "raster_file")) {
+      if (is.null(layer$path) || !nzchar(layer$path)) {
+        rlang::abort(
+          sprintf("Analysis layer '%s' requires `path`.", id),
+          class = "analysis_layer_missing_path"
+        )
+      }
+    }
+
+    if (identical(type, "vector_arcgis")) {
+      if (is.null(layer$url) || !nzchar(layer$url)) {
+        rlang::abort(
+          sprintf("Analysis layer '%s' requires an ArcGIS URL.", id),
+          class = "analysis_layer_missing_url"
+        )
+      }
+    }
+
+    if (type %in% c("derived_slope", "derived_ndvi", "derived_nbr")) {
+      if (is.null(layer$source_id) || !nzchar(layer$source_id)) {
+        rlang::abort(
+          sprintf("Derived analysis layer '%s' requires `source_id`.", id),
+          class = "analysis_layer_missing_source_id"
+        )
+      }
+    }
+
+    attrib <- layer$attribution
+    if (is.null(attrib) || !is.list(attrib) || is.null(attrib$source)) {
+      rlang::abort(
+        sprintf("Analysis layer '%s' requires `attribution$source`.", id),
+        class = "analysis_layer_missing_attribution"
+      )
+    }
+    layer
+  }, normalized, ids)
+
+  normalized
+}
+
+#' Fetch analysis layers (vector + raster)
+#'
+#' @param layers Validated analysis layer list.
+#' @param aoi AOI list from `build_aoi_from_config()`.
+#' @param cache_dir Optional cache directory.
+#' @return Tibble of analysis layer outputs.
+#' @export
+fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
+  layers <- validate_analysis_layers(layers)
+  if (length(layers) == 0L) {
+    return(tibble::tibble(
+      id = character(),
+      type = character(),
+      path = character(),
+      provenance_path = character(),
+      cache_path = character(),
+      source_id = character(),
+      attribution_source = character(),
+      attribution_license = character(),
+      attribution_credit = character()
+    ))
+  }
+  if (is.null(aoi) || !is.list(aoi) || is.null(aoi$aoi)) {
+    rlang::abort("AOI is required for analysis layers.", class = "analysis_layers_missing_aoi")
+  }
+
+  if (is.null(cache_dir)) {
+    cache_dir <- here::here("data", "cache", "analysis")
+  }
+  cache_dir <- analysis_normalize_path(cache_dir, cache_dir)
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+
+  aoi_geom <- aoi$aoi
+  analysis_crs <- aoi$crs
+
+  results <- list()
+  raster_store <- list()
+
+  for (layer in layers) {
+    type <- layer$type
+    source_descriptor <- layer$path %||% layer$url %||% layer$source_id %||% ""
+    params <- list(
+      layer = layer$layer,
+      where = layer$where,
+      out_fields = layer$out_fields,
+      crs = layer$crs,
+      categorical = layer$categorical,
+      resample = layer$resample,
+      bands = layer$bands,
+      units = layer$units,
+      source_id = layer$source_id
+    )
+    output_path <- analysis_normalize_path(
+      layer$output_path,
+      here::here("outputs", "analysis", paste0(layer$id, ".tif"))
+    )
+    provenance_path <- paste0(output_path, ".yml")
+    cache_key <- imagery_cache_key(list(
+      id = layer$id,
+      type = type,
+      source = source_descriptor,
+      params = params,
+      bbox = as.numeric(sf::st_bbox(sf::st_transform(aoi_geom, 4326)))
+    ))
+    ext <- if (grepl("\\.gpkg$", output_path, ignore.case = TRUE)) ".gpkg" else ".tif"
+    cache_path <- file.path(cache_dir, paste0(cache_key, ext))
+    source_id <- layer$source_id %||% NA_character_
+
+    if (file.exists(cache_path)) {
+      dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+      if (!identical(
+        normalizePath(cache_path, mustWork = FALSE),
+        normalizePath(output_path, mustWork = FALSE)
+      )) {
+        file.copy(cache_path, output_path, overwrite = TRUE)
+      }
+      if (type %in% c("raster_file", "derived_slope", "derived_ndvi", "derived_nbr")) {
+        raster_store[[layer$id]] <- terra::rast(output_path)
+      }
+      imagery_write_provenance(
+        provenance_path,
+        list(
+          type = type,
+          status = "cache_hit",
+          cache_key = cache_key,
+          cache_path = cache_path,
+          output_path = output_path,
+          source = source_descriptor,
+          source_id = source_id,
+          params = params
+        )
+      )
+    } else {
+      if (identical(type, "vector_file")) {
+        vector <- read_vector_layer(layer$path, layer$layer)
+        clipped <- clip_vector_to_aoi(vector, aoi_geom, analysis_crs)
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        sf::st_write(clipped, output_path, layer = layer$layer %||% layer$id, quiet = TRUE)
+      } else if (identical(type, "vector_arcgis")) {
+        clipped <- fetch_arcgis_vector(layer, aoi_geom)
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        sf::st_write(clipped, output_path, layer = layer$layer %||% layer$id, quiet = TRUE)
+      } else if (identical(type, "raster_file")) {
+        raster <- read_raster_layer(layer$path)
+        clipped <- clip_raster_to_aoi(
+          raster,
+          aoi_geom,
+          analysis_crs,
+          categorical = isTRUE(layer$categorical),
+          resample = layer$resample
+        )
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(clipped, output_path, overwrite = TRUE)
+        raster_store[[layer$id]] <- clipped
+      } else if (identical(type, "derived_slope")) {
+        source <- raster_store[[layer$source_id]]
+        if (is.null(source)) {
+          rlang::abort(
+            sprintf("Slope source raster '%s' not found.", layer$source_id),
+            class = "analysis_layer_missing_source"
+          )
+        }
+        units <- analysis_default(layer$units, "degrees")
+        slope <- terra::terrain(source, v = "slope", unit = units)
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(slope, output_path, overwrite = TRUE)
+        raster_store[[layer$id]] <- slope
+      } else if (type %in% c("derived_ndvi", "derived_nbr")) {
+        source <- raster_store[[layer$source_id]]
+        if (is.null(source)) {
+          rlang::abort(
+            sprintf("Index source raster '%s' not found.", layer$source_id),
+            class = "analysis_layer_missing_source"
+          )
+        }
+        bands <- layer$bands
+        if (is.null(bands) || !is.list(bands)) {
+          rlang::abort(
+            sprintf("Derived layer '%s' requires `bands` mapping.", layer$id),
+            class = "analysis_layer_missing_bands"
+          )
+        }
+        if (identical(type, "derived_ndvi")) {
+          red <- as.integer(bands$red)
+          nir <- as.integer(bands$nir)
+          idx <- compute_index(source, nir, red)
+        } else {
+          nir <- as.integer(bands$nir)
+          swir2 <- as.integer(bands$swir2)
+          idx <- compute_index(source, nir, swir2)
+        }
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(idx, output_path, overwrite = TRUE)
+        raster_store[[layer$id]] <- idx
+      }
+
+      if (!file.exists(output_path)) {
+        rlang::abort(
+          sprintf("Analysis layer output not created: %s", output_path),
+          class = "analysis_layer_missing_output"
+        )
+      }
+      dir.create(dirname(cache_path), recursive = TRUE, showWarnings = FALSE)
+      if (!identical(
+        normalizePath(cache_path, mustWork = FALSE),
+        normalizePath(output_path, mustWork = FALSE)
+      )) {
+        file.copy(output_path, cache_path, overwrite = TRUE)
+      }
+      imagery_write_provenance(
+        provenance_path,
+        list(
+          type = type,
+          status = "created",
+          cache_key = cache_key,
+          cache_path = cache_path,
+          output_path = output_path,
+          source = source_descriptor,
+          source_id = source_id,
+          params = params
+        )
+      )
+    }
+
+    results[[length(results) + 1L]] <- tibble::tibble(
+      id = layer$id,
+      type = type,
+      path = output_path,
+      provenance_path = provenance_path,
+      cache_path = cache_path,
+      source_id = source_id,
+      attribution_source = as.character(layer$attribution$source),
+      attribution_license = as.character(layer$attribution$license %||% ""),
+      attribution_credit = as.character(layer$attribution$credit %||% "")
+    )
+  }
+
+  dplyr::bind_rows(results)
+}
+
+read_vector_layer <- function(path, layer = NULL) {
+  path <- analysis_normalize_path(path, path)
+  if (!file.exists(path)) {
+    rlang::abort(
+      sprintf("Vector layer not found: %s", path),
+      class = "analysis_vector_missing_file"
+    )
+  }
+  sf::st_read(path, layer = layer, quiet = TRUE)
+}
+
+clip_vector_to_aoi <- function(vector, aoi_geom, analysis_crs) {
+  if (sf::st_crs(vector) != sf::st_crs(aoi_geom)) {
+    vector <- sf::st_transform(vector, sf::st_crs(analysis_crs))
+  }
+  clipped <- sf::st_intersection(vector, sf::st_make_valid(aoi_geom))
+  sf::st_make_valid(clipped)
+}
+
+fetch_arcgis_vector <- function(layer, aoi_geom) {
+  if (isTRUE(layer$offline)) {
+    fixture <- layer$fixture_path
+    if (is.null(fixture) || !nzchar(fixture)) {
+      rlang::abort(
+        sprintf("ArcGIS vector layer '%s' offline without fixture.", layer$id),
+        class = "analysis_vector_offline_missing_fixture"
+      )
+    }
+    vector <- read_vector_layer(fixture, layer$fixture_layer)
+    return(clip_vector_to_aoi(vector, aoi_geom, layer$crs %||% sf::st_crs(aoi_geom)$wkt))
+  }
+
+  base_url <- layer$url
+  if (!grepl("/query$", base_url)) {
+    base_url <- paste0(rtrim_slash(base_url), "/query")
+  }
+  crs <- analysis_default(layer$crs, "EPSG:4326")
+  bbox <- sf::st_bbox(sf::st_transform(aoi_geom, sf::st_crs(crs)))
+  bbox_param <- paste(c(bbox["xmin"], bbox["ymin"], bbox["xmax"], bbox["ymax"]), collapse = ",")
+  query <- list(
+    f = "geojson",
+    where = analysis_default(layer$where, "1=1"),
+    geometry = bbox_param,
+    geometryType = "esriGeometryEnvelope",
+    inSR = arcgis_wkid_from_crs(crs),
+    outSR = arcgis_wkid_from_crs(crs),
+    outFields = analysis_default(layer$out_fields, "*")
+  )
+  req <- httr2::request(base_url)
+  resp <- try(httr2::req_url_query(req, !!!query) |> httr2::req_perform(), silent = TRUE)
+  if (inherits(resp, "try-error")) {
+    rlang::abort(
+      sprintf("ArcGIS vector fetch failed for '%s'.", layer$id),
+      class = "analysis_vector_fetch_failed"
+    )
+  }
+  httr2::resp_check_status(resp)
+  body <- httr2::resp_body_string(resp)
+  tmp <- tempfile(fileext = ".geojson")
+  on.exit(unlink(tmp), add = TRUE)
+  writeLines(body, tmp, useBytes = TRUE)
+  vector <- sf::st_read(tmp, quiet = TRUE)
+  clip_vector_to_aoi(vector, aoi_geom, crs)
+}
+
+read_raster_layer <- function(path) {
+  path <- analysis_normalize_path(path, path)
+  if (!file.exists(path)) {
+    rlang::abort(
+      sprintf("Raster layer not found: %s", path),
+      class = "analysis_raster_missing_file"
+    )
+  }
+  terra::rast(path)
+}
+
+clip_raster_to_aoi <- function(raster,
+                               aoi_geom,
+                               analysis_crs,
+                               categorical = FALSE,
+                               resample = NULL) {
+  if (is.null(resample) || !nzchar(resample)) {
+    resample <- if (isTRUE(categorical)) "near" else "bilinear"
+  }
+  resample <- tolower(as.character(resample))
+  if (!resample %in% c("near", "bilinear", "cubic")) {
+    rlang::abort(
+      "Raster resample must be near/bilinear/cubic.",
+      class = "analysis_raster_resample_invalid"
+    )
+  }
+
+  target_crs <- analysis_crs
+  if (!is.null(terra::crs(raster)) && !identical(terra::crs(raster), target_crs)) {
+    raster <- terra::project(raster, target_crs, method = resample)
+  }
+  aoi_vect <- terra::vect(sf::st_transform(aoi_geom, sf::st_crs(target_crs)))
+  cropped <- terra::crop(raster, aoi_vect, snap = "out")
+  terra::mask(cropped, aoi_vect)
+}
+
+compute_index <- function(raster, band_a, band_b) {
+  if (!is.finite(band_a) || !is.finite(band_b)) {
+    rlang::abort("Index bands must be numeric.", class = "analysis_index_invalid_bands")
+  }
+  band_a <- as.integer(band_a)
+  band_b <- as.integer(band_b)
+  if (terra::nlyr(raster) < max(band_a, band_b)) {
+    rlang::abort(
+      "Index bands exceed available raster layers.",
+      class = "analysis_index_missing_band"
+    )
+  }
+  a <- raster[[band_a]]
+  b <- raster[[band_b]]
+  denom <- a + b
+  idx <- (a - b) / denom
+  idx[denom == 0] <- NA
+  idx
+}
+
+rtrim_slash <- function(path) {
+  sub("/+$", "", path)
+}
+
+`%||%` <- function(x, y) {
+  if (is.null(x)) y else x
+}

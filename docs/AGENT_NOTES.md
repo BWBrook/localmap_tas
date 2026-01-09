@@ -195,3 +195,10 @@
 - 2026-01-09: CI + layer registry alignment for JC.
   - Added `jc_ci` profile (offline-safe JC outputs) and CI step to collect JC artefacts alongside demo outputs.
   - Regenerated JC overview + panel figures and updated WP-011–WP-013 canonical runs/logs to use JC imagery.
+
+- 2026-01-09: Line 0.5 work (WP-014–WP-018).
+  - Implemented analysis-layer acquisition for vector/raster inputs plus derived slope/indices with caching + provenance.
+  - Added run-level provenance outputs (analysis_layers.csv, attribution.md, run_manifest.yml) and updated schema/tests/docs.
+  - Generated JC analysis fixtures (habitat polygons, DEM, multiband raster) and canonical runs for WP-014–WP-018.
+  - Artefact review: vector bbox matches AOI; DEM extent aligns; slope range ~4.60–4.61°; NDVI range ~-0.01–0.20; NBR range ~0.03–0.48; attribution report lists imagery + analysis layers.
+  - Note: `sf::st_intersection` warning about attribute variables is expected for polygon clipping.

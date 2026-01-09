@@ -108,11 +108,11 @@ Every WP must create or update:
 - [x] **WP-013:** Multi-panel figure assembler v1 (labels, layout, PNG+PDF outputs) (completed 2026-01-09; evidence: docs/log/WP-013_2026-01-09_panel-figure.md; canonical run: outputs/canonical_runs/WP-013_2026-01-09_panel-figure — JC)
 
 ### Line 0.5.x — Analysis-grade layers (clipped data, not just imagery)
-- [ ] **WP-014:** Vector acquisition v1 (AOI-clipped) + cached GeoPackage + provenance  
-- [ ] **WP-015:** Raster ingestion v1 (AOI-clipped) + cached GeoTIFF + resampling rules  
-- [ ] **WP-016:** Derived rasters v1 (DEM → slope) + categorical-safe resampling policy  
-- [ ] **WP-017:** Spectral indices v1 (NDVI, NBR) from configured multiband raster  
-- [ ] **WP-018:** Provenance + attribution outputs v1 (machine + human-readable)
+- [x] **WP-014:** Vector acquisition v1 (AOI-clipped) + cached GeoPackage + provenance (completed 2026-01-09; evidence: docs/log/WP-014_2026-01-09_vector-acquisition.md; canonical run: outputs/canonical_runs/WP-014_2026-01-09_vector-acquisition)  
+- [x] **WP-015:** Raster ingestion v1 (AOI-clipped) + cached GeoTIFF + resampling rules (completed 2026-01-09; evidence: docs/log/WP-015_2026-01-09_raster-ingestion.md; canonical run: outputs/canonical_runs/WP-015_2026-01-09_raster-ingestion)  
+- [x] **WP-016:** Derived rasters v1 (DEM → slope) + categorical-safe resampling policy (completed 2026-01-09; evidence: docs/log/WP-016_2026-01-09_derived-slope.md; canonical run: outputs/canonical_runs/WP-016_2026-01-09_derived-slope)  
+- [x] **WP-017:** Spectral indices v1 (NDVI, NBR) from configured multiband raster (completed 2026-01-09; evidence: docs/log/WP-017_2026-01-09_spectral-indices.md; canonical run: outputs/canonical_runs/WP-017_2026-01-09_spectral-indices)  
+- [x] **WP-018:** Provenance + attribution outputs v1 (machine + human-readable) (completed 2026-01-09; evidence: docs/log/WP-018_2026-01-09_provenance-attribution.md; canonical run: outputs/canonical_runs/WP-018_2026-01-09_provenance-attribution)
 
 ### Line 0.6.x — Site attribute extraction (tables for analysis and reporting)
 - [ ] **WP-019:** Raster point extraction v1 → canonical long table + tests  

@@ -1,0 +1,11 @@
+type: derived_ndvi
+status: cache_hit
+cache_key: 220bd50a410369d21f1b6521d466a99d
+cache_path: /home/bwbrook/git/localmap_tas/data/cache/analysis/220bd50a410369d21f1b6521d466a99d.tif
+output_path: outputs/analysis/raster/jc_ndvi.tif
+source: jc_multiband
+source_id: jc_multiband
+params.bands.red: 1
+params.bands.nir: 2
+params.source_id: jc_multiband
+timestamp: 2026-01-09T12:14:58Z

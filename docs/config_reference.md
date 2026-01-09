@@ -26,6 +26,7 @@ Required:
 - `camera_sites` (list): camera-site settings.
 - `coverage` (list, optional): coverage polygon settings.
 - `layers` (list, optional): registry of imagery layers (WMS/ArcGIS/file).
+- `analysis_layers` (list, optional): analysis-grade vector/raster layers and derived products.
 - `overview_map` (list, optional): overview map rendering settings.
 - `panel_figure` (list, optional): multi-panel figure assembly settings.
 
@@ -213,6 +214,49 @@ Attribution fields (per layer):
 - `source` (string, required).
 - `license` (string, optional).
 - `credit` (string, optional).
+
+### `data.analysis_layers`
+
+Analysis layers describe AOI-clipped vector/raster inputs and derived rasters.
+
+Common fields:
+- `id` (string, required): unique layer ID.
+- `type` (string, required): one of `vector_file`, `vector_arcgis`, `raster_file`,
+  `derived_slope`, `derived_ndvi`, `derived_nbr`.
+- `output_path` (string, required): output GeoPackage/GeoTIFF path.
+- `attribution` (list, required): at least `source`, plus optional `license`, `credit`.
+
+Vector file fields (`type: vector_file`):
+- `path` (string, required): input vector file path (e.g., GeoPackage).
+- `layer` (string, optional): layer name within the GeoPackage.
+
+Vector ArcGIS fields (`type: vector_arcgis`):
+- `url` (string, required): ArcGIS REST layer URL (MapServer/FeatureServer).
+- `where` (string, optional): filter clause (default `1=1`).
+- `out_fields` (string, optional): field list (default `*`).
+- `crs` (string, optional): request CRS (default `EPSG:4326`).
+- `offline` (logical, optional): skip network fetch.
+- `fixture_path` (string, optional): local vector fixture for offline mode.
+- `fixture_layer` (string, optional): layer name within fixture.
+
+Raster file fields (`type: raster_file`):
+- `path` (string, required): input raster path (GeoTIFF).
+- `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
+- `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
+
+Derived slope (`type: derived_slope`):
+- `source_id` (string, required): raster layer ID (DEM).
+- `units` (string, optional): `degrees` (default) or `radians`.
+
+Derived indices (`type: derived_ndvi`, `type: derived_nbr`):
+- `source_id` (string, required): multiband raster layer ID.
+- `bands` (list, required): band mapping.
+  - NDVI: `red`, `nir` band numbers.
+  - NBR: `nir`, `swir2` band numbers.
+
+Resampling policy:
+- Categorical rasters use `near` (nearest neighbor).
+- Continuous rasters default to `bilinear`.
 
 ### `data.overview_map`
 

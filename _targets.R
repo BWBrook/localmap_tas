@@ -161,6 +161,68 @@ list(
     description = "Layer provenance sidecars."
   ),
   targets::tar_target(
+    analysis_layers,
+    fetch_analysis_layers(cfg$data$analysis_layers, aoi = aoi),
+    description = "Analysis-grade vector/raster layers clipped to AOI."
+  ),
+  targets::tar_target(
+    analysis_layer_paths,
+    stats::setNames(analysis_layers$path, analysis_layers$id),
+    description = "Named vector of analysis layer output paths."
+  ),
+  targets::tar_target(
+    analysis_layer_provenance_paths,
+    stats::setNames(analysis_layers$provenance_path, analysis_layers$id),
+    description = "Named vector of analysis layer provenance paths."
+  ),
+  targets::tar_target(
+    analysis_layer_files,
+    analysis_layers$path,
+    format = "file",
+    description = "Analysis layer outputs (GeoPackage/GeoTIFF)."
+  ),
+  targets::tar_target(
+    analysis_layer_provenance_files,
+    analysis_layers$provenance_path,
+    format = "file",
+    description = "Analysis layer provenance sidecars."
+  ),
+  targets::tar_target(
+    analysis_provenance,
+    build_layer_provenance(
+      layers = layer_outputs,
+      analysis_layers = analysis_layers,
+      output_path = "outputs/provenance/analysis_layers.csv"
+    ),
+    format = "file",
+    description = "Combined provenance table for imagery and analysis layers."
+  ),
+  targets::tar_target(
+    attribution_report,
+    write_attribution_report(
+      layers = layer_outputs,
+      analysis_layers = analysis_layers,
+      output_path = "outputs/provenance/attribution.md"
+    ),
+    format = "file",
+    description = "Human-readable layer attribution report."
+  ),
+  targets::tar_target(
+    run_manifest,
+    write_run_manifest(
+      cfg = cfg,
+      cfg_file = cfg_file,
+      layer_registry = layer_registry,
+      layer_outputs = layer_outputs,
+      analysis_layers_cfg = cfg$data$analysis_layers,
+      analysis_layers = analysis_layers,
+      output_manifest_file = output_manifest_file,
+      output_path = "outputs/provenance/run_manifest.yml"
+    ),
+    format = "file",
+    description = "Machine-readable run manifest with layer metadata."
+  ),
+  targets::tar_target(
     camera_sites_context,
     prepare_camera_site_context(
       sites = camera_sites_data,
@@ -271,7 +333,22 @@ list(
         arcgis_layer_provenance = layer_provenance_paths[["topography_arcgis"]],
         overview_map = overview_map,
         panel_figure_png = panel_figure_png,
-        panel_figure_pdf = panel_figure_pdf
+        panel_figure_pdf = panel_figure_pdf,
+        vector_habitats = analysis_layer_paths[["jc_habitats"]],
+        vector_habitats_provenance = analysis_layer_provenance_paths[["jc_habitats"]],
+        raster_dem = analysis_layer_paths[["jc_dem"]],
+        raster_dem_provenance = analysis_layer_provenance_paths[["jc_dem"]],
+        raster_multiband = analysis_layer_paths[["jc_multiband"]],
+        raster_multiband_provenance = analysis_layer_provenance_paths[["jc_multiband"]],
+        raster_slope = analysis_layer_paths[["jc_slope"]],
+        raster_slope_provenance = analysis_layer_provenance_paths[["jc_slope"]],
+        raster_ndvi = analysis_layer_paths[["jc_ndvi"]],
+        raster_ndvi_provenance = analysis_layer_provenance_paths[["jc_ndvi"]],
+        raster_nbr = analysis_layer_paths[["jc_nbr"]],
+        raster_nbr_provenance = analysis_layer_provenance_paths[["jc_nbr"]],
+        analysis_provenance = analysis_provenance,
+        attribution_report = attribution_report,
+        run_manifest = run_manifest
       )
     ),
     description = "Validated output schema manifest (v1) for produced artefacts."

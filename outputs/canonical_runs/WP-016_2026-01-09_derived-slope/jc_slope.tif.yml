@@ -1,0 +1,10 @@
+type: derived_slope
+status: cache_hit
+cache_key: 87ea247a21cf8c8f952f096db61803b7
+cache_path: /home/bwbrook/git/localmap_tas/data/cache/analysis/87ea247a21cf8c8f952f096db61803b7.tif
+output_path: outputs/analysis/raster/jc_slope.tif
+source: jc_dem
+source_id: jc_dem
+params.units: degrees
+params.source_id: jc_dem
+timestamp: 2026-01-09T12:14:58Z
