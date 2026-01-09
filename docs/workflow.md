@@ -70,6 +70,13 @@ Fix and repeat until coherent.
   - resolve paths via `here::here()`
 - All outputs go to `outputs/` and runtime caches to `data/`.
 
+### Local datasets
+- Real-world datasets belong under `data/` (gitignored).
+- The Judbury camera study example lives at `data/jc_camera_study/`.
+- Use profile `jc` to derive a compatible camera-site table at `data/interim/jc_camera_sites.csv`.
+- Minimal JC run:
+  - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\"))'`
+
 ## 4) Data acquisition rules
 
 - Remote layers must be cached deterministically.

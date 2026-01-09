@@ -33,11 +33,80 @@ cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
   if (!is.list(cfg)) {
     rlang::abort("Config must resolve to a list.", class = "cfg_read_invalid_config")
   }
+  cfg <- cfg_migrate(cfg, config_path = path)
   cfg_validate(cfg, config_path = path)
   cfg
 }
 
-cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 1L) {
+cfg_migrate <- function(cfg, config_path = NULL) {
+  checkmate::assert_list(cfg, any.missing = FALSE)
+  schema_version <- cfg$schema_version
+  if (is.null(schema_version)) {
+    config_note <- NULL
+    if (!is.null(config_path)) {
+      config_note <- sprintf("Config file: %s", config_path)
+    }
+    rlang::abort(
+      c(
+        "`schema_version` is required in the config profile.",
+        i = "Add `schema_version: 2` under the profile root.",
+        if (!is.null(config_note)) config_note else NULL
+      ),
+      class = "cfg_schema_missing"
+    )
+  }
+
+  schema_version <- as.integer(schema_version)
+  if (identical(schema_version, 1L)) {
+    cfg <- cfg_migrate_v1_to_v2(cfg)
+    schema_version <- as.integer(cfg$schema_version)
+  }
+
+  if (!identical(schema_version, 2L)) {
+    rlang::abort(
+      c(
+        "Unsupported config schema_version.",
+        i = sprintf("Expected schema_version 2, got %s.", cfg$schema_version)
+      ),
+      class = "cfg_schema_unsupported"
+    )
+  }
+
+  cfg
+}
+
+cfg_migrate_v1_to_v2 <- function(cfg) {
+  if (is.null(cfg$data)) {
+    rlang::abort(
+      "`data` must be present for schema migration.",
+      class = "cfg_schema_migrate_missing"
+    )
+  }
+  if (is.null(cfg$data$aoi)) {
+    bbox <- cfg$data$occurrence$map$bounding_box
+    if (is.null(bbox) || is.null(bbox$top_left) || is.null(bbox$length_km)) {
+      rlang::abort(
+        "Cannot migrate config without a bounding box to derive AOI.",
+        class = "cfg_schema_migrate_missing_bbox"
+      )
+    }
+    top_left <- coerce_top_left(bbox$top_left)
+    side_length <- as.numeric(bbox$length_km)
+    half_m <- side_length * 1000 / 2
+    mid_east <- geosphere::destPoint(c(top_left[["lon"]], top_left[["lat"]]), b = 90, d = half_m)
+    centre <- geosphere::destPoint(mid_east, b = 180, d = half_m)
+    cfg$data$aoi <- list(
+      centroid = list(lat = as.numeric(centre[1, 2]), lon = as.numeric(centre[1, 1])),
+      size_km = side_length,
+      rotation_deg = 0,
+      crs = "EPSG:28355"
+    )
+  }
+  cfg$schema_version <- 2L
+  cfg
+}
+
+cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) {
   checkmate::assert_list(cfg, any.missing = FALSE)
   schema_version <- cfg$schema_version
   if (is.null(schema_version)) {
@@ -68,6 +137,36 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 1L) 
   data_cfg <- cfg$data
   if (is.null(data_cfg) || !is.list(data_cfg)) {
     rlang::abort("`data` must be a list in the config.", class = "cfg_data_missing")
+  }
+
+  aoi_cfg <- data_cfg$aoi
+  if (is.null(aoi_cfg) || !is.list(aoi_cfg)) {
+    rlang::abort("`data$aoi` must be a list in the config.", class = "cfg_aoi_missing")
+  }
+  if (!is.null(aoi_cfg$centroid_site)) {
+    checkmate::assert_string(aoi_cfg$centroid_site, min.chars = 1L)
+  } else {
+    centroid <- aoi_cfg$centroid
+    if (is.null(centroid) || !is.list(centroid) || !all(c("lat", "lon") %in% names(centroid))) {
+      rlang::abort(
+        "`data$aoi$centroid` must include lat/lon when centroid_site is not set.",
+        class = "cfg_aoi_centroid_missing"
+      )
+    }
+    checkmate::assert_numeric(as.numeric(centroid$lat), len = 1L, any.missing = FALSE)
+    checkmate::assert_numeric(as.numeric(centroid$lon), len = 1L, any.missing = FALSE)
+  }
+  if (!is.null(aoi_cfg$size_km)) {
+    checkmate::assert_numeric(aoi_cfg$size_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+  } else {
+    checkmate::assert_numeric(aoi_cfg$width_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+    checkmate::assert_numeric(aoi_cfg$height_km, len = 1L, lower = 1e-6, any.missing = FALSE)
+  }
+  if (!is.null(aoi_cfg$rotation_deg)) {
+    checkmate::assert_numeric(aoi_cfg$rotation_deg, len = 1L, any.missing = FALSE)
+  }
+  if (!is.null(aoi_cfg$crs)) {
+    checkmate::assert_string(aoi_cfg$crs, min.chars = 1L)
   }
 
   cfg_require_string <- function(value, label, hint = NULL) {
@@ -130,25 +229,24 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 1L) 
     )
   }
   bbox <- occ_map$bounding_box
-  if (is.null(bbox) || !is.list(bbox)) {
-    rlang::abort(
-      c(
-        "`data$occurrence$map$bounding_box` is required in the config.",
-        i = "Provide top_left (lat/lon) and length_km."
-      ),
-      class = "cfg_occurrence_bbox_missing"
-    )
+  if (!is.null(bbox)) {
+    if (!is.list(bbox)) {
+      rlang::abort(
+        "`data$occurrence$map$bounding_box` must be a list if provided.",
+        class = "cfg_occurrence_bbox_invalid"
+      )
+    }
+    top_left <- bbox$top_left
+    if (is.null(top_left) || !is.list(top_left) || !all(c("lat", "lon") %in% names(top_left))) {
+      rlang::abort(
+        "`data$occurrence$map$bounding_box$top_left` must be a list with lat/lon.",
+        class = "cfg_occurrence_bbox_top_left_missing"
+      )
+    }
+    checkmate::assert_numeric(as.numeric(top_left$lat), len = 1L, any.missing = FALSE)
+    checkmate::assert_numeric(as.numeric(top_left$lon), len = 1L, any.missing = FALSE)
+    checkmate::assert_numeric(bbox$length_km, len = 1L, lower = 0, any.missing = FALSE)
   }
-  top_left <- bbox$top_left
-  if (is.null(top_left) || !is.list(top_left) || !all(c("lat", "lon") %in% names(top_left))) {
-    rlang::abort(
-      "`data$occurrence$map$bounding_box$top_left` must be a list with lat/lon.",
-      class = "cfg_occurrence_bbox_top_left_missing"
-    )
-  }
-  checkmate::assert_numeric(as.numeric(top_left$lat), len = 1L, any.missing = FALSE)
-  checkmate::assert_numeric(as.numeric(top_left$lon), len = 1L, any.missing = FALSE)
-  checkmate::assert_numeric(bbox$length_km, len = 1L, lower = 0, any.missing = FALSE)
 
   camera_cfg <- data_cfg$camera_sites
   if (is.null(camera_cfg) || !is.list(camera_cfg)) {
@@ -157,7 +255,30 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 1L) 
       class = "cfg_camera_sites_missing"
     )
   }
-  cfg_require_string(camera_cfg$path, "data$camera_sites$path")
+  source_type <- camera_cfg$source
+  if (is.null(source_type)) {
+    source_type <- "file"
+  }
+  checkmate::assert_string(source_type, min.chars = 1L)
+  if (!source_type %in% c("file", "jc")) {
+    rlang::abort(
+      sprintf("Unsupported camera_sites source '%s'.", source_type),
+      class = "cfg_camera_sites_source_invalid"
+    )
+  }
+  if (identical(source_type, "jc")) {
+    jc_cfg <- camera_cfg$jc
+    if (is.null(jc_cfg) || !is.list(jc_cfg)) {
+      rlang::abort(
+        "`data$camera_sites$jc` must be provided for source=jc.",
+        class = "cfg_camera_sites_jc_missing"
+      )
+    }
+    cfg_require_string(jc_cfg$site_path, "data$camera_sites$jc$site_path")
+    cfg_require_string(jc_cfg$obs_path, "data$camera_sites$jc$obs_path")
+  } else {
+    cfg_require_string(camera_cfg$path, "data$camera_sites$path")
+  }
   cfg_require_string(camera_cfg$central_site, "data$camera_sites$central_site")
   checkmate::assert_numeric(camera_cfg$bbox_half_km, len = 1L, lower = 0, any.missing = FALSE)
 

@@ -33,6 +33,13 @@ targets::tar_make()
 
 Outputs are written to `outputs/` (ignored by git).
 
+Optional local dataset (Judbury camera study):
+
+```r
+Sys.setenv(R_CONFIG_ACTIVE = "jc", TARGETS_PROFILE = "ci")
+targets::tar_make(names = c("camera_sites_file", "camera_sites_data", "aoi", "aoi_debug_plot"))
+```
+
 ## Configuration
 
 Configuration lives in `config/config.yaml` and supports multiple profiles.

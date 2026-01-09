@@ -1,9 +1,16 @@
 default:
-  schema_version: 1
+  schema_version: 2
   data_dir: "data"
   db_path: "data/interim/local.duckdb"
   sample_frac: 1.0
   data:
+    aoi:
+      centroid:
+        lat: -41.97708
+        lon: 146.3484
+      size_km: 400
+      rotation_deg: 0
+      crs: "EPSG:28355"
     manifest: "metadata/data_manifest.csv"
     species_requests: "metadata/species_requests.csv"
     occurrence:
@@ -179,3 +186,23 @@ demo:
           padding_px: 12
           colour: "#ffffff"
           font_size: 28
+
+jc:
+  inherits: default
+  ala:
+    use_fixture: true
+    fixture_occurrences: "inst/extdata/occurrences_demo.csv"
+  data:
+    aoi:
+      centroid_site: "jc_cen"
+      size_km: 5
+      rotation_deg: 0
+    camera_sites:
+      source: "jc"
+      jc:
+        site_path: "data/jc_camera_study/jc_site.csv"
+        obs_path: "data/jc_camera_study/jc_obs.csv"
+        output_path: "data/interim/jc_camera_sites.csv"
+      path: "data/interim/jc_camera_sites.csv"
+      central_site: "jc_cen"
+      bbox_half_km: 2

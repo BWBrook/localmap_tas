@@ -20,9 +20,9 @@ _targets/
 docs/_site/
 
 # data (raw or large) — track only small samples in inst/extdata
-data/
 data-raw/
 data-raw/cache/
+data/
 inst/extdata/*.zip
 inst/extdata/*.gz
 src/

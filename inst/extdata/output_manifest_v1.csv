@@ -3,3 +3,4 @@ species_map,map,Species occurrence overview map,outputs/maps/demo_species_occurr
 camera_sites_map,map,Camera sites basemap map,outputs/maps/demo_camera_sites.png,png,EPSG:3857,demo,render_camera_sites_map
 camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo_camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
 camera_sites_tile,basemap,Placeholder camera basemap tile,outputs/tiles/demo_camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
+aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot

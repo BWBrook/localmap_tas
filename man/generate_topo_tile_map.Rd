@@ -7,6 +7,7 @@
 generate_topo_tile_map(
   occurrences,
   mapping_settings = NULL,
+  aoi = NULL,
   output_path = NULL
 )
 }
@@ -18,6 +19,9 @@ least \code{longitude}, \code{latitude}, and \code{species_id} columns.}
 \code{basemap}, \code{output_path}, appearance toggles (\code{show_title}, \code{show_legend}),
 point styling, and an optional \code{additional_points} list containing \code{path},
 \code{colour}, and \code{size}. Typically sourced from \code{config/config.yaml}.}
+
+\item{aoi}{Optional AOI list returned by \code{build_aoi_from_config()}; overrides
+\code{mapping_settings$bounding_box} when provided.}
 
 \item{output_path}{Optional override for the output image path. When \code{NULL},
 the value from \code{mapping_settings$output_path} is used; if that is also

@@ -2,6 +2,7 @@
 ^renv\.lock$
 ^_targets$
 ^docs$
+^data$
 ^inst/extdata/cache$
 ^\.github$
 ^\.vscode$

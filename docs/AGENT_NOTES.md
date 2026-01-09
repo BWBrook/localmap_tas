@@ -134,3 +134,17 @@
   - Fixed output schema target to read the manifest via `readr::read_csv()` for pipeline validation.
   - Demo pipeline rerun (`R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()`), outputs inspected and captured under `outputs/canonical_runs/WP-006_2026-01-09_ci-gates-v1`.
   - Verification gates rerun: `renv::restore()`/`renv::status()` OK, `lintr::lint_package()` OK, `devtools::test()` OK (87 pass), `rcmdcheck::rcmdcheck(args = "--no-manual")` OK.
+
+- 2026-01-09: Dataset intake + AOI pre-work.
+  - Reviewed `data/jc_camera_study/` (camera sites, observations, operations, taxa, data dictionary); dataset is ~15k observations and 13 sites with WGS84 lat/lon.
+  - Added `data/` to `.gitignore` per runtime-data policy; recorded decision to keep real datasets out of package defaults.
+  - Documented AOI conventions (analysis CRS, units, rotation) in `docs/config_reference.md`.
+  - Added `render_aoi_debug_plot()` and `aoi_debug_plot` target for AOI sanity previews (bounding box + sites).
+  - Ran `devtools::test()` (88 pass) and regenerated `outputs/maps/aoi_debug.png` for inspection.
+
+- 2026-01-09: WP-007 AOI builder + JC dataset integration.
+  - Implemented `build_aoi_from_config()` with centroid/size/rotation and schema v2 migration from v1 bounding boxes.
+  - Hooked AOI into species mapping and tile maps; added AOI debug plots (including a rotated example).
+  - Added JC dataset derivation (`derive_camera_sites_from_jc`) and `jc` profile config to produce `data/interim/jc_camera_sites.csv`.
+  - Demo pipeline rebuilt after `targets::tar_destroy()`; outputs inspected and logged in `docs/log/WP-007_2026-01-09_aoi-builder.md`.
+  - Validation: `lintr::lint_package()` OK, `devtools::test()` OK (104 pass), `rcmdcheck::rcmdcheck(args = "--no-manual")` OK.

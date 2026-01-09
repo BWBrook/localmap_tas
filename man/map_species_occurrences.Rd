@@ -7,6 +7,7 @@
 map_species_occurrences(
   occurrences,
   mapping_settings = NULL,
+  aoi = NULL,
   output_path = NULL
 )
 }
@@ -19,6 +20,9 @@ least \code{longitude}, \code{latitude}, and \code{species_id} columns.}
 point styling, and an optional \code{additional_points} list containing \code{path},
 \code{colour}, and \code{size}. Typically sourced from \code{config/config.yaml}.}
 
+\item{aoi}{Optional AOI list returned by \code{build_aoi_from_config()}; overrides
+\code{mapping_settings$bounding_box} when provided.}
+
 \item{output_path}{Optional override for the output image path. When \code{NULL},
 the value from \code{mapping_settings$output_path} is used; if that is also
 missing, defaults to \code{here::here("outputs", "maps", "species_occurrences.png")}.}
@@ -28,7 +32,8 @@ The path (character scalar) to the generated map image.
 }
 \description{
 Generates a static map depicting species occurrence points within a user
-defined bounding box. The bounding box is derived from configuration settings
-(top-left coordinate and side length in kilometres). The output is written to
-an image file to be tracked by the \code{{targets}} pipeline.
+defined AOI or bounding box. The AOI is preferred when supplied, otherwise
+the bounding box is derived from configuration settings (top-left coordinate
+and side length in kilometres). The output is written to an image file to be
+tracked by the \code{{targets}} pipeline.
 }

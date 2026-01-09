@@ -99,7 +99,7 @@ Every WP must create or update:
 - [x] **WP-006:** CI gates v1 (check/test/lint + demo smoke run artefact) (completed 2026-01-09; evidence: docs/log/WP-006_2026-01-09_ci-gates-v1.md; canonical run: outputs/canonical_runs/WP-006_2026-01-09_ci-gates-v1)
 
 ### Line 0.4.x — Core spatial primitives + imagery panels (publication-first)
-- [ ] **WP-007:** AOI builder v1 (centroid/extent/rotation) with tests + documented assumptions  
+- [x] **WP-007:** AOI builder v1 (centroid/extent/rotation) with tests + documented assumptions (completed 2026-01-09; evidence: docs/log/WP-007_2026-01-09_aoi-builder.md; canonical run: outputs/canonical_runs/WP-007_2026-01-09_aoi-builder)  
 - [ ] **WP-008:** Coverage zone polygon v1 (convex hull + buffer) with tests + optional config  
 - [ ] **WP-009:** WMS imagery fetch v1 (GetMap) with caching + provenance + offline fallback  
 - [ ] **WP-010:** ArcGIS export imagery fetch v1 with caching + provenance + offline fallback  

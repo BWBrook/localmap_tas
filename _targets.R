@@ -73,7 +73,8 @@ list(
     species_map,
     map_species_occurrences(
       occurrences = species_occurrences,
-      mapping_settings = cfg$data$occurrence$map
+      mapping_settings = cfg$data$occurrence$map,
+      aoi = aoi
     ),
     format = "file",
     description = "Static map visualising species occurrences within the configured bounding box."
@@ -83,7 +84,8 @@ list(
     topo_tile_map,
     generate_topo_tile_map(
       occurrences = species_occurrences,
-      mapping_settings = cfg$data$occurrence$map
+      mapping_settings = cfg$data$occurrence$map,
+      aoi = aoi
     ),
     format = "file",
     description = "Tile-based occurrence map using slippy tiles (OpenTopoMap by default)."
@@ -91,14 +93,22 @@ list(
 
   targets::tar_target(
     camera_sites_file,
-    here::here(cfg$data$camera_sites$path),
+    resolve_camera_sites_file(cfg$data$camera_sites),
     format = "file",
-    description = "Camera site effort CSV defined in configuration."
+    description = "Camera site effort CSV defined or derived from configuration."
   ),
   targets::tar_target(
     camera_sites_data,
     read_camera_sites(camera_sites_file),
     description = "Camera site metrics including effort and observations."
+  ),
+  targets::tar_target(
+    aoi,
+    build_aoi_from_config(
+      aoi_cfg = cfg$data$aoi,
+      sites = camera_sites_data
+    ),
+    description = "AOI polygon and derived bounding boxes."
   ),
   targets::tar_target(
     camera_sites_context,
@@ -109,6 +119,16 @@ list(
       basemap_cfg = cfg$data$camera_sites$basemap
     ),
     description = "Prepared spatial context (bounding box, filtered sites) for mapping camera deployments."
+  ),
+  targets::tar_target(
+    aoi_debug_plot,
+    render_aoi_debug_plot(
+      aoi = aoi,
+      sites = camera_sites_data,
+      output_path = NULL
+    ),
+    format = "file",
+    description = "Debug plot showing the configured AOI bounding box and camera sites."
   ),
   targets::tar_target(
     camera_sites_tile,
@@ -140,8 +160,15 @@ list(
   ),
 
   targets::tar_target(
+    output_manifest_file,
+    "inst/extdata/output_manifest_v1.csv",
+    format = "file",
+    description = "Output schema manifest (v1) file."
+  ),
+
+  targets::tar_target(
     output_manifest,
-    readr::read_csv("inst/extdata/output_manifest_v1.csv", show_col_types = FALSE, num_threads = 1),
+    readr::read_csv(output_manifest_file, show_col_types = FALSE, num_threads = 1),
     description = "Output schema manifest (v1) defining expected outputs."
   ),
 
@@ -153,7 +180,8 @@ list(
         species_map = species_map,
         camera_sites_map = camera_sites_map,
         camera_sites_panel = camera_sites_panel,
-        camera_sites_tile = camera_sites_tile
+        camera_sites_tile = camera_sites_tile,
+        aoi_debug_plot = aoi_debug_plot
       )
     ),
     description = "Validated output schema manifest (v1) for produced artefacts."

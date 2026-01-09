@@ -1,9 +1,10 @@
 #' Map species occurrence records
 #'
 #' Generates a static map depicting species occurrence points within a user
-#' defined bounding box. The bounding box is derived from configuration settings
-#' (top-left coordinate and side length in kilometres). The output is written to
-#' an image file to be tracked by the `{targets}` pipeline.
+#' defined AOI or bounding box. The AOI is preferred when supplied, otherwise
+#' the bounding box is derived from configuration settings (top-left coordinate
+#' and side length in kilometres). The output is written to an image file to be
+#' tracked by the `{targets}` pipeline.
 #'
 #' @param occurrences Tibble or data frame of occurrence records containing at
 #'   least `longitude`, `latitude`, and `species_id` columns.
@@ -11,6 +12,8 @@
 #'   `basemap`, `output_path`, appearance toggles (`show_title`, `show_legend`),
 #'   point styling, and an optional `additional_points` list containing `path`,
 #'   `colour`, and `size`. Typically sourced from `config/config.yaml`.
+#' @param aoi Optional AOI list returned by `build_aoi_from_config()`; overrides
+#'   `mapping_settings$bounding_box` when provided.
 #' @param output_path Optional override for the output image path. When `NULL`,
 #'   the value from `mapping_settings$output_path` is used; if that is also
 #'   missing, defaults to `here::here("outputs", "maps",
@@ -19,6 +22,7 @@
 #' @export
 map_species_occurrences <- function(occurrences,
                                     mapping_settings = NULL,
+                                    aoi = NULL,
                                     output_path = NULL) {
   checkmate::assert_data_frame(occurrences, min.rows = 0L)
 
@@ -48,29 +52,7 @@ map_species_occurrences <- function(occurrences,
   }
   additional_points_sf <- load_additional_points(additional_cfg)
 
-  bbox_cfg <- mapping_settings$bounding_box
-  if (is.null(bbox_cfg)) {
-    rlang::abort(
-      c(
-        "A bounding box configuration is required for mapping.",
-        i = "Set cfg$data$occurrence$map$bounding_box in config/config.yaml"
-      ),
-      class = "map_species_occurrences_no_bbox"
-    )
-  }
-
-  top_left <- bbox_cfg$top_left
-  if (is.null(top_left)) {
-    rlang::abort(
-      "Bounding box must include a `top_left` coordinate.",
-      class = "map_species_occurrences_missing_top_left"
-    )
-  }
-  top_left_vec <- coerce_top_left(top_left)
-
-  length_km <- bbox_cfg$length_km
-  checkmate::assert_numeric(length_km, len = 1L, lower = 1e-6)
-  side_length <- as.numeric(length_km)
+  bbox <- resolve_occurrence_bbox(mapping_settings, aoi = aoi)
 
   basemap <- mapping_settings$basemap
   if (is.null(basemap)) {
@@ -99,7 +81,6 @@ map_species_occurrences <- function(occurrences,
   has_coords <- !is.na(occurrences$longitude) & !is.na(occurrences$latitude)
   occurrences <- occurrences[has_coords, , drop = FALSE]
 
-  bbox <- build_square_bbox(top_left_vec, side_length)
   bbox_bb <- sf::st_bbox(bbox)
 
   basemap_sf <- NULL
@@ -125,16 +106,22 @@ map_species_occurrences <- function(occurrences,
     occurrences_sf$species_id <- "occurrence"
   }
 
-  occurrences_sf <- dplyr::mutate(
-    occurrences_sf,
-    species_label = dplyr::coalesce(
-      .data$matched_common_name,
-      .data$matched_scientific_name,
-      .data$query_scientific_name,
-      .data$query_common_name,
-      .data$species_id
-    )
+  label_fields <- c(
+    "matched_common_name",
+    "matched_scientific_name",
+    "query_scientific_name",
+    "query_common_name",
+    "species_id"
   )
+  available_labels <- intersect(label_fields, names(occurrences_sf))
+  if (length(available_labels) == 0L) {
+    occurrences_sf$species_label <- "occurrence"
+  } else {
+    occurrences_sf <- dplyr::mutate(
+      occurrences_sf,
+      species_label = dplyr::coalesce(!!!rlang::syms(available_labels))
+    )
+  }
 
   plot_obj <- ggplot2::ggplot()
   if (!is.null(basemap_sf)) {
@@ -175,15 +162,17 @@ map_species_occurrences <- function(occurrences,
     ggplot2::theme(legend.position = if (isTRUE(mapping_settings$show_legend)) "bottom" else "none")
 
   if (isTRUE(mapping_settings$show_title)) {
+    subtitle <- sprintf(
+      "Bounding box: (%.3f, %.3f)-(%.3f, %.3f)",
+      bbox_bb["xmin"],
+      bbox_bb["ymin"],
+      bbox_bb["xmax"],
+      bbox_bb["ymax"]
+    )
     plot_obj <- plot_obj +
       ggplot2::labs(
         title = "Species occurrences",
-        subtitle = sprintf(
-          "Bounding box top-left: (%.3f, %.3f); side: %.0f km",
-          top_left_vec[["lat"]],
-          top_left_vec[["lon"]],
-          side_length
-        ),
+        subtitle = subtitle,
         x = "Longitude",
         y = "Latitude"
       )
@@ -203,6 +192,49 @@ validate_mapping_settings <- function(mapping_settings) {
   }
   checkmate::assert_list(mapping_settings, any.missing = FALSE)
   mapping_settings
+}
+
+resolve_occurrence_bbox <- function(mapping_settings, aoi = NULL) {
+  if (!is.null(aoi)) {
+    aoi_geom <- aoi
+    if (is.list(aoi) && !is.null(aoi$bbox_4326)) {
+      return(aoi$bbox_4326)
+    }
+    if (is.list(aoi) && !is.null(aoi$aoi)) {
+      aoi_geom <- aoi$aoi
+    }
+    if (!inherits(aoi_geom, c("sfc", "sf"))) {
+      rlang::abort("AOI must be an sf polygon.", class = "map_species_occurrences_invalid_aoi")
+    }
+    aoi_4326 <- sf::st_transform(aoi_geom, 4326)
+    return(sf::st_as_sfc(sf::st_bbox(aoi_4326)))
+  }
+
+  bbox_cfg <- mapping_settings$bounding_box
+  if (is.null(bbox_cfg)) {
+    rlang::abort(
+      c(
+        "A bounding box configuration is required for mapping.",
+        i = "Set cfg$data$occurrence$map$bounding_box in config/config.yaml"
+      ),
+      class = "map_species_occurrences_no_bbox"
+    )
+  }
+
+  top_left <- bbox_cfg$top_left
+  if (is.null(top_left)) {
+    rlang::abort(
+      "Bounding box must include a `top_left` coordinate.",
+      class = "map_species_occurrences_missing_top_left"
+    )
+  }
+  top_left_vec <- coerce_top_left(top_left)
+
+  length_km <- bbox_cfg$length_km
+  checkmate::assert_numeric(length_km, len = 1L, lower = 1e-6)
+  side_length <- as.numeric(length_km)
+
+  build_square_bbox(top_left_vec, side_length)
 }
 
 coerce_top_left <- function(value) {
@@ -338,6 +370,7 @@ create_graticule <- function(bbox) {
 #' @export
 generate_topo_tile_map <- function(occurrences,
                                    mapping_settings = NULL,
+                                   aoi = NULL,
                                    output_path = NULL) {
   checkmate::assert_data_frame(occurrences, min.rows = 0L)
 
@@ -367,7 +400,7 @@ generate_topo_tile_map <- function(occurrences,
   }
   checkmate::assert_logical(enable_tiles, len = 1L, any.missing = FALSE)
   if (!isTRUE(enable_tiles)) {
-    return(map_species_occurrences(occurrences, mapping_settings, output_path))
+    return(map_species_occurrences(occurrences, mapping_settings, aoi = aoi, output_path))
   }
 
   checkmate::assert_numeric(mapping_settings$point_size, len = 1L, lower = 0)
@@ -387,22 +420,11 @@ generate_topo_tile_map <- function(occurrences,
 
   additional_points_sf <- load_additional_points(additional_cfg)
 
-  bbox_cfg <- mapping_settings$bounding_box
-  if (is.null(bbox_cfg)) {
-    rlang::warn("No bounding box configured; falling back to default species map.")
-    return(map_species_occurrences(occurrences, mapping_settings, output_path))
+  bbox <- try(resolve_occurrence_bbox(mapping_settings, aoi = aoi), silent = TRUE)
+  if (inherits(bbox, "try-error")) {
+    rlang::warn("Bounding box configuration missing; falling back to default species map.")
+    return(map_species_occurrences(occurrences, mapping_settings, aoi = aoi, output_path))
   }
-
-  top_left <- bbox_cfg$top_left
-  if (is.null(top_left)) {
-    rlang::warn("Bounding box missing top_left; falling back to default species map.")
-    return(map_species_occurrences(occurrences, mapping_settings, output_path))
-  }
-  top_left_vec <- coerce_top_left(top_left)
-
-  length_km <- bbox_cfg$length_km
-  checkmate::assert_numeric(length_km, len = 1L, lower = 1e-6)
-  side_length <- as.numeric(length_km)
 
   if (is.null(output_path)) {
     output_path <- mapping_settings$topo_output_path
@@ -417,13 +439,12 @@ generate_topo_tile_map <- function(occurrences,
     rlang::warn(
       "Occurrence data missing longitude/latitude columns; falling back to default species map."
     )
-    return(map_species_occurrences(occurrences, mapping_settings, output_path))
+    return(map_species_occurrences(occurrences, mapping_settings, aoi = aoi, output_path))
   }
 
   has_coords <- !is.na(occurrences$longitude) & !is.na(occurrences$latitude)
   occurrences <- occurrences[has_coords, , drop = FALSE]
 
-  bbox <- build_square_bbox(top_left_vec, side_length)
   bbox_3857 <- sf::st_transform(bbox, 3857)
 
   occurrences_sf <- sf::st_as_sf(
@@ -462,7 +483,7 @@ generate_topo_tile_map <- function(occurrences,
       "Failed to retrieve tiles from provider '%s'; falling back to default species map.",
       mapping_settings$tile_provider
     ))
-    return(map_species_occurrences(occurrences, mapping_settings, output_path))
+    return(map_species_occurrences(occurrences, mapping_settings, aoi = aoi, output_path))
   }
 
   plot_obj <- ggplot2::ggplot() +
@@ -531,15 +552,18 @@ generate_topo_tile_map <- function(occurrences,
   plot_obj <- plot_obj + ggplot2::theme_void()
 
   if (isTRUE(mapping_settings$show_title)) {
+    bbox_bb <- sf::st_bbox(bbox)
+    subtitle <- sprintf(
+      "Bounding box: (%.3f, %.3f)-(%.3f, %.3f)",
+      bbox_bb["xmin"],
+      bbox_bb["ymin"],
+      bbox_bb["xmax"],
+      bbox_bb["ymax"]
+    )
     plot_obj <- plot_obj +
       ggplot2::labs(
         title = "Species occurrences",
-        subtitle = sprintf(
-          "Bounding box top-left: (%.3f, %.3f); side: %.0f km",
-          top_left_vec[["lat"]],
-          top_left_vec[["lon"]],
-          side_length
-        )
+        subtitle = subtitle
       )
   }
 

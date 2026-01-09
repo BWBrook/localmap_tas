@@ -45,6 +45,26 @@ test_that("map_species_occurrences errors when bounding box missing", {
   )
 })
 
+test_that("map_species_occurrences accepts AOI when bounding box missing", {
+  records <- tibble::tibble(
+    species_id = "species_01",
+    longitude = 147,
+    latitude = -42
+  )
+  tmp_path <- file.path(tempdir(), paste0("map-", as.integer(runif(1, 1, 1e6)), ".png"))
+  bbox_vals <- c(xmin = 144, ymin = -43, xmax = 148, ymax = -40)
+  aoi <- list(
+    bbox_4326 = sf::st_as_sfc(sf::st_bbox(bbox_vals, crs = 4326))
+  )
+
+  result <- map_species_occurrences(
+    records,
+    mapping_settings = list(basemap = "none", output_path = tmp_path),
+    aoi = aoi
+  )
+  expect_true(file.exists(result))
+})
+
 test_that("missing additional points file triggers warning but continues", {
   records <- tibble::tibble(
     species_id = "species_01",

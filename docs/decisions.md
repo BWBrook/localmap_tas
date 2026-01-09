@@ -71,3 +71,23 @@ Format:
 **Decision:** Track expected artefacts in a manifest CSV (`inst/extdata/output_manifest_v1.csv`) and validate via `output_schema_v1` target.
 **Rationale:** Makes output contracts explicit and testable, reducing silent output drift.
 **Status:** Active.
+
+## 2026-01-09 — AOI rotation convention (planned)
+**Decision:** Define AOI `rotation_deg` as clockwise from geographic north, applied in the analysis CRS (EPSG:28355).
+**Rationale:** Matches common GIS bearing conventions and keeps rotation deterministic after projection.
+**Status:** Active.
+
+## 2026-01-09 — Handling user-supplied datasets in `data/`
+**Decision:** Treat real-world user datasets under `data/` as runtime inputs (gitignored) and derive any package-included demos as small fixtures in `inst/extdata/`.
+**Rationale:** Keeps the repo lightweight, avoids shipping user data by default, and preserves reproducibility through curated fixtures.
+**Status:** Active.
+
+## 2026-01-09 — Config schema v2 introduces AOI definition
+**Decision:** Bump config schema to v2 and add `data$aoi` (centroid/size/rotation) as the authoritative AOI definition, with a migration from v1 bounding boxes.
+**Rationale:** AOI provides a single, reusable spatial frame for mapping and acquisition, and reduces duplicated extent definitions.
+**Status:** Active.
+
+## 2026-01-09 — JC dataset effort metrics
+**Decision:** Derive `rd` (recording days) from unique observation dates and `obs` from summed counts (or row counts if counts missing) when building a JC-compatible camera site table.
+**Rationale:** JC observations are the only guaranteed source in the local dataset; this yields a deterministic effort metric without requiring operational logs.
+**Status:** Active.

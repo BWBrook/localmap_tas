@@ -1,11 +1,11 @@
-# Config reference (schema v1)
+# Config reference (schema v2)
 
 This document describes the configuration schema used by `config/config.yaml`.
 The active profile is selected via `R_CONFIG_ACTIVE` (default: `default`).
 
 ## Schema version
 
-- `schema_version` (integer, required): current schema version. Must be `1`.
+- `schema_version` (integer, required): current schema version. Must be `2`.
 
 ## Top-level keys (profile root)
 
@@ -18,10 +18,30 @@ The active profile is selected via `R_CONFIG_ACTIVE` (default: `default`).
 ## `data`
 
 Required:
+- `aoi` (list, required): area of interest definition.
 - `manifest` (string): CSV manifest path (e.g., `metadata/data_manifest.csv`).
 - `species_requests` (string): species query CSV path (e.g., `metadata/species_requests.csv`).
 - `occurrence` (list): occurrence settings.
 - `camera_sites` (list): camera-site settings.
+
+### `data.aoi`
+
+The AOI (Area of Interest) standardizes map extents and data acquisition.
+
+- `centroid` (list): lat/lon centroid in EPSG:4326.
+  - `lat` (numeric, degrees).
+  - `lon` (numeric, degrees).
+- `centroid_site` (string, optional): site ID to use as centroid (from camera sites table).
+- `width_km`/`height_km` (numeric, km): AOI width/height (total size).
+- `size_km` (numeric, km): square AOI size (overrides width/height).
+- `rotation_deg` (numeric, default 0): clockwise from geographic north.
+- `crs` (string, default `"EPSG:28355"`): analysis CRS for AOI geometry.
+
+Notes:
+- **Analysis CRS:** AOI geometry is built in EPSG:28355 (GDA94 / MGA Zone 55).
+- **Centroid inputs:** lat/lon centroid coordinates are interpreted as EPSG:4326.
+- **Dimensions:** `width_km`/`height_km` define total AOI size (not half-widths).
+- **Rotation:** `rotation_deg` is clockwise from geographic north, applied after projection to EPSG:28355.
 
 ### `data.occurrence`
 
@@ -51,6 +71,7 @@ Required:
 - `topo_output_path` (string, optional): output path for tile map.
 - `output_path` (string, optional): output path for vector basemap map.
 - `bounding_box` (list, required): AOI box definition.
+  - NOTE: optional when `data.aoi` is present; retained for backward compatibility.
   - `top_left` (list, required):
     - `lat` (numeric, degrees, EPSG:4326).
     - `lon` (numeric, degrees, EPSG:4326).
@@ -58,12 +79,25 @@ Required:
 
 ### `data.camera_sites`
 
-- `path` (string, required): camera site CSV (must include `site`, `lat`, `lon`, `rd`, `obs`).
+- `source` (string, optional): `"file"` (default) or `"jc"` for the Judbury camera study.
+- `path` (string, required for `source: file`): camera site CSV (must include `site`, `lat`, `lon`, `rd`, `obs`).
 - `central_site` (string, required): focal site name.
 - `bbox_half_km` (numeric, km, required): half-width of the map extent in kilometres.
 - `basemap` (list, optional): WMS settings (placeholders allowed for demo).
 - `map` (list, optional): camera-site map styling settings.
 - `stack` (list, optional): panel assembly settings.
+
+### `data.camera_sites.jc`
+
+For `source: jc`, derive a compatible camera-site table from the Judbury camera study:
+
+- `site_path` (string, required): path to `jc_site.csv` (lat/lon).
+- `obs_path` (string, required): path to `jc_obs.csv` (datetime + site).
+- `output_path` (string, optional): derived output CSV (defaults to `data/interim/jc_camera_sites.csv`).
+
+Derived fields:
+- `rd`: number of unique observation dates per site (from `jc_obs.csv`).
+- `obs`: total observed individuals per site (sum of `count` if present; otherwise row count).
 
 ### `data.camera_sites.basemap`
 

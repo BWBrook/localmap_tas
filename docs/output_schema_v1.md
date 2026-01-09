@@ -26,6 +26,10 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `camera_sites_panel` → `outputs/maps/demo_camera_sites_panel.png`
 - `camera_sites_tile` → `outputs/tiles/demo_camera_sites_tile.png`
 
+### Default profile entries
+
+- `aoi_debug_plot` → `outputs/maps/aoi_debug.png`
+
 ## Validation
 
 The `validate_output_manifest()` helper checks:
