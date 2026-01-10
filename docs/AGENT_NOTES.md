@@ -206,3 +206,7 @@
 - 2026-01-10: Analysis layer preview PNGs.
   - Added quick-look PNG previews for analysis vectors/rasters (auto-generated beside outputs).
   - Updated output schema/manifest and added tests to ensure preview files are created.
+- 2026-01-10: Analysis preview overlays and derived-layer ordering guard.
+  - Vector previews now colour by an attribute (prefers `habitat`) with legend and AOI outline.
+  - Raster previews overlay AOI and camera sites for quick orientation checks.
+  - Added validation to ensure derived layers appear after their source_id.

@@ -258,6 +258,9 @@ Resampling policy:
 - Categorical rasters use `near` (nearest neighbor).
 - Continuous rasters default to `bilinear`.
 
+Ordering note:
+- Derived layers must appear *after* their `source_id` in `analysis_layers`.
+
 ### `data.overview_map`
 
 - `output_path` (string, optional): output PNG path.

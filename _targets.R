@@ -189,7 +189,11 @@ list(
   ),
   targets::tar_target(
     analysis_layer_previews,
-    render_analysis_layer_previews(analysis_layers, aoi = aoi),
+    render_analysis_layer_previews(
+      analysis_layers,
+      aoi = aoi,
+      sites = camera_sites_data
+    ),
     description = "Quick-look PNG previews for analysis layers."
   ),
   targets::tar_target(

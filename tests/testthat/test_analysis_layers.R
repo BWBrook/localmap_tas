@@ -199,3 +199,27 @@ testthat::test_that("analysis layer previews render PNGs", {
   previews <- localmap:::render_analysis_layer_previews(layers, aoi = aoi)
   testthat::expect_true(all(file.exists(previews$path)))
 })
+
+testthat::test_that("derived layers require sources to appear earlier", {
+  layers <- list(
+    list(
+      id = "slope",
+      type = "derived_slope",
+      source_id = "dem",
+      output_path = tempfile(fileext = ".tif"),
+      attribution = list(source = "fixture")
+    ),
+    list(
+      id = "dem",
+      type = "raster_file",
+      path = "inst/extdata/jc_dem.tif",
+      output_path = tempfile(fileext = ".tif"),
+      attribution = list(source = "fixture")
+    )
+  )
+
+  testthat::expect_error(
+    localmap::validate_analysis_layers(layers),
+    class = "analysis_layer_source_order"
+  )
+})

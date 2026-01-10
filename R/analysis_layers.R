@@ -78,6 +78,8 @@ validate_analysis_layers <- function(layers) {
     rlang::abort("Analysis layer IDs must be unique.", class = "analysis_layer_duplicate_id")
   }
 
+  id_index <- stats::setNames(seq_along(ids), ids)
+
   normalized <- Map(function(layer, id) {
     layer$id <- id
     type <- layer$type
@@ -132,6 +134,32 @@ validate_analysis_layers <- function(layers) {
     }
     layer
   }, normalized, ids)
+
+  for (layer in normalized) {
+    if (layer$type %in% c("derived_slope", "derived_ndvi", "derived_nbr")) {
+      source_id <- as.character(layer$source_id)
+      if (!source_id %in% ids) {
+        rlang::abort(
+          sprintf(
+            "Derived analysis layer '%s' references missing source_id '%s'.",
+            layer$id,
+            source_id
+          ),
+          class = "analysis_layer_source_not_found"
+        )
+      }
+      if (id_index[[source_id]] >= id_index[[layer$id]]) {
+        rlang::abort(
+          sprintf(
+            "Derived analysis layer '%s' must appear after its source layer '%s'.",
+            layer$id,
+            source_id
+          ),
+          class = "analysis_layer_source_order"
+        )
+      }
+    }
+  }
 
   normalized
 }
