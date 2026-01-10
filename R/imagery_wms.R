@@ -101,6 +101,12 @@ fetch_wms_imagery <- function(wms_cfg,
   dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
 
   offline <- isTRUE(offline) || isTRUE(wms_cfg$offline)
+  if (!localmap_network_allowed()) {
+    if (!offline) {
+      rlang::warn("Network access disabled; using offline placeholder for WMS imagery.")
+    }
+    offline <- TRUE
+  }
 
   query_info <- try(wms_build_query(wms_cfg, bbox), silent = TRUE)
   if (inherits(query_info, "try-error")) {

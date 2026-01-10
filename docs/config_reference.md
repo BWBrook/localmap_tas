@@ -176,6 +176,8 @@ Derived fields:
 Profiles can `inherit` from `default` and override keys (e.g., `demo`, `ci`).
 Always keep `schema_version` in the active profile (inherited from `default` if not overridden).
 The `jc_ci` profile inherits `jc` but forces offline-safe settings for CI runs.
+The `tas_canonical` profile provides the Tasmania layer stack (Orthophoto + TASVEG + DEM) anchored to the JC AOI.
+The `tas_canonical_ci` profile inherits `tas_canonical` and forces offline-safe imagery/vector settings.
 ### `data.coverage`
 
 Coverage polygons describe the monitored region derived from site points.
@@ -261,6 +263,14 @@ Resampling policy:
 
 Ordering note:
 - Derived layers must appear *after* their `source_id` in `analysis_layers`.
+
+Network access:
+- Remote imagery/vector fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
+- When network is disabled, imagery uses placeholders; ArcGIS vectors require a `fixture_path`.
+
+Cache invalidation:
+- Delete `data/cache/` to force a refetch, or set a new `cache_dir` in the layer config.
+- For analysis layers, bump `analysis_cache_version` in `R/analysis_layers.R` if the cache key logic changes.
 
 ### `data.attributes`
 

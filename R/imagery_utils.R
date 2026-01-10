@@ -37,6 +37,12 @@ imagery_cache_key <- function(params) {
   unname(tools::md5sum(tmp))
 }
 
+localmap_network_allowed <- function() {
+  flag <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", "")
+  flag <- tolower(trimws(flag))
+  flag %in% c("1", "true", "yes", "y")
+}
+
 imagery_write_placeholder <- function(path, width, height, colour = "#f0f0f0") {
   width <- as.integer(width)
   height <- as.integer(height)

@@ -1,9 +1,0 @@
-type: raster_file
-status: cache_hit
-cache_key: dd9eacf947ebb837f8dd78b6dfc7c5f5
-cache_path: /home/bwbrook/git/localmap_tas/data/cache/analysis/dd9eacf947ebb837f8dd78b6dfc7c5f5.tif
-output_path: outputs/analysis/raster/jc_dem.tif
-source: inst/extdata/jc_dem.tif
-source_id: NA
-params.categorical: FALSE
-timestamp: 2026-01-09T12:14:57Z

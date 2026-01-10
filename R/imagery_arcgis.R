@@ -106,6 +106,12 @@ fetch_arcgis_imagery <- function(arc_cfg,
   dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
 
   offline <- isTRUE(offline) || isTRUE(arc_cfg$offline)
+  if (!localmap_network_allowed()) {
+    if (!offline) {
+      rlang::warn("Network access disabled; using offline placeholder for ArcGIS imagery.")
+    }
+    offline <- TRUE
+  }
 
   query_info <- try(arcgis_build_query(arc_cfg, bbox), silent = TRUE)
   if (inherits(query_info, "try-error")) {

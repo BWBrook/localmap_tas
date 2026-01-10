@@ -44,3 +44,35 @@ testthat::test_that("fetch_arcgis_imagery writes placeholder and provenance offl
   testthat::expect_true(file.exists(res$provenance_path))
   testthat::expect_gt(file.info(res$provenance_path)$size, 0)
 })
+
+testthat::test_that("fetch_arcgis_imagery respects network gating", {
+  bbox <- sf::st_sfc(sf::st_polygon(list(rbind(
+    c(145, -42),
+    c(145.1, -42),
+    c(145.1, -42.1),
+    c(145, -42.1),
+    c(145, -42)
+  ))), crs = 4326)
+
+  cfg <- list(
+    url = "https://example.com/arcgis/export",
+    crs = "EPSG:3857",
+    width = 64,
+    height = 64,
+    output_path = tempfile(fileext = ".png")
+  )
+
+  old <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) {
+      Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+    } else {
+      Sys.setenv(LOCALMAP_ALLOW_NETWORK = old)
+    }
+  }, add = TRUE)
+  Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+
+  res <- localmap::fetch_arcgis_imagery(cfg, bbox, offline = FALSE, cache_dir = tempfile())
+  prov <- readLines(res$provenance_path, warn = FALSE)
+  testthat::expect_true(any(grepl("status: offline_placeholder", prov)))
+})

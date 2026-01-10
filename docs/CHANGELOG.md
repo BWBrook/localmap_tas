@@ -11,6 +11,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Run-level provenance outputs (`analysis_layers.csv`, `attribution.md`, `run_manifest.yml`) for publication-ready attribution.
 - Quick-look PNG previews alongside each analysis vector/raster output for rapid QA.
 - Site attribute extraction outputs (long parquet + wide CSV) from raster and vector analysis layers.
+- Offline-first network gating via `LOCALMAP_ALLOW_NETWORK` with placeholder imagery by default.
+- Cache audit coverage: deterministic cache keys + cache-hit tests for analysis layers.
+- Container bootstrap script (`scripts/bootstrap_container.R`) for Docker/Apptainer builds with renv-only restores.
 - AOI builder (`build_aoi_from_config`) with centroid/size/rotation and AOI debug plots (`aoi_debug_plot` target).
 - AOI auto mode to derive extents from site bounds with a buffered heuristic (median nearest-neighbour distance).
 - `jc` camera-sites source to derive effort (`rd`) and observations (`obs`) from Judbury camera study inputs.
@@ -62,6 +65,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Config schema bumped to v2 with AOI as the authoritative extent definition; v1 configs are migrated.
 - Species mapping now accepts AOI input and only falls back to bounding-box config when needed.
 - JC profile now uses AOI auto mode for a camera-scale extent.
+- Added `tas_canonical`/`tas_canonical_ci` profiles (LIST orthophoto + TASVEG + DEM fixture) plus a dedicated output manifest for validating canonical outputs.
 - Rename project metadata, Quarto site, and pkgdown home content from `rcompendium`
   to `localmap`.
 - Update vignette examples and namespace-qualified calls to use `localmap::`.

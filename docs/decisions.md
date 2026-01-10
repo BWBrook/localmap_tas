@@ -116,3 +116,18 @@ Format:
 **Decision:** Site attribute extraction writes a canonical long table in parquet (via `{arrow}`) and a convenience wide CSV for quick inspection.
 **Rationale:** Parquet keeps the primary dataset compact and analysis-ready, while a wide CSV offers a familiar format for spreadsheet and reporting workflows.
 **Status:** Active.
+
+## 2026-01-10 — Offline-first network gating via `LOCALMAP_ALLOW_NETWORK`
+**Decision:** Network fetches are disabled by default and only run when `LOCALMAP_ALLOW_NETWORK=1` is set; otherwise imagery renders placeholders and ArcGIS vectors require fixtures.
+**Rationale:** Keeps CI and offline runs deterministic while still allowing explicit opt-in for live network checks.
+**Status:** Active.
+
+## 2026-01-10 — Container bootstrap uses renv restore only
+**Decision:** Docker/Apptainer builds run `scripts/bootstrap_container.R`, which performs a renv restore only (no dependency reinstall or roxygen documentation).
+**Rationale:** Keeps container builds deterministic and tractable by relying on the lockfile and r2u binaries rather than re-installing the dependency manifest.
+**Status:** Active.
+
+## 2026-01-10 — Tasmania canonical layer set (Orthophoto + TASVEG + DEM)
+**Decision:** The canonical Tasmania example uses The LIST Orthophoto ArcGIS export, TASVEG 4.0 Groups (WMS for imagery + ArcGIS layer 84 for vectors), and a DEM fixture (with derived slope) for deterministic analysis layers.
+**Rationale:** Provides a realistic, Tasmania-focused layer stack while keeping the example reproducible and offline-safe with fixtures where needed.
+**Status:** Active.

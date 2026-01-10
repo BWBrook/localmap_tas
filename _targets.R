@@ -364,7 +364,17 @@ list(
 
   targets::tar_target(
     output_manifest_file,
-    "inst/extdata/output_manifest_v1.csv",
+    {
+      profile <- attr(cfg, "config")
+      if (is.null(profile) || !nzchar(profile)) {
+        profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
+      }
+      if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
+        "inst/extdata/output_manifest_tas_canonical.csv"
+      } else {
+        "inst/extdata/output_manifest_v1.csv"
+      }
+    },
     format = "file",
     description = "Output schema manifest (v1) file."
   ),
@@ -377,47 +387,92 @@ list(
 
   targets::tar_target(
     output_schema_v1,
-    validate_output_manifest(
-      manifest = output_manifest,
-      expected_outputs = list(
-        species_map = species_map,
-        camera_sites_map = camera_sites_map,
-        camera_sites_panel = camera_sites_panel,
-        camera_sites_tile = camera_sites_tile,
-        aoi_debug_plot = aoi_debug_plot,
-        coverage_summary = coverage_summary,
-        wms_layer = layer_output_paths[["tasveg_wms"]],
-        wms_layer_provenance = layer_provenance_paths[["tasveg_wms"]],
-        arcgis_layer = layer_output_paths[["topography_arcgis"]],
-        arcgis_layer_provenance = layer_provenance_paths[["topography_arcgis"]],
-        overview_map = overview_map,
-        panel_figure_png = panel_figure_png,
-        panel_figure_pdf = panel_figure_pdf,
-        vector_habitats = analysis_layer_paths[["jc_habitats"]],
-        vector_habitats_provenance = analysis_layer_provenance_paths[["jc_habitats"]],
-        raster_dem = analysis_layer_paths[["jc_dem"]],
-        raster_dem_provenance = analysis_layer_provenance_paths[["jc_dem"]],
-        raster_multiband = analysis_layer_paths[["jc_multiband"]],
-        raster_multiband_provenance = analysis_layer_provenance_paths[["jc_multiband"]],
-        raster_slope = analysis_layer_paths[["jc_slope"]],
-        raster_slope_provenance = analysis_layer_provenance_paths[["jc_slope"]],
-        raster_ndvi = analysis_layer_paths[["jc_ndvi"]],
-        raster_ndvi_provenance = analysis_layer_provenance_paths[["jc_ndvi"]],
-        raster_nbr = analysis_layer_paths[["jc_nbr"]],
-        raster_nbr_provenance = analysis_layer_provenance_paths[["jc_nbr"]],
-        vector_habitats_preview = analysis_layer_preview_paths[["jc_habitats"]],
-        raster_dem_preview = analysis_layer_preview_paths[["jc_dem"]],
-        raster_multiband_preview = analysis_layer_preview_paths[["jc_multiband"]],
-        raster_slope_preview = analysis_layer_preview_paths[["jc_slope"]],
-        raster_ndvi_preview = analysis_layer_preview_paths[["jc_ndvi"]],
-        raster_nbr_preview = analysis_layer_preview_paths[["jc_nbr"]],
-        site_attributes_long = site_attributes_long_file,
-        site_attributes_wide = site_attributes_wide_file,
-        analysis_provenance = analysis_provenance,
-        attribution_report = attribution_report,
-        run_manifest = run_manifest
-      )
-    ),
+    {
+      profile <- attr(cfg, "config")
+      if (is.null(profile) || !nzchar(profile)) {
+        profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
+      }
+      safe_lookup <- function(values, key) {
+        if (is.null(values) || is.null(key) || !nzchar(key)) {
+          return("")
+        }
+        if (!key %in% names(values)) {
+          return("")
+        }
+        values[[key]]
+      }
+      expected_outputs <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
+        list(
+          species_map = species_map,
+          camera_sites_map = camera_sites_map,
+          camera_sites_panel = camera_sites_panel,
+          camera_sites_tile = camera_sites_tile,
+          aoi_debug_plot = aoi_debug_plot,
+          coverage_summary = coverage_summary,
+          wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
+          wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
+          arcgis_layer = safe_lookup(layer_output_paths, "orthophoto_arcgis"),
+          arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "orthophoto_arcgis"),
+          overview_map = overview_map,
+          panel_figure_png = panel_figure_png,
+          panel_figure_pdf = panel_figure_pdf,
+          vector_tasveg = safe_lookup(analysis_layer_paths, "tasveg_vector"),
+          vector_tasveg_provenance = safe_lookup(analysis_layer_provenance_paths, "tasveg_vector"),
+          raster_dem = safe_lookup(analysis_layer_paths, "tas_dem"),
+          raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_dem"),
+          raster_slope = safe_lookup(analysis_layer_paths, "tas_slope"),
+          raster_slope_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_slope"),
+          vector_tasveg_preview = safe_lookup(analysis_layer_preview_paths, "tasveg_vector"),
+          raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "tas_dem"),
+          raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "tas_slope"),
+          site_attributes_long = site_attributes_long_file,
+          site_attributes_wide = site_attributes_wide_file,
+          analysis_provenance = analysis_provenance,
+          attribution_report = attribution_report,
+          run_manifest = run_manifest
+        )
+      } else {
+        list(
+          species_map = species_map,
+          camera_sites_map = camera_sites_map,
+          camera_sites_panel = camera_sites_panel,
+          camera_sites_tile = camera_sites_tile,
+          aoi_debug_plot = aoi_debug_plot,
+          coverage_summary = coverage_summary,
+          wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
+          wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
+          arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
+          arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "topography_arcgis"),
+          overview_map = overview_map,
+          panel_figure_png = panel_figure_png,
+          panel_figure_pdf = panel_figure_pdf,
+          vector_habitats = safe_lookup(analysis_layer_paths, "jc_habitats"),
+          vector_habitats_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_habitats"),
+          raster_dem = safe_lookup(analysis_layer_paths, "jc_dem"),
+          raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_dem"),
+          raster_multiband = safe_lookup(analysis_layer_paths, "jc_multiband"),
+          raster_multiband_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_multiband"),
+          raster_slope = safe_lookup(analysis_layer_paths, "jc_slope"),
+          raster_slope_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_slope"),
+          raster_ndvi = safe_lookup(analysis_layer_paths, "jc_ndvi"),
+          raster_ndvi_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_ndvi"),
+          raster_nbr = safe_lookup(analysis_layer_paths, "jc_nbr"),
+          raster_nbr_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_nbr"),
+          vector_habitats_preview = safe_lookup(analysis_layer_preview_paths, "jc_habitats"),
+          raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "jc_dem"),
+          raster_multiband_preview = safe_lookup(analysis_layer_preview_paths, "jc_multiband"),
+          raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "jc_slope"),
+          raster_ndvi_preview = safe_lookup(analysis_layer_preview_paths, "jc_ndvi"),
+          raster_nbr_preview = safe_lookup(analysis_layer_preview_paths, "jc_nbr"),
+          site_attributes_long = site_attributes_long_file,
+          site_attributes_wide = site_attributes_wide_file,
+          analysis_provenance = analysis_provenance,
+          attribution_report = attribution_report,
+          run_manifest = run_manifest
+        )
+      }
+      validate_output_manifest(manifest = output_manifest, expected_outputs = expected_outputs)
+    },
     description = "Validated output schema manifest (v1) for produced artefacts."
   ),
 
@@ -471,7 +526,10 @@ list(
       qmd <- "reports/paper.qmd"
       out_dir <- dirname(qmd)
       # Render with Quarto if available; otherwise write a simple placeholder HTML
-      has_quarto <- requireNamespace("quarto", quietly = TRUE) && !is.na(tryCatch(quarto::quarto_path(), error = function(e) NA))
+      quarto_path <- tryCatch(quarto::quarto_path(), error = function(e) "")
+      has_quarto <- isTRUE(requireNamespace("quarto", quietly = TRUE)) &&
+        is.character(quarto_path) && length(quarto_path) == 1L &&
+        nzchar(quarto_path) && !is.na(quarto_path)
       base <- tools::file_path_sans_ext(basename(qmd))
       html <- file.path(out_dir, paste0(base, ".html"))
       ok <- FALSE

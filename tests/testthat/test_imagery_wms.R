@@ -49,6 +49,39 @@ testthat::test_that("fetch_wms_imagery writes placeholder and provenance offline
   testthat::expect_gt(file.info(res$provenance_path)$size, 0)
 })
 
+testthat::test_that("fetch_wms_imagery respects network gating", {
+  bbox <- sf::st_sfc(sf::st_polygon(list(rbind(
+    c(145, -42),
+    c(145.1, -42),
+    c(145.1, -42.1),
+    c(145, -42.1),
+    c(145, -42)
+  ))), crs = 4326)
+
+  cfg <- list(
+    url = "https://example.com/wms",
+    layers = c("layer_a"),
+    crs = "EPSG:3857",
+    width = 64,
+    height = 64,
+    output_path = tempfile(fileext = ".png")
+  )
+
+  old <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) {
+      Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+    } else {
+      Sys.setenv(LOCALMAP_ALLOW_NETWORK = old)
+    }
+  }, add = TRUE)
+  Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+
+  res <- localmap::fetch_wms_imagery(cfg, bbox, offline = FALSE, cache_dir = tempfile())
+  prov <- readLines(res$provenance_path, warn = FALSE)
+  testthat::expect_true(any(grepl("status: offline_placeholder", prov)))
+})
+
 testthat::test_that("imagery_cache_key changes with bbox", {
   params_a <- list(url = "https://example.com/wms", BBOX = "1,2,3,4", width = 256)
   params_b <- list(url = "https://example.com/wms", BBOX = "5,6,7,8", width = 256)

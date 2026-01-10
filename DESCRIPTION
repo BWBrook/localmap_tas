@@ -31,7 +31,7 @@ Imports:
     ggspatial,
     maptiles,
     png,
-    rnaturalearth,
+    rnaturalearthdata,
     tidyterra,
     terra,
     arrow

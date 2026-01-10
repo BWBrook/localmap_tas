@@ -121,10 +121,10 @@ Every WP must create or update:
 - [x] **WP-022:** End-to-end Quarto vignette/report (figures + tables + interpretation) (completed 2026-01-10; evidence: docs/log/WP-022_2026-01-10_report.md; canonical run: outputs/canonical_runs/WP-022_2026-01-10_report)  
 
 ### Line 0.7.x — Hardening, portability, and realism
-- [ ] **WP-023:** Offline-first contract + network-gated tests (explicit, documented)  
-- [ ] **WP-024:** Cache correctness audit (deterministic keys; cache hit guarantees)  
-- [ ] **WP-025 (Large):** Container parity (Docker and/or Apptainer JC run) + docs  
-- [ ] **WP-026:** “Tasmania canonical example” layer set (Orthophoto + TASVEG + DEM) runs end-to-end
+- [x] **WP-023:** Offline-first contract + network-gated tests (explicit, documented) (completed 2026-01-10; evidence: docs/log/WP-023_2026-01-10_offline-first.md; canonical run: outputs/canonical_runs/WP-023_2026-01-10_offline-first)  
+- [x] **WP-024:** Cache correctness audit (deterministic keys; cache hit guarantees) (completed 2026-01-10; evidence: docs/log/WP-024_2026-01-10_cache-audit.md; canonical run: outputs/canonical_runs/WP-024_2026-01-10_cache-audit)  
+- [x] **WP-025 (Large):** Container parity (Docker and/or Apptainer JC run) + docs (completed 2026-01-10; evidence: docs/log/WP-025_2026-01-10_container-parity.md; canonical run: outputs/canonical_runs/WP-025_2026-01-10_container-parity)  
+- [x] **WP-026:** “Tasmania canonical example” layer set (Orthophoto + TASVEG + DEM) runs end-to-end (completed 2026-01-10; evidence: docs/log/WP-026_2026-01-10_tas-canonical.md; canonical run: outputs/canonical_runs/WP-026_2026-01-10_tas-canonical)
 
 ### Line 1.0.x — Release readiness
 - [ ] **WP-027 (Large):** Public API freeze + docs polish (user-facing)  

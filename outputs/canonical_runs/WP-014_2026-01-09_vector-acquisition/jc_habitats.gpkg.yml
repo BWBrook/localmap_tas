@@ -1,9 +1,0 @@
-type: vector_file
-status: cache_hit
-cache_key: a0f32d2e7b79a53bd5b1391c5147e637
-cache_path: /home/bwbrook/git/localmap_tas/data/cache/analysis/a0f32d2e7b79a53bd5b1391c5147e637.gpkg
-output_path: outputs/analysis/vector/jc_habitats.gpkg
-source: inst/extdata/jc_habitats.gpkg
-source_id: NA
-params.layer: habitats
-timestamp: 2026-01-09T12:14:53Z

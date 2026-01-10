@@ -217,3 +217,15 @@
   - Sanity checks: long table has 117 rows (13 sites × 9 attributes), NDVI/NBR within expected ranges, habitats show two classes, raster previews align with sites.
   - Validation: `devtools::document()` ran clean; `devtools::test()` (163 pass), `lintr::lint_package()` clean, `rcmdcheck::rcmdcheck(--no-manual)` OK.
   - JC pipeline run: `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci targets::tar_make()` completed with expected `sf::st_intersection` warnings.
+
+## 2026-01-10 — Line 0.6 (WP-025 container parity)
+- Built Docker image using `inst/containers/Dockerfile` and ran JC profile in offline mode with host-mounted `data/` and `outputs/`.
+- Resolved container build issues by adding system deps (harfbuzz/fribidi/pkg-config) and disabling pak auto-install in container bootstrap.
+- Captured container outputs and provenance in `outputs/canonical_runs/WP-025_2026-01-10_container-parity/` and logged inspection notes.
+- Remaining: update roadmap WP checkboxes, run local QA gates, commit + push at Line 0.6 gate.
+
+## 2026-01-10 — WP-026 Tasmania canonical example
+- Added `tas_canonical`/`tas_canonical_ci` profiles and a dedicated output manifest for Tasmania canonical outputs.
+- Ran `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 targets::tar_make()` and captured outputs in `outputs/canonical_runs/WP-026_2026-01-10_tas-canonical/`.
+- Artefact review: orthophoto aligns with AOI + sites; TASVEG vector preview shows multiple vegetation groups; DEM/slope previews align with sites and show coherent gradients.
+- Panel figure assembled all four maps with expected labels and no blank panels.

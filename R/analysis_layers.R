@@ -407,6 +407,21 @@ clip_vector_to_aoi <- function(vector, aoi_geom, analysis_crs) {
 }
 
 fetch_arcgis_vector <- function(layer, aoi_geom) {
+  aoi_crs <- sf::st_crs(aoi_geom)
+  if (!localmap_network_allowed()) {
+    if (!isTRUE(layer$offline)) {
+      rlang::warn(
+        sprintf(
+          paste0(
+            "Network access disabled; ArcGIS vector layer '%s' requires a fixture ",
+            "or LOCALMAP_ALLOW_NETWORK=1."
+          ),
+          layer$id
+        )
+      )
+    }
+    layer$offline <- TRUE
+  }
   if (isTRUE(layer$offline)) {
     fixture <- layer$fixture_path
     if (is.null(fixture) || !nzchar(fixture)) {
@@ -416,23 +431,23 @@ fetch_arcgis_vector <- function(layer, aoi_geom) {
       )
     }
     vector <- read_vector_layer(fixture, layer$fixture_layer)
-    return(clip_vector_to_aoi(vector, aoi_geom, layer$crs %||% sf::st_crs(aoi_geom)$wkt))
+    return(clip_vector_to_aoi(vector, aoi_geom, aoi_crs))
   }
 
   base_url <- layer$url
   if (!grepl("/query$", base_url)) {
     base_url <- paste0(rtrim_slash(base_url), "/query")
   }
-  crs <- analysis_default(layer$crs, "EPSG:4326")
-  bbox <- sf::st_bbox(sf::st_transform(aoi_geom, sf::st_crs(crs)))
+  query_crs <- analysis_default(layer$crs, "EPSG:4326")
+  bbox <- sf::st_bbox(sf::st_transform(aoi_geom, sf::st_crs(query_crs)))
   bbox_param <- paste(c(bbox["xmin"], bbox["ymin"], bbox["xmax"], bbox["ymax"]), collapse = ",")
   query <- list(
     f = "geojson",
     where = analysis_default(layer$where, "1=1"),
     geometry = bbox_param,
     geometryType = "esriGeometryEnvelope",
-    inSR = arcgis_wkid_from_crs(crs),
-    outSR = arcgis_wkid_from_crs(crs),
+    inSR = arcgis_wkid_from_crs(query_crs),
+    outSR = arcgis_wkid_from_crs(query_crs),
     outFields = analysis_default(layer$out_fields, "*")
   )
   req <- httr2::request(base_url)
@@ -449,7 +464,7 @@ fetch_arcgis_vector <- function(layer, aoi_geom) {
   on.exit(unlink(tmp), add = TRUE)
   writeLines(body, tmp, useBytes = TRUE)
   vector <- sf::st_read(tmp, quiet = TRUE)
-  clip_vector_to_aoi(vector, aoi_geom, crs)
+  clip_vector_to_aoi(vector, aoi_geom, aoi_crs)
 }
 
 read_raster_layer <- function(path) {

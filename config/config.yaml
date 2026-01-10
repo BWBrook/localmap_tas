@@ -501,3 +501,235 @@ jc_ci:
         url: ""
         layers: []
         overlays: []
+
+tas_canonical:
+  inherits: default
+  ala:
+    use_fixture: true
+    fixture_occurrences: "inst/extdata/occurrences_jc.csv"
+  data:
+    species_requests: "metadata/species_requests_jc.csv"
+    occurrence:
+      map:
+        output_path: "outputs/maps/tas_species_occurrences.png"
+        topo_output_path: "outputs/maps/tas_species_topo.png"
+    aoi:
+      mode: "auto"
+      buffer_multiplier: 1
+      min_buffer_km: 0.1
+      rotation_deg: 0
+      crs: "EPSG:28355"
+    coverage:
+      enabled: true
+      buffer_m: 50
+      summary_path: "outputs/tables/tas_coverage_summary.csv"
+    camera_sites:
+      source: "jc"
+      jc:
+        site_path: "data/jc_camera_study/jc_site.csv"
+        obs_path: "data/jc_camera_study/jc_obs.csv"
+        output_path: "data/interim/jc_camera_sites.csv"
+      path: "data/interim/jc_camera_sites.csv"
+      central_site: "jc_cen"
+      bbox_half_km: 2
+      basemap:
+        output_path: "outputs/tiles/tas_camera_sites_tile.png"
+      map:
+        output_path: "outputs/maps/tas_camera_sites.png"
+      stack:
+        paths:
+          - "outputs/maps/tas_species_occurrences.png"
+          - "outputs/maps/tas_camera_sites.png"
+        glob: []
+        input_dir: []
+        columns: 1
+        rows: 2
+        output_path: "outputs/maps/tas_camera_sites_panel.png"
+        gap_px: 8
+        labels:
+          values: ["a)", "b)"]
+          padding_px: 12
+          colour: "#050505"
+          font_size: 28
+    layers:
+      - id: "orthophoto_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Basemaps/Orthophoto/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 2000
+        height: 2000
+        dpi: 96
+        output_path: "outputs/layers/tas_orthophoto_arcgis.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Orthophoto"
+      - id: "tasveg_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.0_Groups55513"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas_tasveg_wms.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Groups"
+    overview_map:
+      output_path: "outputs/maps/tas_overview_map.png"
+      width: 7
+      height: 7
+      dpi: 300
+      base_layer_id: "orthophoto_arcgis"
+      overlays:
+        - id: "tasveg_wms"
+          opacity: 0.35
+      show_labels: false
+      point_colour: "#2171b5"
+      point_size: 2
+      aoi_colour: "#d95f0e"
+      coverage_colour: "#2ca25f"
+      coverage_alpha: 0.15
+      scale_bar_location: "bl"
+      north_arrow_location: "tr"
+    panel_figure:
+      paths:
+        - "outputs/maps/tas_overview_map.png"
+        - "outputs/maps/tas_species_occurrences.png"
+        - "outputs/maps/tas_camera_sites.png"
+        - "outputs/maps/tas_species_topo.png"
+      order:
+        - "tas_overview_map"
+        - "tas_species_occurrences"
+        - "tas_camera_sites"
+        - "tas_species_topo"
+      columns: 2
+      rows: 2
+      output_path: "outputs/maps/tas_panel_figure.png"
+      output_pdf: "outputs/maps/tas_panel_figure.pdf"
+      gap_px: 8
+      labels:
+        values: ["a)", "b)", "c)", "d)"]
+        padding_px: 16
+        colour: "#050505"
+        font_size: 28
+    analysis_layers:
+      - id: "tasveg_vector"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
+        crs: "EPSG:4326"
+        output_path: "outputs/analysis/vector/tas_tasveg.gpkg"
+        offline: false
+        fixture_path: "inst/extdata/jc_habitats.gpkg"
+        fixture_layer: "habitats"
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Groups (vector)"
+      - id: "tas_dem"
+        type: "raster_file"
+        path: "inst/extdata/jc_dem.tif"
+        output_path: "outputs/analysis/raster/tas_dem.tif"
+        categorical: false
+        units: "m"
+        attribution:
+          source: "JC fixture"
+          license: "CC BY 4.0"
+          credit: "Synthetic DEM (fixture)"
+      - id: "tas_slope"
+        type: "derived_slope"
+        source_id: "tas_dem"
+        output_path: "outputs/analysis/raster/tas_slope.tif"
+        units: "degrees"
+        attribution:
+          source: "Derived from tas_dem"
+          license: "CC BY 4.0"
+          credit: "Slope"
+    attributes:
+      enabled: true
+      output_long: "outputs/tables/tas_site_attributes_long.parquet"
+      output_wide: "outputs/tables/tas_site_attributes_wide.csv"
+
+tas_canonical_ci:
+  inherits: tas_canonical
+  data:
+    occurrence:
+      map:
+        enable_topo_tiles: false
+    layers:
+      - id: "orthophoto_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Basemaps/Orthophoto/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 2000
+        height: 2000
+        dpi: 96
+        output_path: "outputs/layers/tas_orthophoto_arcgis.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Orthophoto"
+      - id: "tasveg_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.0_Groups55513"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas_tasveg_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Groups"
+    analysis_layers:
+      - id: "tasveg_vector"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
+        crs: "EPSG:4326"
+        output_path: "outputs/analysis/vector/tas_tasveg.gpkg"
+        offline: true
+        fixture_path: "inst/extdata/jc_habitats.gpkg"
+        fixture_layer: "habitats"
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Groups (vector)"
+      - id: "tas_dem"
+        type: "raster_file"
+        path: "inst/extdata/jc_dem.tif"
+        output_path: "outputs/analysis/raster/tas_dem.tif"
+        categorical: false
+        units: "m"
+        attribution:
+          source: "JC fixture"
+          license: "CC BY 4.0"
+          credit: "Synthetic DEM (fixture)"
+      - id: "tas_slope"
+        type: "derived_slope"
+        source_id: "tas_dem"
+        output_path: "outputs/analysis/raster/tas_slope.tif"
+        units: "degrees"
+        attribution:
+          source: "Derived from tas_dem"
+          license: "CC BY 4.0"
+          credit: "Slope"
+    camera_sites:
+      basemap:
+        url: ""
+        layers: []
+        overlays: []

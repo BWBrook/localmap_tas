@@ -156,6 +156,96 @@ testthat::test_that("categorical rasters use nearest-neighbor resampling", {
   testthat::expect_true(all(abs(vals - round(vals)) < 1e-6))
 })
 
+testthat::test_that("analysis layer cache keys are deterministic and hit cache", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 2,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+  cache_dir <- tempfile()
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+
+  layer <- list(
+    id = "dem",
+    type = "raster_file",
+    path = system.file("extdata", "jc_dem.tif", package = "localmap"),
+    output_path = tempfile(fileext = ".tif"),
+    attribution = list(source = "fixture")
+  )
+
+  res1 <- localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = cache_dir)
+  prov1 <- readLines(res1$provenance_path[[1]], warn = FALSE)
+  testthat::expect_true(any(grepl("status: created", prov1)))
+
+  file.remove(res1$path[[1]])
+  res2 <- localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = cache_dir)
+  prov2 <- readLines(res2$provenance_path[[1]], warn = FALSE)
+  testthat::expect_true(any(grepl("status: cache_hit", prov2)))
+  testthat::expect_identical(res1$cache_path[[1]], res2$cache_path[[1]])
+})
+
+testthat::test_that("arcgis vector fetch is gated without network or fixture", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 2,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+
+  layer <- list(
+    id = "arcgis_vec",
+    type = "vector_arcgis",
+    url = "https://example.com/arcgis/service",
+    output_path = tempfile(fileext = ".gpkg"),
+    attribution = list(source = "fixture")
+  )
+
+  old <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) {
+      Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+    } else {
+      Sys.setenv(LOCALMAP_ALLOW_NETWORK = old)
+    }
+  }, add = TRUE)
+  Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+
+  testthat::expect_error(
+    localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = tempfile()),
+    class = "analysis_vector_offline_missing_fixture"
+  )
+})
+
+testthat::test_that("arcgis vector fixtures are clipped in AOI CRS", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 2,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+  cache_dir <- tempfile()
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+
+  layer <- list(
+    id = "arcgis_vec_fixture",
+    type = "vector_arcgis",
+    url = "https://example.com/arcgis/service",
+    output_path = tempfile(fileext = ".gpkg"),
+    offline = TRUE,
+    fixture_path = "inst/extdata/jc_habitats.gpkg",
+    fixture_layer = "habitats",
+    attribution = list(source = "fixture")
+  )
+
+  res <- localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = cache_dir)
+  vec <- sf::st_read(res$path[[1]], quiet = TRUE)
+  testthat::expect_equal(sf::st_crs(vec)$epsg, sf::st_crs(aoi$aoi)$epsg)
+})
+
 testthat::test_that("analysis layer previews render PNGs", {
   aoi_cfg <- list(
     centroid = list(lat = -43.0, lon = 146.944),

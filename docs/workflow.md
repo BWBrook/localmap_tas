@@ -70,6 +70,11 @@ Fix and repeat until coherent.
   - resolve paths via `here::here()`
 - All outputs go to `outputs/` and runtime caches to `data/`.
 
+### Container builds
+- Use `scripts/bootstrap_container.R` for Docker/Apptainer images (renv restore only).
+- The container bootstrap prefers r2u binaries to keep build times reasonable.
+- The container run should mount `data/` from the host when using local datasets (e.g., `data/jc_camera_study/`).
+
 ### Local datasets
 - Real-world datasets belong under `data/` (gitignored).
 - The Judbury camera study example lives at `data/jc_camera_study/`.
@@ -79,6 +84,9 @@ Fix and repeat until coherent.
   - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
 - Offline JC run for CI:
   - `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"species_map\",\"camera_sites_map\",\"camera_sites_panel\"))'`
+- Tasmania canonical example (LIST orthophoto + TASVEG + DEM fixture):
+  - `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 Rscript -e 'targets::tar_make()'`
+  - Offline/CI-safe variant: `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
 
 ## 4) Data acquisition rules
 
@@ -86,6 +94,12 @@ Fix and repeat until coherent.
 - Remote failures must be explicit (warnings/errors) and never silently produce empty maps.
 - Network-dependent tests must be gated (off by default).
 - See `docs/layers_guide.md` for adding WMS/ArcGIS/file layers via the registry.
+
+### Offline/network contract
+- Offline mode is the default for CI and fixture profiles (`demo`, `jc_ci`).
+- Network fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
+- When network is disabled, imagery fetches fall back to placeholders with a warning.
+- ArcGIS vector layers must provide a `fixture_path` when offline; otherwise the run fails with an actionable error.
 
 ## 5) When to ask the human
 

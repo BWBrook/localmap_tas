@@ -604,7 +604,8 @@ build_square_bbox <- function(top_left, side_length_km) {
 }
 
 get_basemap_tasmania <- function(bbox) {
-  australia <- rnaturalearth::ne_countries(scale = 50, country = "australia", returnclass = "sf")
+  australia <- rnaturalearthdata::countries50
+  australia <- australia[australia$admin == "Australia", , drop = FALSE]
   australia <- sf::st_make_valid(australia)
   bbox_sfc <- sf::st_as_sfc(sf::st_bbox(bbox))
   clipped <- sf::st_intersection(sf::st_geometry(australia), bbox_sfc)

@@ -26,10 +26,13 @@ jobs:
       - name: Prepare CI artifacts
         run: |
           mkdir -p ci_artifacts
-          touch ci_artifacts/.keep
+          echo "ci artifacts placeholder" > ci_artifacts/placeholder.txt
 
       - name: Lint
-        run: Rscript -e 'l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) }'
+        run: >-
+          Rscript -e 'if (!requireNamespace("lintr", quietly = TRUE)) install.packages("lintr");
+          l <- lintr::lint_package();
+          if (length(l) > 0) { print(l); quit(status = 1) }'
 
       - name: Unit tests
         run: >-

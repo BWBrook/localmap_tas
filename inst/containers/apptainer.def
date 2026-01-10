@@ -5,12 +5,14 @@ From: rocker/r2u:jammy
     # Install system dependencies for geospatial work
     apt-get update && apt-get install -y --no-install-recommends \
         gdal-bin libgdal-dev libgeos-dev libproj-dev libudunits2-dev \
+        cmake git pandoc libfontconfig1-dev libfreetype6-dev libgit2-dev \
+        libglpk-dev libx11-dev libharfbuzz-dev libfribidi-dev pkg-config \
         && rm -rf /var/lib/apt/lists/*
 
     # Copy project files into image (handled in %files section)
 
     # Bootstrap dependencies (restore if renv.lock exists, otherwise init + snapshot)
-    R -q -e "source('scripts/bootstrap.R')"
+    R -q -e "source('scripts/bootstrap_container.R')"
 
 %files
     . /project
