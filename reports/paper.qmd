@@ -1,19 +1,63 @@
-title: "Project report"
+title: "Localmap JC workflow report"
 format: html
 execute:
   echo: false
 
-# Introduction
+# Overview
 
-This Quarto document is a placeholder for your analysis report.  You can
-embed text, code chunks, and figures.  The pipeline defined in
-`_targets.R` should generate all necessary intermediate data; in this
-document you can read those data via the targets API or by loading
-files under `data/processed/`.
+This report demonstrates the end-to-end JC workflow: AOI + maps, raster/vector
+attribute extraction, and provenance/attribution outputs. Render after running
+the JC pipeline (see `docs/workflow.md`).
 
 ```{r}
-#| label: use-targets
-# Read a target produced by the pipeline (run after tar_make)
+#| label: summary
 summary_tbl <- targets::tar_read(manifest_summary)
 summary_tbl
+```
+
+# Maps
+
+## Overview map
+
+```{r}
+#| label: overview-map
+knitr::include_graphics("outputs/maps/jc_overview_map.png")
+```
+
+## Panel figure
+
+```{r}
+#| label: panel-figure
+knitr::include_graphics("outputs/maps/jc_panel_figure.png")
+```
+
+# Site attributes (preview)
+
+```{r}
+#| label: attributes-preview
+attrs_long <- arrow::read_parquet("outputs/tables/jc_site_attributes_long.parquet")
+attrs_wide <- readr::read_csv(
+  "outputs/tables/jc_site_attributes_wide.csv",
+  show_col_types = FALSE,
+  num_threads = 1
+)
+
+head(attrs_long, 10)
+```
+
+```{r}
+#| label: attributes-wide-preview
+head(attrs_wide, 5)
+```
+
+# Provenance + attribution
+
+```{r}
+#| label: attribution
+cat(readLines("outputs/provenance/attribution.md"), sep = "\n")
+```
+
+```{r}
+#| label: run-manifest-preview
+cat(readLines("outputs/provenance/run_manifest.yml")[1:20], sep = "\n")
 ```

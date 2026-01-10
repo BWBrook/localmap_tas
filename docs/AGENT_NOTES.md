@@ -210,3 +210,10 @@
   - Vector previews now colour by an attribute (prefers `habitat`) with legend and AOI outline.
   - Raster previews overlay AOI and camera sites for quick orientation checks.
   - Added validation to ensure derived layers appear after their source_id.
+
+- 2026-01-10: Line 0.6 site attributes + report outputs.
+  - Implemented raster/vector site attribute extraction with long parquet + wide CSV products and new unit tests.
+  - Generated JC artefacts for WP-019–WP-022, including attribute tables, overview/panel figures, and report HTML.
+  - Sanity checks: long table has 117 rows (13 sites × 9 attributes), NDVI/NBR within expected ranges, habitats show two classes, raster previews align with sites.
+  - Validation: `devtools::document()` ran clean; `devtools::test()` (163 pass), `lintr::lint_package()` clean, `rcmdcheck::rcmdcheck(--no-manual)` OK.
+  - JC pipeline run: `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci targets::tar_make()` completed with expected `sf::st_intersection` warnings.

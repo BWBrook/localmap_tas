@@ -355,6 +355,25 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     validate_analysis_layers(analysis_layers_cfg)
   }
 
+  attributes_cfg <- data_cfg$attributes
+  if (!is.null(attributes_cfg)) {
+    if (!is.list(attributes_cfg)) {
+      rlang::abort(
+        "`data$attributes` must be a list if provided.",
+        class = "cfg_attributes_invalid"
+      )
+    }
+    if (!is.null(attributes_cfg$enabled)) {
+      checkmate::assert_logical(attributes_cfg$enabled, len = 1L, any.missing = FALSE)
+    }
+    if (!is.null(attributes_cfg$output_long)) {
+      checkmate::assert_string(attributes_cfg$output_long, min.chars = 1L)
+    }
+    if (!is.null(attributes_cfg$output_wide)) {
+      checkmate::assert_string(attributes_cfg$output_wide, min.chars = 1L)
+    }
+  }
+
   overview_cfg <- data_cfg$overview_map
   if (!is.null(overview_cfg)) {
     if (!is.list(overview_cfg)) {

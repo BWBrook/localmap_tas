@@ -85,7 +85,8 @@ Expected targets (new branch, names may evolve):
 - `layers` (dynamic branching where appropriate)
 - `analysis_layers`
 - `panel_maps` → `panel_figure`
-- `site_attributes` (optional)
+- `site_attributes_long`
+- `site_attributes_wide`
 - `analysis_provenance`
 - `run_manifest`
 - `attribution_report`

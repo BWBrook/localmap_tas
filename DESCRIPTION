@@ -12,6 +12,8 @@ LazyData: true
 Depends: R (>= 4.5)
 Imports:
     dplyr,
+    tidyr,
+    tidyselect,
     readr,
     purrr,
     tibble,
@@ -31,7 +33,8 @@ Imports:
     png,
     rnaturalearth,
     tidyterra,
-    terra
+    terra,
+    arrow
 Suggests:
     targets,
     tarchetypes,

@@ -14,6 +14,10 @@ default:
     manifest: "metadata/data_manifest.csv"
     species_requests: "metadata/species_requests.csv"
     analysis_layers: []
+    attributes:
+      enabled: true
+      output_long: "outputs/tables/site_attributes_long.parquet"
+      output_wide: "outputs/tables/site_attributes_wide.csv"
     occurrence:
       min_year: 2000
       min_lat: null
@@ -399,6 +403,7 @@ jc:
         path: "inst/extdata/jc_dem.tif"
         output_path: "outputs/analysis/raster/jc_dem.tif"
         categorical: false
+        units: "m"
         attribution:
           source: "JC fixture"
           license: "CC BY 4.0"
@@ -408,6 +413,7 @@ jc:
         path: "inst/extdata/jc_multiband.tif"
         output_path: "outputs/analysis/raster/jc_multiband.tif"
         categorical: false
+        units: "index"
         attribution:
           source: "JC fixture"
           license: "CC BY 4.0"
@@ -428,6 +434,7 @@ jc:
           red: 1
           nir: 2
         output_path: "outputs/analysis/raster/jc_ndvi.tif"
+        units: "index"
         attribution:
           source: "Derived from jc_multiband"
           license: "CC BY 4.0"
@@ -439,10 +446,15 @@ jc:
           nir: 2
           swir2: 3
         output_path: "outputs/analysis/raster/jc_nbr.tif"
+        units: "index"
         attribution:
           source: "Derived from jc_multiband"
           license: "CC BY 4.0"
           credit: "NBR"
+    attributes:
+      enabled: true
+      output_long: "outputs/tables/jc_site_attributes_long.parquet"
+      output_wide: "outputs/tables/jc_site_attributes_wide.csv"
 
 jc_ci:
   inherits: jc

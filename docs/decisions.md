@@ -111,3 +111,8 @@ Format:
 **Decision:** Each canonical run writes a machine-readable run manifest (`outputs/provenance/run_manifest.yml`) and a human-readable attribution report (`outputs/provenance/attribution.md`), alongside a combined layer provenance table.
 **Rationale:** Provides traceable, publication-ready metadata for reproducibility and attribution requirements.
 **Status:** Active.
+
+## 2026-01-10 — Site attributes output format (long parquet + wide CSV)
+**Decision:** Site attribute extraction writes a canonical long table in parquet (via `{arrow}`) and a convenience wide CSV for quick inspection.
+**Rationale:** Parquet keeps the primary dataset compact and analysis-ready, while a wide CSV offers a familiar format for spreadsheet and reporting workflows.
+**Status:** Active.

@@ -10,6 +10,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Derived raster products (slope from DEM, NDVI/NBR from multiband rasters) with JC fixtures in `inst/extdata/`.
 - Run-level provenance outputs (`analysis_layers.csv`, `attribution.md`, `run_manifest.yml`) for publication-ready attribution.
 - Quick-look PNG previews alongside each analysis vector/raster output for rapid QA.
+- Site attribute extraction outputs (long parquet + wide CSV) from raster and vector analysis layers.
 - AOI builder (`build_aoi_from_config`) with centroid/size/rotation and AOI debug plots (`aoi_debug_plot` target).
 - AOI auto mode to derive extents from site bounds with a buffered heuristic (median nearest-neighbour distance).
 - `jc` camera-sites source to derive effort (`rd`) and observations (`obs`) from Judbury camera study inputs.

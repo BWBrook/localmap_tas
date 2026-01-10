@@ -243,6 +243,7 @@ Raster file fields (`type: raster_file`):
 - `path` (string, required): input raster path (GeoTIFF).
 - `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
 - `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
+- `units` (string, optional): units for extracted values (e.g., `m`).
 
 Derived slope (`type: derived_slope`):
 - `source_id` (string, required): raster layer ID (DEM).
@@ -260,6 +261,14 @@ Resampling policy:
 
 Ordering note:
 - Derived layers must appear *after* their `source_id` in `analysis_layers`.
+
+### `data.attributes`
+
+Controls site attribute extraction outputs.
+
+- `enabled` (logical, default `true`): enable extraction and table outputs.
+- `output_long` (string, optional): path for the canonical long table (parquet).
+- `output_wide` (string, optional): path for the convenience wide CSV.
 
 ### `data.overview_map`
 

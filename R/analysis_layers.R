@@ -13,6 +13,7 @@ analysis_layer_types <- c(
   "derived_ndvi",
   "derived_nbr"
 )
+analysis_cache_version <- "v2"
 
 analysis_default <- function(value, fallback) {
   if (is.null(value)) fallback else value
@@ -181,6 +182,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       provenance_path = character(),
       cache_path = character(),
       source_id = character(),
+      units = character(),
       attribution_source = character(),
       attribution_license = character(),
       attribution_credit = character()
@@ -226,6 +228,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       type = type,
       source = source_descriptor,
       params = params,
+      version = analysis_cache_version,
       bbox = as.numeric(sf::st_bbox(sf::st_transform(aoi_geom, 4326)))
     ))
     ext <- if (grepl("\\.gpkg$", output_path, ignore.case = TRUE)) ".gpkg" else ".tif"
@@ -261,11 +264,25 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         vector <- read_vector_layer(layer$path, layer$layer)
         clipped <- clip_vector_to_aoi(vector, aoi_geom, analysis_crs)
         dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
-        sf::st_write(clipped, output_path, layer = layer$layer %||% layer$id, quiet = TRUE)
+        sf::st_write(
+          clipped,
+          output_path,
+          layer = layer$layer %||% layer$id,
+          quiet = TRUE,
+          append = FALSE,
+          delete_layer = TRUE
+        )
       } else if (identical(type, "vector_arcgis")) {
         clipped <- fetch_arcgis_vector(layer, aoi_geom)
         dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
-        sf::st_write(clipped, output_path, layer = layer$layer %||% layer$id, quiet = TRUE)
+        sf::st_write(
+          clipped,
+          output_path,
+          layer = layer$layer %||% layer$id,
+          quiet = TRUE,
+          append = FALSE,
+          delete_layer = TRUE
+        )
       } else if (identical(type, "raster_file")) {
         raster <- read_raster_layer(layer$path)
         clipped <- clip_raster_to_aoi(
@@ -288,6 +305,9 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         }
         units <- analysis_default(layer$units, "degrees")
         slope <- terra::terrain(source, v = "slope", unit = units)
+        if (terra::nlyr(slope) == 1L) {
+          names(slope) <- "slope"
+        }
         dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
         terra::writeRaster(slope, output_path, overwrite = TRUE)
         raster_store[[layer$id]] <- slope
@@ -310,10 +330,12 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
           red <- as.integer(bands$red)
           nir <- as.integer(bands$nir)
           idx <- compute_index(source, nir, red)
+          names(idx) <- "ndvi"
         } else {
           nir <- as.integer(bands$nir)
           swir2 <- as.integer(bands$swir2)
           idx <- compute_index(source, nir, swir2)
+          names(idx) <- "nbr"
         }
         dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
         terra::writeRaster(idx, output_path, overwrite = TRUE)
@@ -355,6 +377,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       provenance_path = provenance_path,
       cache_path = cache_path,
       source_id = source_id,
+      units = as.character(layer$units %||% NA_character_),
       attribution_source = as.character(layer$attribution$source),
       attribution_license = as.character(layer$attribution$license %||% ""),
       attribution_credit = as.character(layer$attribution$credit %||% "")

@@ -115,10 +115,10 @@ Every WP must create or update:
 - [x] **WP-018:** Provenance + attribution outputs v1 (machine + human-readable) (completed 2026-01-09; evidence: docs/log/WP-018_2026-01-09_provenance-attribution.md; canonical run: outputs/canonical_runs/WP-018_2026-01-09_provenance-attribution)
 
 ### Line 0.6.x — Site attribute extraction (tables for analysis and reporting)
-- [ ] **WP-019:** Raster point extraction v1 → canonical long table + tests  
-- [ ] **WP-020:** Vector point-in-polygon extraction v1 → canonical long table + tests  
-- [ ] **WP-021:** Site attributes “products” v1 (long parquet + convenience wide CSV)  
-- [ ] **WP-022:** End-to-end Quarto vignette/report (figures + tables + interpretation)
+- [x] **WP-019:** Raster point extraction v1 → canonical long table + tests (completed 2026-01-10; evidence: docs/log/WP-019_2026-01-10_raster-extraction.md; canonical run: outputs/canonical_runs/WP-019_2026-01-10_raster-extraction)  
+- [x] **WP-020:** Vector point-in-polygon extraction v1 → canonical long table + tests (completed 2026-01-10; evidence: docs/log/WP-020_2026-01-10_vector-extraction.md; canonical run: outputs/canonical_runs/WP-020_2026-01-10_vector-extraction)  
+- [x] **WP-021:** Site attributes “products” v1 (long parquet + convenience wide CSV) (completed 2026-01-10; evidence: docs/log/WP-021_2026-01-10_site-attributes.md; canonical run: outputs/canonical_runs/WP-021_2026-01-10_site-attributes)  
+- [x] **WP-022:** End-to-end Quarto vignette/report (figures + tables + interpretation) (completed 2026-01-10; evidence: docs/log/WP-022_2026-01-10_report.md; canonical run: outputs/canonical_runs/WP-022_2026-01-10_report)  
 
 ### Line 0.7.x — Hardening, portability, and realism
 - [ ] **WP-023:** Offline-first contract + network-gated tests (explicit, documented)  

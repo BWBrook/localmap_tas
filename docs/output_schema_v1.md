@@ -26,6 +26,8 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `camera_sites_panel` → `outputs/maps/jc_camera_sites_panel.png`
 - `camera_sites_tile` → `outputs/tiles/jc_camera_sites_tile.png`
 - `coverage_summary` → `outputs/tables/jc_coverage_summary.csv`
+- `site_attributes_long` → `outputs/tables/jc_site_attributes_long.parquet`
+- `site_attributes_wide` → `outputs/tables/jc_site_attributes_wide.csv`
 - `wms_layer` → `outputs/layers/jc_tasveg_wms.png`
 - `wms_layer_provenance` → `outputs/layers/jc_tasveg_wms.png.yml`
 - `arcgis_layer` → `outputs/layers/jc_topography_arcgis.png`

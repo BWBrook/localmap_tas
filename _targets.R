@@ -208,6 +208,45 @@ list(
     description = "Analysis layer preview PNGs."
   ),
   targets::tar_target(
+    site_attributes_long,
+    {
+      attributes_cfg <- cfg$data$attributes
+      enabled <- is.null(attributes_cfg$enabled) || isTRUE(attributes_cfg$enabled)
+      if (isTRUE(enabled)) {
+        build_site_attributes_long(sites = camera_sites_data, analysis_layers = analysis_layers)
+      } else {
+        empty_site_attributes()
+      }
+    },
+    description = "Canonical long table of site attributes (raster + vector)."
+  ),
+  targets::tar_target(
+    site_attributes_long_file,
+    {
+      attributes_cfg <- cfg$data$attributes
+      output_path <- NULL
+      if (!is.null(attributes_cfg$output_long)) {
+        output_path <- attributes_cfg$output_long
+      }
+      write_site_attributes_long(site_attributes_long, output_path = output_path)
+    },
+    format = "file",
+    description = "Parquet output for site attributes (long)."
+  ),
+  targets::tar_target(
+    site_attributes_wide_file,
+    {
+      attributes_cfg <- cfg$data$attributes
+      output_path <- NULL
+      if (!is.null(attributes_cfg$output_wide)) {
+        output_path <- attributes_cfg$output_wide
+      }
+      write_site_attributes_wide(site_attributes_long, output_path = output_path)
+    },
+    format = "file",
+    description = "Convenience CSV output for site attributes (wide)."
+  ),
+  targets::tar_target(
     analysis_provenance,
     build_layer_provenance(
       layers = layer_outputs,
@@ -372,6 +411,8 @@ list(
         raster_slope_preview = analysis_layer_preview_paths[["jc_slope"]],
         raster_ndvi_preview = analysis_layer_preview_paths[["jc_ndvi"]],
         raster_nbr_preview = analysis_layer_preview_paths[["jc_nbr"]],
+        site_attributes_long = site_attributes_long_file,
+        site_attributes_wide = site_attributes_wide_file,
         analysis_provenance = analysis_provenance,
         attribution_report = attribution_report,
         run_manifest = run_manifest

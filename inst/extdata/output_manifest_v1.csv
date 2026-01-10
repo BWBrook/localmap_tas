@@ -5,6 +5,8 @@ camera_sites_panel,figure,Stacked panel of JC maps,outputs/maps/jc_camera_sites_
 camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/jc_camera_sites_tile.png,png,EPSG:3857,jc,fetch_camera_wms_tile
 aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
 coverage_summary,table,Coverage zone summary table,outputs/tables/jc_coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/tables/jc_site_attributes_long.parquet,parquet,NA,jc,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/tables/jc_site_attributes_wide.csv,csv,NA,jc,write_site_attributes_wide
 wms_layer,basemap,WMS layer imagery,outputs/layers/jc_tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
 wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/jc_tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
 arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/jc_topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
