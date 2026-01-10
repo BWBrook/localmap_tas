@@ -14,16 +14,22 @@ panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/jc_panel_figure.png,
 panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/jc_panel_figure.pdf,pdf,EPSG:3857,jc,assemble_panel_figure
 vector_habitats,vector,JC habitat polygons (clipped),outputs/analysis/vector/jc_habitats.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
 vector_habitats_provenance,provenance,JC habitat provenance,outputs/analysis/vector/jc_habitats.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_habitats_preview,figure,JC habitat preview PNG,outputs/analysis/vector/jc_habitats.png,png,EPSG:28355,jc,render_analysis_layer_previews
 raster_dem,raster,JC DEM (clipped),outputs/analysis/raster/jc_dem.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_dem_provenance,provenance,JC DEM provenance,outputs/analysis/raster/jc_dem.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_dem_preview,figure,JC DEM preview PNG,outputs/analysis/raster/jc_dem.png,png,EPSG:28355,jc,render_analysis_layer_previews
 raster_multiband,raster,JC multiband raster (clipped),outputs/analysis/raster/jc_multiband.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_multiband_provenance,provenance,JC multiband provenance,outputs/analysis/raster/jc_multiband.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_multiband_preview,figure,JC multiband preview PNG,outputs/analysis/raster/jc_multiband.png,png,EPSG:28355,jc,render_analysis_layer_previews
 raster_slope,raster,JC slope derived raster,outputs/analysis/raster/jc_slope.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_slope_provenance,provenance,JC slope provenance,outputs/analysis/raster/jc_slope.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_slope_preview,figure,JC slope preview PNG,outputs/analysis/raster/jc_slope.png,png,EPSG:28355,jc,render_analysis_layer_previews
 raster_ndvi,raster,JC NDVI derived raster,outputs/analysis/raster/jc_ndvi.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_ndvi_provenance,provenance,JC NDVI provenance,outputs/analysis/raster/jc_ndvi.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_ndvi_preview,figure,JC NDVI preview PNG,outputs/analysis/raster/jc_ndvi.png,png,EPSG:28355,jc,render_analysis_layer_previews
 raster_nbr,raster,JC NBR derived raster,outputs/analysis/raster/jc_nbr.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_nbr_provenance,provenance,JC NBR provenance,outputs/analysis/raster/jc_nbr.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_nbr_preview,figure,JC NBR preview PNG,outputs/analysis/raster/jc_nbr.png,png,EPSG:28355,jc,render_analysis_layer_previews
 analysis_provenance,provenance,Combined layer provenance table,outputs/provenance/analysis_layers.csv,csv,NA,jc,build_layer_provenance
 attribution_report,provenance,Layer attribution report,outputs/provenance/attribution.md,md,NA,jc,write_attribution_report
 run_manifest,provenance,Run manifest metadata,outputs/provenance/run_manifest.yml,yml,NA,jc,write_run_manifest

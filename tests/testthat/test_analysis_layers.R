@@ -155,3 +155,47 @@ testthat::test_that("categorical rasters use nearest-neighbor resampling", {
   testthat::expect_true(all(vals %in% c(1, 2)))
   testthat::expect_true(all(abs(vals - round(vals)) < 1e-6))
 })
+
+testthat::test_that("analysis layer previews render PNGs", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 5,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+
+  vec_path <- tempfile(fileext = ".gpkg")
+  rast_path <- tempfile(fileext = ".tif")
+
+  vec <- sf::st_sf(
+    id = c("a", "b"),
+    geometry = sf::st_sfc(
+      sf::st_point(c(146.94, -43.0)),
+      sf::st_point(c(146.945, -43.002)),
+      crs = 4326
+    )
+  )
+  sf::st_write(vec, vec_path, quiet = TRUE)
+
+  rast <- terra::rast(
+    nrows = 5,
+    ncols = 5,
+    xmin = 146.94,
+    xmax = 146.95,
+    ymin = -43.01,
+    ymax = -42.99,
+    crs = "EPSG:4326"
+  )
+  rast <- terra::setValues(rast, seq_len(terra::ncell(rast)))
+  terra::writeRaster(rast, rast_path, overwrite = TRUE)
+
+  layers <- tibble::tibble(
+    id = c("vec", "rast"),
+    type = c("vector_file", "raster_file"),
+    path = c(vec_path, rast_path)
+  )
+
+  previews <- localmap:::render_analysis_layer_previews(layers, aoi = aoi)
+  testthat::expect_true(all(file.exists(previews$path)))
+})

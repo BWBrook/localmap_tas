@@ -202,3 +202,7 @@
   - Generated JC analysis fixtures (habitat polygons, DEM, multiband raster) and canonical runs for WP-014–WP-018.
   - Artefact review: vector bbox matches AOI; DEM extent aligns; slope range ~4.60–4.61°; NDVI range ~-0.01–0.20; NBR range ~0.03–0.48; attribution report lists imagery + analysis layers.
   - Note: `sf::st_intersection` warning about attribute variables is expected for polygon clipping.
+
+- 2026-01-10: Analysis layer preview PNGs.
+  - Added quick-look PNG previews for analysis vectors/rasters (auto-generated beside outputs).
+  - Updated output schema/manifest and added tests to ensure preview files are created.

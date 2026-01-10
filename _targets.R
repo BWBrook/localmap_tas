@@ -188,6 +188,22 @@ list(
     description = "Analysis layer provenance sidecars."
   ),
   targets::tar_target(
+    analysis_layer_previews,
+    render_analysis_layer_previews(analysis_layers, aoi = aoi),
+    description = "Quick-look PNG previews for analysis layers."
+  ),
+  targets::tar_target(
+    analysis_layer_preview_paths,
+    stats::setNames(analysis_layer_previews$path, analysis_layer_previews$id),
+    description = "Named vector of analysis layer preview PNG paths."
+  ),
+  targets::tar_target(
+    analysis_layer_preview_files,
+    analysis_layer_previews$path,
+    format = "file",
+    description = "Analysis layer preview PNGs."
+  ),
+  targets::tar_target(
     analysis_provenance,
     build_layer_provenance(
       layers = layer_outputs,
@@ -346,6 +362,12 @@ list(
         raster_ndvi_provenance = analysis_layer_provenance_paths[["jc_ndvi"]],
         raster_nbr = analysis_layer_paths[["jc_nbr"]],
         raster_nbr_provenance = analysis_layer_provenance_paths[["jc_nbr"]],
+        vector_habitats_preview = analysis_layer_preview_paths[["jc_habitats"]],
+        raster_dem_preview = analysis_layer_preview_paths[["jc_dem"]],
+        raster_multiband_preview = analysis_layer_preview_paths[["jc_multiband"]],
+        raster_slope_preview = analysis_layer_preview_paths[["jc_slope"]],
+        raster_ndvi_preview = analysis_layer_preview_paths[["jc_ndvi"]],
+        raster_nbr_preview = analysis_layer_preview_paths[["jc_nbr"]],
         analysis_provenance = analysis_provenance,
         attribution_report = attribution_report,
         run_manifest = run_manifest

@@ -1,0 +1,129 @@
+# Render quick-look PNG previews for analysis layers.
+
+render_analysis_layer_previews <- function(analysis_layers,
+                                           aoi = NULL,
+                                           preview_cfg = NULL) {
+  if (is.null(analysis_layers) || !is.data.frame(analysis_layers) || nrow(analysis_layers) == 0L) {
+    return(tibble::tibble(id = character(), path = character(), type = character()))
+  }
+
+  defaults <- list(width = 900, height = 900, dpi = 120, overwrite = FALSE)
+  preview_cfg <- utils::modifyList(defaults, preview_cfg %||% list())
+
+  aoi_geom <- NULL
+  if (!is.null(aoi)) {
+    if (is.list(aoi) && !is.null(aoi$aoi)) {
+      aoi_geom <- aoi$aoi
+    } else if (inherits(aoi, c("sf", "sfc"))) {
+      aoi_geom <- aoi
+    }
+  }
+
+  results <- vector("list", length = nrow(analysis_layers))
+  for (idx in seq_len(nrow(analysis_layers))) {
+    layer_id <- as.character(analysis_layers$id[[idx]])
+    layer_type <- as.character(analysis_layers$type[[idx]])
+    source_path <- as.character(analysis_layers$path[[idx]])
+    if (!file.exists(source_path)) {
+      rlang::warn(sprintf("Analysis layer preview skipped; file missing: %s", source_path))
+      next
+    }
+    preview_path <- analysis_preview_path(source_path)
+    if (!isTRUE(preview_cfg$overwrite) &&
+          file.exists(preview_path) &&
+          file.mtime(preview_path) >= file.mtime(source_path)) {
+      results[[idx]] <- tibble::tibble(id = layer_id, path = preview_path, type = layer_type)
+      next
+    }
+    if (analysis_layer_is_vector(layer_type, source_path)) {
+      render_vector_preview(
+        path = source_path,
+        output_path = preview_path,
+        aoi_geom = aoi_geom,
+        width = preview_cfg$width,
+        height = preview_cfg$height,
+        dpi = preview_cfg$dpi
+      )
+    } else {
+      render_raster_preview(
+        path = source_path,
+        output_path = preview_path,
+        width = preview_cfg$width,
+        height = preview_cfg$height,
+        dpi = preview_cfg$dpi
+      )
+    }
+    results[[idx]] <- tibble::tibble(id = layer_id, path = preview_path, type = layer_type)
+  }
+
+  dplyr::bind_rows(results)
+}
+
+analysis_preview_path <- function(path) {
+  if (is.null(path) || !nzchar(path)) {
+    return(NA_character_)
+  }
+  if (grepl("\\.[A-Za-z0-9]+$", path)) {
+    return(sub("\\.[A-Za-z0-9]+$", ".png", path))
+  }
+  paste0(path, ".png")
+}
+
+analysis_layer_is_vector <- function(layer_type, path) {
+  if (!is.null(layer_type) && layer_type %in% c("vector_file", "vector_arcgis")) {
+    return(TRUE)
+  }
+  grepl("\\.(gpkg|geojson|shp)$", path, ignore.case = TRUE)
+}
+
+render_vector_preview <- function(path, output_path, aoi_geom, width, height, dpi) {
+  vec <- sf::st_read(path, quiet = TRUE)
+  aoi <- NULL
+  if (!is.null(aoi_geom)) {
+    aoi <- try(sf::st_transform(aoi_geom, sf::st_crs(vec)), silent = TRUE)
+    if (inherits(aoi, "try-error")) {
+      aoi <- NULL
+    }
+  }
+  dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+  grDevices::png(filename = output_path, width = width, height = height, res = dpi)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  graphics::par(mar = c(2, 2, 2, 2))
+  graphics::plot(sf::st_geometry(vec), col = "#74a9cf", border = "#2b8cbe",
+                 main = tools::file_path_sans_ext(basename(path)))
+  if (!is.null(aoi)) {
+    graphics::plot(sf::st_geometry(aoi), add = TRUE, border = "#d95f0e", lwd = 2)
+  }
+  invisible(output_path)
+}
+
+render_raster_preview <- function(path, output_path, width, height, dpi) {
+  rast <- terra::rast(path)
+  dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+  grDevices::png(filename = output_path, width = width, height = height, res = dpi)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  graphics::par(mar = c(2, 2, 2, 2))
+  if (terra::nlyr(rast) >= 3) {
+    terra::plotRGB(
+      rast,
+      r = 1,
+      g = 2,
+      b = 3,
+      stretch = "lin",
+      main = tools::file_path_sans_ext(basename(path)),
+      axes = FALSE
+    )
+  } else {
+    terra::plot(
+      rast,
+      main = tools::file_path_sans_ext(basename(path)),
+      axes = FALSE
+    )
+  }
+  graphics::box()
+  invisible(output_path)
+}
+
+`%||%` <- function(x, y) {
+  if (is.null(x)) y else x
+}
