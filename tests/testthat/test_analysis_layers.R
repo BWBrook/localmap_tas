@@ -219,6 +219,71 @@ testthat::test_that("arcgis vector fetch is gated without network or fixture", {
   )
 })
 
+testthat::test_that("arcgis raster fetch falls back to fixture when offline", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 2,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+
+  layer <- list(
+    id = "arcgis_raster",
+    type = "raster_arcgis",
+    url = "https://example.com/arcgis/export",
+    output_path = tempfile(fileext = ".tif"),
+    fixture_path = "inst/extdata/jc_dem.tif",
+    attribution = list(source = "fixture")
+  )
+
+  old <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) {
+      Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+    } else {
+      Sys.setenv(LOCALMAP_ALLOW_NETWORK = old)
+    }
+  }, add = TRUE)
+  Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+
+  res <- localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = tempfile())
+  testthat::expect_true(file.exists(res$path[res$id == "arcgis_raster"]))
+})
+
+testthat::test_that("arcgis raster fetch errors when offline without fixture", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 2,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+
+  layer <- list(
+    id = "arcgis_raster",
+    type = "raster_arcgis",
+    url = "https://example.com/arcgis/export",
+    output_path = tempfile(fileext = ".tif"),
+    attribution = list(source = "fixture")
+  )
+
+  old <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) {
+      Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+    } else {
+      Sys.setenv(LOCALMAP_ALLOW_NETWORK = old)
+    }
+  }, add = TRUE)
+  Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+
+  testthat::expect_error(
+    localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = tempfile()),
+    class = "analysis_raster_offline_missing_fixture"
+  )
+})
+
 testthat::test_that("arcgis vector fixtures are clipped in AOI CRS", {
   aoi_cfg <- list(
     centroid = list(lat = -43.0, lon = 146.944),

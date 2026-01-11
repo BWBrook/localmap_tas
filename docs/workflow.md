@@ -84,7 +84,7 @@ Fix and repeat until coherent.
   - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
 - Offline JC run for CI:
   - `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"species_map\",\"camera_sites_map\",\"camera_sites_panel\"))'`
-- Tasmania canonical example (LIST orthophoto + TASVEG + DEM fixture):
+- Tasmania canonical example (LIST orthophoto + TASVEG + LIST DEM export with fixture fallback; optional roads/localities overlays):
   - `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 Rscript -e 'targets::tar_make()'`
   - Offline/CI-safe variant: `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
 

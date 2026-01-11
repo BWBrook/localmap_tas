@@ -583,6 +583,40 @@ tas_canonical:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups"
+      - id: "roads_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer"
+        layers:
+          - "State_Growth_Roads26192"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas_roads_wms.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "State Growth Roads"
+      - id: "localities_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/CadastreAndAdministrative/MapServer/WMSServer"
+        layers:
+          - "Localities"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas_localities_wms.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Localities"
     overview_map:
       output_path: "outputs/maps/tas_overview_map.png"
       width: 7
@@ -592,6 +626,10 @@ tas_canonical:
       overlays:
         - id: "tasveg_wms"
           opacity: 0.35
+        - id: "roads_wms"
+          opacity: 0.6
+        - id: "localities_wms"
+          opacity: 0.75
       show_labels: false
       point_colour: "#2171b5"
       point_size: 2
@@ -635,15 +673,25 @@ tas_canonical:
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups (vector)"
       - id: "tas_dem"
-        type: "raster_file"
-        path: "inst/extdata/jc_dem.tif"
+        type: "raster_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Raster/RasterMisc/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 2048
+        height: 2048
+        dpi: 96
+        layers:
+          - "73"
+        layers_mode: "show"
         output_path: "outputs/analysis/raster/tas_dem.tif"
         categorical: false
         units: "m"
+        offline: false
+        fixture_path: "inst/extdata/jc_dem.tif"
         attribution:
-          source: "JC fixture"
+          source: "The LIST"
           license: "CC BY 4.0"
-          credit: "Synthetic DEM (fixture)"
+          credit: "Digital Terrain Model 10m (MapServer export)"
       - id: "tas_slope"
         type: "derived_slope"
         source_id: "tas_dem"
@@ -696,6 +744,40 @@ tas_canonical_ci:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups"
+      - id: "roads_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer"
+        layers:
+          - "State_Growth_Roads26192"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas_roads_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "State Growth Roads"
+      - id: "localities_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/CadastreAndAdministrative/MapServer/WMSServer"
+        layers:
+          - "Localities"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas_localities_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Localities"
     analysis_layers:
       - id: "tasveg_vector"
         type: "vector_arcgis"
@@ -710,15 +792,25 @@ tas_canonical_ci:
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups (vector)"
       - id: "tas_dem"
-        type: "raster_file"
-        path: "inst/extdata/jc_dem.tif"
+        type: "raster_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Raster/RasterMisc/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 2048
+        height: 2048
+        dpi: 96
+        layers:
+          - "73"
+        layers_mode: "show"
         output_path: "outputs/analysis/raster/tas_dem.tif"
         categorical: false
         units: "m"
+        offline: true
+        fixture_path: "inst/extdata/jc_dem.tif"
         attribution:
           source: "JC fixture"
           license: "CC BY 4.0"
-          credit: "Synthetic DEM (fixture)"
+          credit: "Synthetic DEM (offline fixture)"
       - id: "tas_slope"
         type: "derived_slope"
         source_id: "tas_dem"

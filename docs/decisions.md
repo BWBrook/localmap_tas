@@ -130,4 +130,9 @@ Format:
 ## 2026-01-10 — Tasmania canonical layer set (Orthophoto + TASVEG + DEM)
 **Decision:** The canonical Tasmania example uses The LIST Orthophoto ArcGIS export, TASVEG 4.0 Groups (WMS for imagery + ArcGIS layer 84 for vectors), and a DEM fixture (with derived slope) for deterministic analysis layers.
 **Rationale:** Provides a realistic, Tasmania-focused layer stack while keeping the example reproducible and offline-safe with fixtures where needed.
+**Status:** Superseded by the LIST DEM export decision below.
+
+## 2026-01-10 — LIST DEM export with fixture fallback for canonical run
+**Decision:** Use The LIST RasterMisc MapServer export (layer 73, DTM 10m) as the canonical DEM source when network access is enabled, with the JC DEM fixture as the offline fallback.
+**Rationale:** Aligns the canonical example with a real LIST DEM service while preserving offline reproducibility; the export is a rendered raster, so we coerce it to a single-band surface for demo purposes and retain the fixture for deterministic analysis.
 **Status:** Active.

@@ -229,3 +229,11 @@
 - Ran `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 targets::tar_make()` and captured outputs in `outputs/canonical_runs/WP-026_2026-01-10_tas-canonical/`.
 - Artefact review: orthophoto aligns with AOI + sites; TASVEG vector preview shows multiple vegetation groups; DEM/slope previews align with sites and show coherent gradients.
 - Panel figure assembled all four maps with expected labels and no blank panels.
+- Refreshed canonical DEM to LIST DTM export with overlays.
+  - Added ArcGIS raster analysis layer support and switched `tas_canonical` DEM to LIST RasterMisc MapServer (layer 73) with JC fixture fallback.
+  - Added roads/localities WMS overlays to the Tasmania canonical overview map.
+  - Regenerated canonical artefacts (overview map, DEM/slope rasters + previews, overlay layers, provenance) and refreshed WP-026 canonical run folder.
+  - Sanity: orthophoto + overlays align with AOI; DEM gradient looks plausible; slope shows expected terrain pattern; AOI/illustrative points overlay correctly.
+  - Validation: `devtools::test()` OK (172 pass, expected warnings), `lintr::lint_package()` clean, `targets::tar_make()` for `tas_canonical` ran to completion.
+  - `rcmdcheck::rcmdcheck(--no-manual --as-cran)` reported qpdf warning + NOTEs about top-level files (expected for dev repo); no errors.
+  - CI fix: added `lintr`, `rex`, `xmlparsedata`, and `lazyeval` to `renv.lock` and removed in-step installs; ensured `ci_artifacts` placeholder exists before upload.

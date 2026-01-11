@@ -22,7 +22,7 @@ build_site_attributes_long <- function(sites, analysis_layers) {
     return(empty_site_attributes())
   }
 
-  raster_types <- c("raster_file", "derived_slope", "derived_ndvi", "derived_nbr")
+  raster_types <- c("raster_file", "raster_arcgis", "derived_slope", "derived_ndvi", "derived_nbr")
   vector_types <- c("vector_file", "vector_arcgis")
 
   raster_layers <- analysis_layers[analysis_layers$type %in% raster_types, , drop = FALSE]

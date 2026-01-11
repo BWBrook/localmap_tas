@@ -9,6 +9,10 @@ site_attributes_long,table,Site attributes long table,outputs/tables/tas_site_at
 site_attributes_wide,table,Site attributes wide table,outputs/tables/tas_site_attributes_wide.csv,csv,NA,tas_canonical,write_site_attributes_wide
 wms_layer,basemap,TASVEG 4.0 Groups WMS layer,outputs/layers/tas_tasveg_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
 wms_layer_provenance,provenance,TASVEG 4.0 Groups WMS provenance,outputs/layers/tas_tasveg_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
+roads_wms_layer,basemap,State Growth Roads WMS layer,outputs/layers/tas_roads_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
+roads_wms_layer_provenance,provenance,State Growth Roads WMS provenance,outputs/layers/tas_roads_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
+localities_wms_layer,basemap,Localities WMS layer,outputs/layers/tas_localities_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
+localities_wms_layer_provenance,provenance,Localities WMS provenance,outputs/layers/tas_localities_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
 arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/layers/tas_orthophoto_arcgis.png,png,EPSG:3857,tas_canonical,fetch_arcgis_imagery
 arcgis_layer_provenance,provenance,Orthophoto ArcGIS export provenance,outputs/layers/tas_orthophoto_arcgis.png.yml,yml,EPSG:3857,tas_canonical,fetch_arcgis_imagery
 overview_map,map,Overview map panel,outputs/maps/tas_overview_map.png,png,EPSG:3857,tas_canonical,render_overview_map
@@ -17,8 +21,8 @@ panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/tas_panel_figure.pdf
 vector_tasveg,vector,TASVEG 4.0 Groups polygons (clipped),outputs/analysis/vector/tas_tasveg.gpkg,gpkg,EPSG:28355,tas_canonical,fetch_analysis_layers
 vector_tasveg_provenance,provenance,TASVEG vector provenance,outputs/analysis/vector/tas_tasveg.gpkg.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers
 vector_tasveg_preview,figure,TASVEG preview PNG,outputs/analysis/vector/tas_tasveg.png,png,EPSG:28355,tas_canonical,render_analysis_layer_previews
-raster_dem,raster,TAS DEM (clipped),outputs/analysis/raster/tas_dem.tif,tif,EPSG:28355,tas_canonical,fetch_analysis_layers
-raster_dem_provenance,provenance,TAS DEM provenance,outputs/analysis/raster/tas_dem.tif.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers
+raster_dem,raster,TAS DEM (LIST DTM 10m export; clipped),outputs/analysis/raster/tas_dem.tif,tif,EPSG:28355,tas_canonical,fetch_analysis_layers
+raster_dem_provenance,provenance,TAS DEM provenance (LIST DTM 10m export),outputs/analysis/raster/tas_dem.tif.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers
 raster_dem_preview,figure,TAS DEM preview PNG,outputs/analysis/raster/tas_dem.png,png,EPSG:28355,tas_canonical,render_analysis_layer_previews
 raster_slope,raster,TAS slope derived raster,outputs/analysis/raster/tas_slope.tif,tif,EPSG:28355,tas_canonical,fetch_analysis_layers
 raster_slope_provenance,provenance,TAS slope provenance,outputs/analysis/raster/tas_slope.tif.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers

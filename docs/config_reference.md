@@ -224,7 +224,7 @@ Analysis layers describe AOI-clipped vector/raster inputs and derived rasters.
 Common fields:
 - `id` (string, required): unique layer ID.
 - `type` (string, required): one of `vector_file`, `vector_arcgis`, `raster_file`,
-  `derived_slope`, `derived_ndvi`, `derived_nbr`.
+  `raster_arcgis`, `derived_slope`, `derived_ndvi`, `derived_nbr`.
 - `output_path` (string, required): output GeoPackage/GeoTIFF path.
 - `attribution` (list, required): at least `source`, plus optional `license`, `credit`.
 
@@ -243,6 +243,21 @@ Vector ArcGIS fields (`type: vector_arcgis`):
 
 Raster file fields (`type: raster_file`):
 - `path` (string, required): input raster path (GeoTIFF).
+- `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
+- `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
+- `units` (string, optional): units for extracted values (e.g., `m`).
+
+Raster ArcGIS fields (`type: raster_arcgis`):
+- `url` (string, required): ArcGIS REST export URL (MapServer/export).
+- `crs` (string, optional): export CRS (default `EPSG:3857`).
+- `format` (string, optional): image format (default `png`).
+- `width`/`height` (integer, optional): export pixel dimensions (default 2048).
+- `dpi` (integer, optional): export DPI (default 96).
+- `layers` (list, optional): layer IDs/names to show.
+- `layers_mode` (string, optional): `show`/`hide`/`include`/`exclude` (default `show`).
+- `band` (integer, optional): select a single band from multiband imagery.
+- `offline` (logical, optional): skip network fetch.
+- `fixture_path` (string, optional): local raster fixture used when offline or fetch fails.
 - `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
 - `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
 - `units` (string, optional): units for extracted values (e.g., `m`).
@@ -266,7 +281,7 @@ Ordering note:
 
 Network access:
 - Remote imagery/vector fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
-- When network is disabled, imagery uses placeholders; ArcGIS vectors require a `fixture_path`.
+- When network is disabled, imagery uses placeholders; ArcGIS vectors/rasters require a `fixture_path`.
 
 Cache invalidation:
 - Delete `data/cache/` to force a refetch, or set a new `cache_dir` in the layer config.

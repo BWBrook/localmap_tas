@@ -7,6 +7,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 ## [Unreleased]
 ### Added
 - Analysis-layer pipeline for AOI-clipped vector/raster data with cached GeoPackage/GeoTIFF outputs and provenance sidecars.
+- ArcGIS raster analysis layers (`raster_arcgis`) with MapServer export support and fixture fallback when offline.
 - Derived raster products (slope from DEM, NDVI/NBR from multiband rasters) with JC fixtures in `inst/extdata/`.
 - Run-level provenance outputs (`analysis_layers.csv`, `attribution.md`, `run_manifest.yml`) for publication-ready attribution.
 - Quick-look PNG previews alongside each analysis vector/raster output for rapid QA.
@@ -65,7 +66,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Config schema bumped to v2 with AOI as the authoritative extent definition; v1 configs are migrated.
 - Species mapping now accepts AOI input and only falls back to bounding-box config when needed.
 - JC profile now uses AOI auto mode for a camera-scale extent.
-- Added `tas_canonical`/`tas_canonical_ci` profiles (LIST orthophoto + TASVEG + DEM fixture) plus a dedicated output manifest for validating canonical outputs.
+- Tasmania canonical profile now uses LIST DTM (MapServer export) for DEM with fixture fallback and adds roads/localities overlays to overview maps.
 - Rename project metadata, Quarto site, and pkgdown home content from `rcompendium`
   to `localmap`.
 - Update vignette examples and namespace-qualified calls to use `localmap::`.

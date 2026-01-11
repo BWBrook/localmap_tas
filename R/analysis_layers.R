@@ -8,12 +8,13 @@
 analysis_layer_types <- c(
   "vector_file",
   "vector_arcgis",
+  "raster_arcgis",
   "raster_file",
   "derived_slope",
   "derived_ndvi",
   "derived_nbr"
 )
-analysis_cache_version <- "v2"
+analysis_cache_version <- "v3"
 
 analysis_default <- function(value, fallback) {
   if (is.null(value)) fallback else value
@@ -108,7 +109,7 @@ validate_analysis_layers <- function(layers) {
       }
     }
 
-    if (identical(type, "vector_arcgis")) {
+    if (type %in% c("vector_arcgis", "raster_arcgis")) {
       if (is.null(layer$url) || !nzchar(layer$url)) {
         rlang::abort(
           sprintf("Analysis layer '%s' requires an ArcGIS URL.", id),
@@ -215,6 +216,15 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       categorical = layer$categorical,
       resample = layer$resample,
       bands = layer$bands,
+      format = layer$format,
+      width = layer$width,
+      height = layer$height,
+      dpi = layer$dpi,
+      layers = layer$layers,
+      layers_mode = layer$layers_mode,
+      band = layer$band,
+      transparent = layer$transparent,
+      fixture_path = layer$fixture_path,
       units = layer$units,
       source_id = layer$source_id
     )
@@ -283,6 +293,18 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
           append = FALSE,
           delete_layer = TRUE
         )
+      } else if (identical(type, "raster_arcgis")) {
+        raster <- fetch_arcgis_raster(layer, aoi_geom)
+        clipped <- clip_raster_to_aoi(
+          raster,
+          aoi_geom,
+          analysis_crs,
+          categorical = isTRUE(layer$categorical),
+          resample = layer$resample
+        )
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(clipped, output_path, overwrite = TRUE)
+        raster_store[[layer$id]] <- clipped
       } else if (identical(type, "raster_file")) {
         raster <- read_raster_layer(layer$path)
         clipped <- clip_raster_to_aoi(
@@ -465,6 +487,171 @@ fetch_arcgis_vector <- function(layer, aoi_geom) {
   writeLines(body, tmp, useBytes = TRUE)
   vector <- sf::st_read(tmp, quiet = TRUE)
   clip_vector_to_aoi(vector, aoi_geom, aoi_crs)
+}
+
+fetch_arcgis_raster <- function(layer, aoi_geom) {
+  if (!localmap_network_allowed()) {
+    if (!isTRUE(layer$offline)) {
+      rlang::warn(
+        sprintf(
+          paste0(
+            "Network access disabled; ArcGIS raster layer '%s' requires a fixture ",
+            "or LOCALMAP_ALLOW_NETWORK=1."
+          ),
+          layer$id
+        )
+      )
+    }
+    layer$offline <- TRUE
+  }
+  if (isTRUE(layer$offline)) {
+    fixture <- layer$fixture_path
+    if (is.null(fixture) || !nzchar(fixture)) {
+      rlang::abort(
+        sprintf("ArcGIS raster layer '%s' offline without fixture.", layer$id),
+        class = "analysis_raster_offline_missing_fixture"
+      )
+    }
+    return(read_raster_layer(fixture))
+  }
+
+  arc_cfg <- list(
+    url = layer$url,
+    crs = analysis_default(layer$crs, "EPSG:3857"),
+    width = as.integer(layer$width %||% 2048L),
+    height = as.integer(layer$height %||% 2048L),
+    format = layer$format %||% "png",
+    dpi = as.integer(layer$dpi %||% 96L),
+    transparent = layer$transparent,
+    layers = layer$layers,
+    layers_mode = layer$layers_mode
+  )
+  arc_cfg <- arc_cfg[!vapply(arc_cfg, is.null, logical(1))]
+  query_info <- try(arcgis_build_query(arc_cfg, aoi_geom), silent = TRUE)
+  if (inherits(query_info, "try-error")) {
+    rlang::abort(
+      sprintf("ArcGIS raster query failed for '%s'.", layer$id),
+      class = "analysis_raster_query_failed"
+    )
+  }
+
+  req <- httr2::request(query_info$url)
+  resp <- try(
+    httr2::req_url_query(req, !!!query_info$query) |> httr2::req_perform(),
+    silent = TRUE
+  )
+  if (inherits(resp, "try-error")) {
+    if (!is.null(layer$fixture_path) && nzchar(layer$fixture_path)) {
+      rlang::warn(
+        sprintf("ArcGIS raster fetch failed for '%s'; using fixture.", layer$id)
+      )
+      return(read_raster_layer(layer$fixture_path))
+    }
+    rlang::abort(
+      sprintf("ArcGIS raster fetch failed for '%s'.", layer$id),
+      class = "analysis_raster_fetch_failed"
+    )
+  }
+  httr2::resp_check_status(resp)
+  body <- httr2::resp_body_raw(resp)
+  if (length(body) == 0L) {
+    if (!is.null(layer$fixture_path) && nzchar(layer$fixture_path)) {
+      rlang::warn(
+        sprintf("ArcGIS raster response empty for '%s'; using fixture.", layer$id)
+      )
+      return(read_raster_layer(layer$fixture_path))
+    }
+    rlang::abort(
+      sprintf("ArcGIS raster response empty for '%s'.", layer$id),
+      class = "analysis_raster_empty_response"
+    )
+  }
+
+  fmt <- tolower(as.character(query_info$query$format %||% "png"))
+  ext <- if (grepl("png", fmt)) ".png" else ".tif"
+  tmp <- tempfile(fileext = ext)
+  on.exit(unlink(tmp), add = TRUE)
+  writeBin(body, tmp)
+  raster <- try(suppressWarnings(terra::rast(tmp)), silent = TRUE)
+  if (inherits(raster, "try-error")) {
+    if (!is.null(layer$fixture_path) && nzchar(layer$fixture_path)) {
+      rlang::warn(
+        sprintf("ArcGIS raster unreadable for '%s'; using fixture.", layer$id)
+      )
+      return(read_raster_layer(layer$fixture_path))
+    }
+    rlang::abort(
+      sprintf("ArcGIS raster unreadable for '%s'.", layer$id),
+      class = "analysis_raster_unreadable"
+    )
+  }
+  nlyr <- terra::nlyr(raster)
+  raster_vals <- terra::values(raster, mat = nlyr > 1L)
+  raster_mem <- terra::rast(
+    nrows = terra::nrow(raster),
+    ncols = terra::ncol(raster),
+    nlyr = nlyr,
+    xmin = terra::xmin(raster),
+    xmax = terra::xmax(raster),
+    ymin = terra::ymin(raster),
+    ymax = terra::ymax(raster),
+    crs = terra::crs(raster)
+  )
+  raster <- terra::setValues(raster_mem, raster_vals)
+
+  bbox <- sf::st_bbox(sf::st_transform(aoi_geom, sf::st_crs(arc_cfg$crs)))
+  terra::ext(raster) <- terra::ext(
+    as.numeric(bbox["xmin"]),
+    as.numeric(bbox["xmax"]),
+    as.numeric(bbox["ymin"]),
+    as.numeric(bbox["ymax"])
+  )
+  terra::crs(raster) <- arc_cfg$crs
+
+  raster <- normalize_arcgis_raster(raster, layer)
+  raster
+}
+
+normalize_arcgis_raster <- function(raster, layer) {
+  nlyr <- terra::nlyr(raster)
+  if (nlyr <= 1L) {
+    names(raster) <- layer$id
+    return(raster)
+  }
+
+  band <- layer$band
+  if (!is.null(band)) {
+    band <- as.integer(band)
+    if (!is.finite(band) || band < 1 || band > nlyr) {
+      rlang::abort(
+        sprintf("ArcGIS raster layer '%s' band %s is out of range.", layer$id, band),
+        class = "analysis_raster_band_invalid"
+      )
+    }
+    raster <- raster[[band]]
+    names(raster) <- layer$id
+    return(raster)
+  }
+
+  if (nlyr >= 3L) {
+    rlang::warn(
+      sprintf(
+        "ArcGIS raster layer '%s' returned multiple bands; averaging RGB channels.",
+        layer$id
+      )
+    )
+    raster <- terra::app(raster[[1:3]], mean, na.rm = TRUE)
+  } else {
+    rlang::warn(
+      sprintf(
+        "ArcGIS raster layer '%s' returned multiple bands; using the first band.",
+        layer$id
+      )
+    )
+    raster <- raster[[1]]
+  }
+  names(raster) <- layer$id
+  raster
 }
 
 read_raster_layer <- function(path) {
