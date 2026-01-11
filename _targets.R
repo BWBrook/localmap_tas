@@ -371,6 +371,8 @@ list(
       }
       if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
         "inst/extdata/output_manifest_tas_canonical.csv"
+      } else if (profile %in% c("demo")) {
+        "inst/extdata/output_manifest_demo.csv"
       } else {
         "inst/extdata/output_manifest_v1.csv"
       }

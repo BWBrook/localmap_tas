@@ -237,3 +237,4 @@
   - Validation: `devtools::test()` OK (172 pass, expected warnings), `lintr::lint_package()` clean, `targets::tar_make()` for `tas_canonical` ran to completion.
   - `rcmdcheck::rcmdcheck(--no-manual --as-cran)` reported qpdf warning + NOTEs about top-level files (expected for dev repo); no errors.
   - CI fix: added `lintr`, `rex`, `xmlparsedata`, and `lazyeval` to `renv.lock` and removed in-step installs; ensured `ci_artifacts` placeholder exists before upload.
+  - CI fix: added demo-specific output manifest so the demo pipeline validates `output_schema_v1` against demo outputs.
