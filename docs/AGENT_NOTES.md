@@ -238,3 +238,9 @@
   - `rcmdcheck::rcmdcheck(--no-manual --as-cran)` reported qpdf warning + NOTEs about top-level files (expected for dev repo); no errors.
   - CI fix: added `lintr`, `rex`, `xmlparsedata`, and `lazyeval` to `renv.lock` and removed in-step installs; ensured `ci_artifacts` placeholder exists before upload.
   - CI fix: added demo-specific output manifest so the demo pipeline validates `output_schema_v1` against demo outputs.
+
+- 2026-01-11: CI JC fixture override for offline pipeline.
+  - Added `inst/extdata/jc_camera_sites_fixture.csv` and configured `config/config.yaml` `jc_ci.data.camera_sites` to use fixture path.
+  - Purpose: avoid CI failure when `data/jc_camera_study/jc_site.csv` is unavailable (data/ is gitignored).
+  - Next: re-run JC CI profile and confirm outputs complete.
+  - Ran `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci targets::tar_make()` successfully; expected offline placeholder warnings only.

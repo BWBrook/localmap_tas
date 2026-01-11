@@ -462,6 +462,13 @@ jc_ci:
     occurrence:
       map:
         enable_topo_tiles: false
+    camera_sites:
+      source: "file"
+      path: "inst/extdata/jc_camera_sites_fixture.csv"
+      basemap:
+        url: ""
+        layers: []
+        overlays: []
     layers:
       - id: "tasveg_wms"
         type: "wms"
@@ -496,11 +503,6 @@ jc_ci:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "Topography"
-    camera_sites:
-      basemap:
-        url: ""
-        layers: []
-        overlays: []
 
 tas_canonical:
   inherits: default
