@@ -17,8 +17,14 @@ list(
     description = "Path to the YAML configuration file (tracked for changes)."
   ),
   targets::tar_target(
+    config_profile,
+    Sys.getenv("R_CONFIG_ACTIVE", "default"),
+    cue = targets::tar_cue(mode = "always"),
+    description = "Active config profile (tracked for changes)."
+  ),
+  targets::tar_target(
     cfg,
-    cfg_read(config_path = cfg_file),
+    cfg_read(profile = config_profile, config_path = cfg_file),
     description = "Project configuration (paths, compute flags)."
   ),
 
@@ -448,8 +454,8 @@ list(
           overview_map = overview_map,
           panel_figure_png = panel_figure_png,
           panel_figure_pdf = panel_figure_pdf,
-          vector_habitats = safe_lookup(analysis_layer_paths, "jc_habitats"),
-          vector_habitats_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_habitats"),
+          vector_tasveg = safe_lookup(analysis_layer_paths, "jc_tasveg"),
+          vector_tasveg_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_tasveg"),
           raster_dem = safe_lookup(analysis_layer_paths, "jc_dem"),
           raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_dem"),
           raster_multiband = safe_lookup(analysis_layer_paths, "jc_multiband"),
@@ -460,7 +466,7 @@ list(
           raster_ndvi_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_ndvi"),
           raster_nbr = safe_lookup(analysis_layer_paths, "jc_nbr"),
           raster_nbr_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_nbr"),
-          vector_habitats_preview = safe_lookup(analysis_layer_preview_paths, "jc_habitats"),
+          vector_tasveg_preview = safe_lookup(analysis_layer_preview_paths, "jc_tasveg"),
           raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "jc_dem"),
           raster_multiband_preview = safe_lookup(analysis_layer_preview_paths, "jc_multiband"),
           raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "jc_slope"),

@@ -224,7 +224,7 @@ Analysis layers describe AOI-clipped vector/raster inputs and derived rasters.
 Common fields:
 - `id` (string, required): unique layer ID.
 - `type` (string, required): one of `vector_file`, `vector_arcgis`, `raster_file`,
-  `raster_arcgis`, `derived_slope`, `derived_ndvi`, `derived_nbr`.
+  `raster_arcgis`, `raster_wcs`, `raster_geodata`, `derived_slope`, `derived_ndvi`, `derived_nbr`.
 - `output_path` (string, required): output GeoPackage/GeoTIFF path.
 - `attribution` (list, required): at least `source`, plus optional `license`, `credit`.
 
@@ -262,6 +262,31 @@ Raster ArcGIS fields (`type: raster_arcgis`):
 - `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
 - `units` (string, optional): units for extracted values (e.g., `m`).
 
+Raster WCS fields (`type: raster_wcs`):
+- `url` (string, required): WCS endpoint URL (GetCapabilities URL base).
+- `coverage` (string, required): coverage identifier (e.g., `1` for GA DEM 1s).
+- `version` (string, optional): WCS version (default `1.0.0`).
+- `crs` (string, optional): request CRS (default `EPSG:4326`).
+- `format` (string, optional): output format (default `GeoTIFF`).
+- `resolution` (string/number, optional): grid resolution in CRS units (e.g., `1s` for 1 arc-second).
+- `width`/`height` (integer, optional): explicit pixel dimensions (overrides `resolution`).
+- `max_dim` (integer, optional): cap on computed width/height (default 4096).
+- `fallback` (list, optional): fallback raster if WCS fails (e.g., `type: raster_geodata`, `resolution: 3s`).
+- `offline` (logical, optional): skip network fetch.
+- `fixture_path` (string, optional): local raster fixture used when offline.
+- `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
+- `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
+- `units` (string, optional): units for extracted values (e.g., `m`).
+
+Raster geodata fields (`type: raster_geodata`):
+- `resolution` (string, optional): `3s` (default) or `30s` (arc-second resolution).
+- `geodata_path` (string, optional): cache directory for downloaded tiles.
+- `offline` (logical, optional): skip network fetch.
+- `fixture_path` (string, optional): local raster fixture used when offline.
+- `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
+- `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
+- `units` (string, optional): units for extracted values (e.g., `m`).
+
 Derived slope (`type: derived_slope`):
 - `source_id` (string, required): raster layer ID (DEM).
 - `units` (string, optional): `degrees` (default) or `radians`.
@@ -286,6 +311,22 @@ Network access:
 Cache invalidation:
 - Delete `data/cache/` to force a refetch, or set a new `cache_dir` in the layer config.
 - For analysis layers, bump `analysis_cache_version` in `R/analysis_layers.R` if the cache key logic changes.
+
+### `data.dem_variant`
+
+Optional convenience switch for DEM sources used by analysis layers with IDs ending in `_dem`.
+If set, it overrides the DEM layer configuration with a known source definition.
+
+Supported values:
+- `ga_1s` (default): Geoscience Australia DEM SRTM 1 Second 2024 (WCS).
+- `ga_1s_hydro`: Geoscience Australia DEM SRTM 1 Second Hydro Enforced 2024 (WCS).
+- `srtm_3s`: geodata SRTM 3 arc-second (~90 m).
+- `srtm_30s`: geodata SRTM 30 arc-second (~1 km).
+- `elvis_2m`: user-supplied ELVIS 2 m DEM (requires `data.dem_variant_path`).
+
+Related keys:
+- `data.dem_variant_path` (string, required for `elvis_2m`): path to the local DEM file.
+- `data.dem_variant_attribution` (list, optional): overrides default attribution for `elvis_2m`.
 
 ### `data.attributes`
 

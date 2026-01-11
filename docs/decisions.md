@@ -135,4 +135,19 @@ Format:
 ## 2026-01-10 — LIST DEM export with fixture fallback for canonical run
 **Decision:** Use The LIST RasterMisc MapServer export (layer 73, DTM 10m) as the canonical DEM source when network access is enabled, with the JC DEM fixture as the offline fallback.
 **Rationale:** Aligns the canonical example with a real LIST DEM service while preserving offline reproducibility; the export is a rendered raster, so we coerce it to a single-band surface for demo purposes and retain the fixture for deterministic analysis.
+**Status:** Superseded by the 2026-01-11 geodata DEM decision below.
+
+## 2026-01-11 — Geodata DEM for analysis layers (LIST export retained for imagery only)
+**Decision:** Switch analysis-layer `tas_dem` to a geodata SRTM DEM (3 arc-second) because the LIST RasterMisc MapServer export delivers rendered imagery only (no raw elevation values), which breaks slope/attribute calculations and misleads previews. Keep the LIST DEM export available for imagery/visual checks and retain the JC DEM fixture for offline CI.
+**Rationale:** Ensures numeric DEM values and derived slope/attributes are meaningful while acknowledging the LIST MapServer export cannot provide raw elevation grids.
+**Status:** Superseded by the 2026-01-11 GA DEM 1 Second baseline decision below.
+
+## 2026-01-11 — GA DEM 1 Second baseline with SRTM fallback
+**Decision:** Use the Geoscience Australia DEM 1 Second (2024) WCS as the default analysis DEM for JC and TAS profiles, with a fallback to geodata SRTM 3 arc-second and optional user-supplied ELVIS 2m DEMs when available.
+**Rationale:** The GA DEM provides a national, higher-resolution elevation baseline for Tasmania while retaining a stable global fallback and offline fixtures.
+**Status:** Active.
+
+## 2026-01-11 — `dem_variant` config switch for DEM sources
+**Decision:** Add a config-level `data.dem_variant` switch to select DEM sources (GA 1s, GA 1s hydro, SRTM 3s/30s, or ELVIS 2m file) and apply overrides to `_dem` analysis layers.
+**Rationale:** Keeps DEM selection consistent across profiles without duplicating WCS/paths in every layer definition.
 **Status:** Active.

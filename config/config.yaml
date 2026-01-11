@@ -14,6 +14,8 @@ default:
     manifest: "metadata/data_manifest.csv"
     species_requests: "metadata/species_requests.csv"
     analysis_layers: []
+    dem_variant: "ga_1s"
+    dem_variant_path: null
     attributes:
       enabled: true
       output_long: "outputs/tables/site_attributes_long.parquet"
@@ -389,29 +391,42 @@ jc:
           colour: "#050505"
           font_size: 28
     analysis_layers:
-      - id: "jc_habitats"
-        type: "vector_file"
-        path: "inst/extdata/jc_habitats.gpkg"
-        layer: "habitats"
-        output_path: "outputs/analysis/vector/jc_habitats.gpkg"
+      - id: "jc_tasveg"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
+        crs: "EPSG:4326"
+        output_path: "outputs/analysis/jc/vector/jc_tasveg.gpkg"
+        offline: false
+        fixture_path: "inst/extdata/jc_habitats.gpkg"
+        fixture_layer: "habitats"
         attribution:
-          source: "JC fixture"
+          source: "The LIST"
           license: "CC BY 4.0"
-          credit: "Judbury camera study"
+          credit: "TASVEG 4.0 Groups (vector)"
       - id: "jc_dem"
-        type: "raster_file"
-        path: "inst/extdata/jc_dem.tif"
-        output_path: "outputs/analysis/raster/jc_dem.tif"
+        type: "raster_wcs"
+        url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"
+        coverage: "1"
+        version: "1.0.0"
+        crs: "EPSG:4326"
+        format: "GeoTIFF"
+        resolution: "1s"
+        output_path: "outputs/analysis/jc/raster/jc_dem.tif"
         categorical: false
         units: "m"
+        offline: false
+        fixture_path: "inst/extdata/jc_dem.tif"
+        fallback:
+          type: "raster_geodata"
+          resolution: "3s"
         attribution:
-          source: "JC fixture"
+          source: "Geoscience Australia"
           license: "CC BY 4.0"
-          credit: "Synthetic DEM"
+          credit: "DEM SRTM 1 Second 2024"
       - id: "jc_multiband"
         type: "raster_file"
         path: "inst/extdata/jc_multiband.tif"
-        output_path: "outputs/analysis/raster/jc_multiband.tif"
+        output_path: "outputs/analysis/jc/raster/jc_multiband.tif"
         categorical: false
         units: "index"
         attribution:
@@ -421,7 +436,7 @@ jc:
       - id: "jc_slope"
         type: "derived_slope"
         source_id: "jc_dem"
-        output_path: "outputs/analysis/raster/jc_slope.tif"
+        output_path: "outputs/analysis/jc/raster/jc_slope.tif"
         units: "degrees"
         attribution:
           source: "Derived from jc_dem"
@@ -433,7 +448,7 @@ jc:
         bands:
           red: 1
           nir: 2
-        output_path: "outputs/analysis/raster/jc_ndvi.tif"
+        output_path: "outputs/analysis/jc/raster/jc_ndvi.tif"
         units: "index"
         attribution:
           source: "Derived from jc_multiband"
@@ -445,7 +460,7 @@ jc:
         bands:
           nir: 2
           swir2: 3
-        output_path: "outputs/analysis/raster/jc_nbr.tif"
+        output_path: "outputs/analysis/jc/raster/jc_nbr.tif"
         units: "index"
         attribution:
           source: "Derived from jc_multiband"
@@ -666,7 +681,7 @@ tas_canonical:
         type: "vector_arcgis"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
         crs: "EPSG:4326"
-        output_path: "outputs/analysis/vector/tas_tasveg.gpkg"
+        output_path: "outputs/analysis/tas/vector/tas_tasveg.gpkg"
         offline: false
         fixture_path: "inst/extdata/jc_habitats.gpkg"
         fixture_layer: "habitats"
@@ -675,29 +690,29 @@ tas_canonical:
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups (vector)"
       - id: "tas_dem"
-        type: "raster_arcgis"
-        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Raster/RasterMisc/MapServer/export"
-        crs: "EPSG:3857"
-        format: "png"
-        width: 2048
-        height: 2048
-        dpi: 96
-        layers:
-          - "73"
-        layers_mode: "show"
-        output_path: "outputs/analysis/raster/tas_dem.tif"
+        type: "raster_wcs"
+        url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"
+        coverage: "1"
+        version: "1.0.0"
+        crs: "EPSG:4326"
+        format: "GeoTIFF"
+        resolution: "1s"
+        output_path: "outputs/analysis/tas/raster/tas_dem.tif"
         categorical: false
         units: "m"
         offline: false
         fixture_path: "inst/extdata/jc_dem.tif"
+        fallback:
+          type: "raster_geodata"
+          resolution: "3s"
         attribution:
-          source: "The LIST"
+          source: "Geoscience Australia"
           license: "CC BY 4.0"
-          credit: "Digital Terrain Model 10m (MapServer export)"
+          credit: "DEM SRTM 1 Second 2024"
       - id: "tas_slope"
         type: "derived_slope"
         source_id: "tas_dem"
-        output_path: "outputs/analysis/raster/tas_slope.tif"
+        output_path: "outputs/analysis/tas/raster/tas_slope.tif"
         units: "degrees"
         attribution:
           source: "Derived from tas_dem"
@@ -785,7 +800,7 @@ tas_canonical_ci:
         type: "vector_arcgis"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
         crs: "EPSG:4326"
-        output_path: "outputs/analysis/vector/tas_tasveg.gpkg"
+        output_path: "outputs/analysis/tas/vector/tas_tasveg.gpkg"
         offline: true
         fixture_path: "inst/extdata/jc_habitats.gpkg"
         fixture_layer: "habitats"
@@ -794,21 +809,21 @@ tas_canonical_ci:
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups (vector)"
       - id: "tas_dem"
-        type: "raster_arcgis"
-        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Raster/RasterMisc/MapServer/export"
-        crs: "EPSG:3857"
-        format: "png"
-        width: 2048
-        height: 2048
-        dpi: 96
-        layers:
-          - "73"
-        layers_mode: "show"
-        output_path: "outputs/analysis/raster/tas_dem.tif"
+        type: "raster_wcs"
+        url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"
+        coverage: "1"
+        version: "1.0.0"
+        crs: "EPSG:4326"
+        format: "GeoTIFF"
+        resolution: "1s"
+        output_path: "outputs/analysis/tas/raster/tas_dem.tif"
         categorical: false
         units: "m"
         offline: true
         fixture_path: "inst/extdata/jc_dem.tif"
+        fallback:
+          type: "raster_geodata"
+          resolution: "3s"
         attribution:
           source: "JC fixture"
           license: "CC BY 4.0"
@@ -816,7 +831,7 @@ tas_canonical_ci:
       - id: "tas_slope"
         type: "derived_slope"
         source_id: "tas_dem"
-        output_path: "outputs/analysis/raster/tas_slope.tif"
+        output_path: "outputs/analysis/tas/raster/tas_slope.tif"
         units: "degrees"
         attribution:
           source: "Derived from tas_dem"

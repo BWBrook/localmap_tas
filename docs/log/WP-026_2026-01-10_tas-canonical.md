@@ -27,3 +27,7 @@
 
 ## Canonical run folder
 - `outputs/canonical_runs/WP-026_2026-01-10_tas-canonical/`
+
+## Addendum (2026-01-11)
+- Updated analysis DEM source to GA DEM 1 Second (WCS) with SRTM 3s fallback (LIST export remains imagery-only).
+- Regenerated JC/TAS analysis DEM + slope layers and inspected previews for alignment and plausible gradients.

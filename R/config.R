@@ -35,6 +35,7 @@ cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
   }
   cfg <- cfg_migrate(cfg, config_path = path)
   cfg_validate(cfg, config_path = path)
+  cfg <- cfg_apply_dem_variant(cfg)
   cfg
 }
 
@@ -200,6 +201,26 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
   }
   if (!is.null(aoi_cfg$crs)) {
     checkmate::assert_string(aoi_cfg$crs, min.chars = 1L)
+  }
+
+  dem_variant <- data_cfg$dem_variant
+  if (!is.null(dem_variant) && nzchar(dem_variant)) {
+    dem_variant <- tolower(as.character(dem_variant))
+    allowed <- c("ga_1s", "ga_1s_hydro", "srtm_3s", "srtm_30s", "elvis_2m")
+    if (!dem_variant %in% allowed) {
+      rlang::abort(
+        sprintf("Unsupported `data$dem_variant` '%s'.", dem_variant),
+        class = "cfg_dem_variant_invalid"
+      )
+    }
+    if (dem_variant %in% c("elvis_2m")) {
+      if (is.null(data_cfg$dem_variant_path) || !nzchar(data_cfg$dem_variant_path)) {
+        rlang::abort(
+          "`data$dem_variant_path` is required when dem_variant is elvis_2m.",
+          class = "cfg_dem_variant_path_missing"
+        )
+      }
+    }
   }
 
   cfg_require_string <- function(value, label, hint = NULL) {
@@ -458,4 +479,121 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
   }
 
   cfg
+}
+
+cfg_apply_dem_variant <- function(cfg) {
+  data_cfg <- cfg$data
+  if (is.null(data_cfg) || !is.list(data_cfg)) {
+    return(cfg)
+  }
+  variant <- data_cfg$dem_variant
+  if (is.null(variant) || !nzchar(variant)) {
+    return(cfg)
+  }
+  variant <- tolower(as.character(variant))
+  if (is.null(data_cfg$analysis_layers) || !is.list(data_cfg$analysis_layers)) {
+    return(cfg)
+  }
+
+  dem_path <- data_cfg$dem_variant_path
+  dem_attr_override <- data_cfg$dem_variant_attribution
+
+  updated_layers <- lapply(data_cfg$analysis_layers, function(layer) {
+    if (is.null(layer$id) || !grepl("_dem$", layer$id)) {
+      return(layer)
+    }
+
+    base <- list(
+      id = layer$id,
+      output_path = layer$output_path,
+      categorical = layer$categorical %||% FALSE,
+      units = layer$units %||% "m",
+      offline = layer$offline,
+      fixture_path = layer$fixture_path,
+      resample = layer$resample
+    )
+
+    variant_cfg <- resolve_dem_variant_config(variant, dem_path, dem_attr_override)
+    utils::modifyList(base, variant_cfg, keep.null = TRUE)
+  })
+
+  cfg$data$analysis_layers <- updated_layers
+  cfg
+}
+
+resolve_dem_variant_config <- function(variant, dem_path, dem_attr_override) {
+  variant <- tolower(as.character(variant))
+  if (identical(variant, "ga_1s")) {
+    return(list(
+      type = "raster_wcs",
+      url = "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer",
+      coverage = "1",
+      version = "1.0.0",
+      crs = "EPSG:4326",
+      format = "GeoTIFF",
+      resolution = "1s",
+      fallback = list(type = "raster_geodata", resolution = "3s"),
+      attribution = list(
+        source = "Geoscience Australia",
+        license = "CC BY 4.0",
+        credit = "DEM SRTM 1 Second 2024"
+      )
+    ))
+  }
+
+  if (identical(variant, "ga_1s_hydro")) {
+    return(list(
+      type = "raster_wcs",
+      url = "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_Hydro_Enforced_2024/MapServer/WCSServer",
+      coverage = "1",
+      version = "1.0.0",
+      crs = "EPSG:4326",
+      format = "GeoTIFF",
+      resolution = "1s",
+      fallback = list(type = "raster_geodata", resolution = "3s"),
+      attribution = list(
+        source = "Geoscience Australia",
+        license = "CC BY 4.0",
+        credit = "DEM SRTM 1 Second Hydro Enforced 2024"
+      )
+    ))
+  }
+
+  if (identical(variant, "srtm_3s")) {
+    return(list(
+      type = "raster_geodata",
+      resolution = "3s",
+      attribution = list(
+        source = "geodata (SRTM)",
+        license = "CC0 1.0",
+        credit = "SRTM 3 arc-second elevation"
+      )
+    ))
+  }
+
+  if (identical(variant, "srtm_30s")) {
+    return(list(
+      type = "raster_geodata",
+      resolution = "30s",
+      attribution = list(
+        source = "geodata (SRTM)",
+        license = "CC0 1.0",
+        credit = "SRTM 30 arc-second elevation"
+      )
+    ))
+  }
+
+  if (identical(variant, "elvis_2m")) {
+    attr <- dem_attr_override
+    if (is.null(attr) || !is.list(attr)) {
+      attr <- list(source = "ELVIS (user supplied)", license = "", credit = "2m DEM")
+    }
+    return(list(
+      type = "raster_file",
+      path = dem_path,
+      attribution = attr
+    ))
+  }
+
+  list()
 }

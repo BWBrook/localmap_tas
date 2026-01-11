@@ -34,6 +34,7 @@ Imports:
     rnaturalearthdata,
     tidyterra,
     terra,
+    geodata,
     arrow
 Suggests:
     targets,

@@ -43,6 +43,59 @@ testthat::test_that("analysis layers create clipped vector and raster outputs", 
   testthat::expect_true(terra::ncell(rast) > 0)
 })
 
+testthat::test_that("geodata raster layers use fixtures when offline", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 5,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+
+  raster_out <- tempfile(fileext = ".tif")
+  layers <- list(
+    list(
+      id = "dem_geo",
+      type = "raster_geodata",
+      resolution = "3s",
+      output_path = raster_out,
+      offline = TRUE,
+      fixture_path = "inst/extdata/jc_dem.tif",
+      attribution = list(source = "fixture")
+    )
+  )
+
+  res <- localmap::fetch_analysis_layers(layers, aoi = aoi)
+  testthat::expect_true(file.exists(res$path[res$id == "dem_geo"]))
+})
+
+testthat::test_that("WCS raster layers use fixtures when offline", {
+  aoi_cfg <- list(
+    centroid = list(lat = -43.0, lon = 146.944),
+    size_km = 5,
+    rotation_deg = 0,
+    crs = "EPSG:28355"
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+
+  raster_out <- tempfile(fileext = ".tif")
+  layers <- list(
+    list(
+      id = "dem_wcs",
+      type = "raster_wcs",
+      url = "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer",
+      coverage = "1",
+      output_path = raster_out,
+      offline = TRUE,
+      fixture_path = "inst/extdata/jc_dem.tif",
+      attribution = list(source = "fixture")
+    )
+  )
+
+  res <- localmap::fetch_analysis_layers(layers, aoi = aoi)
+  testthat::expect_true(file.exists(res$path[res$id == "dem_wcs"]))
+})
+
 testthat::test_that("derived slope and indices are computed", {
   aoi_cfg <- list(
     centroid = list(lat = -43.0, lon = 146.944),

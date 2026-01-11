@@ -9,12 +9,14 @@ analysis_layer_types <- c(
   "vector_file",
   "vector_arcgis",
   "raster_arcgis",
+  "raster_wcs",
   "raster_file",
+  "raster_geodata",
   "derived_slope",
   "derived_ndvi",
   "derived_nbr"
 )
-analysis_cache_version <- "v3"
+analysis_cache_version <- "v5"
 
 analysis_default <- function(value, fallback) {
   if (is.null(value)) fallback else value
@@ -118,6 +120,36 @@ validate_analysis_layers <- function(layers) {
       }
     }
 
+    if (identical(type, "raster_wcs")) {
+      if (is.null(layer$url) || !nzchar(layer$url)) {
+        rlang::abort(
+          sprintf("WCS raster layer '%s' requires `url`.", id),
+          class = "analysis_layer_missing_url"
+        )
+      }
+    }
+
+    if (identical(type, "raster_wcs")) {
+      coverage <- layer$coverage %||% layer$identifier
+      if (is.null(coverage) || !nzchar(coverage)) {
+        rlang::abort(
+          sprintf("WCS raster layer '%s' requires `coverage`.", id),
+          class = "analysis_layer_missing_coverage"
+        )
+      }
+      layer$coverage <- as.character(coverage)
+      resolution <- layer$resolution
+      if (!is.null(resolution)) {
+        res_value <- analysis_parse_wcs_resolution(resolution)
+        if (!is.finite(res_value) || res_value <= 0) {
+          rlang::abort(
+            sprintf("WCS raster layer '%s' has invalid `resolution`.", id),
+            class = "analysis_layer_invalid_resolution"
+          )
+        }
+      }
+    }
+
     if (type %in% c("derived_slope", "derived_ndvi", "derived_nbr")) {
       if (is.null(layer$source_id) || !nzchar(layer$source_id)) {
         rlang::abort(
@@ -125,6 +157,21 @@ validate_analysis_layers <- function(layers) {
           class = "analysis_layer_missing_source_id"
         )
       }
+    }
+
+    if (identical(type, "raster_geodata")) {
+      resolution <- analysis_default(layer$resolution, "3s")
+      resolution <- tolower(as.character(resolution))
+      if (!resolution %in% c("3s", "30s")) {
+        rlang::abort(
+          sprintf(
+            "Geodata raster layer '%s' requires resolution '3s' or '30s'.",
+            id
+          ),
+          class = "analysis_layer_geodata_resolution_invalid"
+        )
+      }
+      layer$resolution <- resolution
     }
 
     attrib <- layer$attribution
@@ -204,10 +251,18 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
 
   results <- list()
   raster_store <- list()
+  layer_cache_keys <- list()
 
   for (layer in layers) {
     type <- layer$type
     source_descriptor <- layer$path %||% layer$url %||% layer$source_id %||% ""
+    offline_flag <- isTRUE(layer$offline)
+    if (type %in% c("vector_arcgis", "raster_arcgis")) {
+      if (!localmap_network_allowed()) {
+        offline_flag <- TRUE
+      }
+    }
+
     params <- list(
       layer = layer$layer,
       where = layer$where,
@@ -225,9 +280,27 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       band = layer$band,
       transparent = layer$transparent,
       fixture_path = layer$fixture_path,
+      offline = offline_flag,
+      wcs_coverage = layer$coverage %||% layer$identifier,
+      wcs_version = layer$version,
+      wcs_format = layer$format,
+      wcs_crs = layer$crs,
+      wcs_resolution = layer$resolution,
+      wcs_width = layer$width,
+      wcs_height = layer$height,
+      wcs_max_dim = layer$max_dim,
+      wcs_fallback_type = layer$fallback$type,
+      resolution = layer$resolution,
+      geodata_path = layer$geodata_path,
       units = layer$units,
       source_id = layer$source_id
     )
+    if (type %in% c("derived_slope", "derived_ndvi", "derived_nbr")) {
+      source_key <- layer_cache_keys[[layer$source_id]]
+      if (!is.null(source_key)) {
+        params$source_cache_key <- source_key
+      }
+    }
     output_path <- analysis_normalize_path(
       layer$output_path,
       here::here("outputs", "analysis", paste0(layer$id, ".tif"))
@@ -241,6 +314,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       version = analysis_cache_version,
       bbox = as.numeric(sf::st_bbox(sf::st_transform(aoi_geom, 4326)))
     ))
+    layer_cache_keys[[layer$id]] <- cache_key
     ext <- if (grepl("\\.gpkg$", output_path, ignore.case = TRUE)) ".gpkg" else ".tif"
     cache_path <- file.path(cache_dir, paste0(cache_key, ext))
     source_id <- layer$source_id %||% NA_character_
@@ -270,6 +344,11 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         )
       )
     } else {
+      prov_params <- params
+      prov_source <- source_descriptor
+      prov_status <- "created"
+      prov_meta <- NULL
+
       if (identical(type, "vector_file")) {
         vector <- read_vector_layer(layer$path, layer$layer)
         clipped <- clip_vector_to_aoi(vector, aoi_geom, analysis_crs)
@@ -295,6 +374,36 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         )
       } else if (identical(type, "raster_arcgis")) {
         raster <- fetch_arcgis_raster(layer, aoi_geom)
+        clipped <- clip_raster_to_aoi(
+          raster,
+          aoi_geom,
+          analysis_crs,
+          categorical = isTRUE(layer$categorical),
+          resample = layer$resample
+        )
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(clipped, output_path, overwrite = TRUE)
+        raster_store[[layer$id]] <- clipped
+      } else if (identical(type, "raster_wcs")) {
+        wcs_result <- fetch_wcs_raster(layer, aoi_geom, cache_dir = cache_dir)
+        if (is.list(wcs_result) && !inherits(wcs_result, "SpatRaster")) {
+          prov_meta <- wcs_result$meta
+          raster <- wcs_result$raster
+        } else {
+          raster <- wcs_result
+        }
+        clipped <- clip_raster_to_aoi(
+          raster,
+          aoi_geom,
+          analysis_crs,
+          categorical = isTRUE(layer$categorical),
+          resample = layer$resample
+        )
+        dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+        terra::writeRaster(clipped, output_path, overwrite = TRUE)
+        raster_store[[layer$id]] <- clipped
+      } else if (identical(type, "raster_geodata")) {
+        raster <- fetch_geodata_raster(layer, aoi_geom, cache_dir = cache_dir)
         clipped <- clip_raster_to_aoi(
           raster,
           aoi_geom,
@@ -364,6 +473,18 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         raster_store[[layer$id]] <- idx
       }
 
+      if (!is.null(prov_meta) && is.list(prov_meta)) {
+        if (!is.null(prov_meta$params) && is.list(prov_meta$params)) {
+          prov_params <- utils::modifyList(prov_params, prov_meta$params)
+        }
+        if (!is.null(prov_meta$source) && nzchar(prov_meta$source)) {
+          prov_source <- prov_meta$source
+        }
+        if (!is.null(prov_meta$status) && nzchar(prov_meta$status)) {
+          prov_status <- prov_meta$status
+        }
+      }
+
       if (!file.exists(output_path)) {
         rlang::abort(
           sprintf("Analysis layer output not created: %s", output_path),
@@ -381,13 +502,13 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         provenance_path,
         list(
           type = type,
-          status = "created",
+          status = prov_status,
           cache_key = cache_key,
           cache_path = cache_path,
           output_path = output_path,
-          source = source_descriptor,
+          source = prov_source,
           source_id = source_id,
-          params = params
+          params = prov_params
         )
       )
     }
@@ -610,6 +731,269 @@ fetch_arcgis_raster <- function(layer, aoi_geom) {
 
   raster <- normalize_arcgis_raster(raster, layer)
   raster
+}
+
+fetch_wcs_raster <- function(layer, aoi_geom, cache_dir = NULL) {
+  if (!localmap_network_allowed()) {
+    if (!isTRUE(layer$offline)) {
+      rlang::warn(
+        sprintf(
+          paste0(
+            "Network access disabled; WCS raster layer '%s' requires a fixture ",
+            "or LOCALMAP_ALLOW_NETWORK=1."
+          ),
+          layer$id
+        )
+      )
+    }
+    layer$offline <- TRUE
+  }
+  if (isTRUE(layer$offline)) {
+    fixture <- layer$fixture_path
+    if (is.null(fixture) || !nzchar(fixture)) {
+      rlang::abort(
+        sprintf("WCS raster layer '%s' offline without fixture.", layer$id),
+        class = "analysis_wcs_offline_missing_fixture"
+      )
+    }
+    return(read_raster_layer(fixture))
+  }
+
+  coverage <- layer$coverage %||% layer$identifier
+  version <- analysis_default(layer$version, "1.0.0")
+  format <- analysis_default(layer$format, "GeoTIFF")
+  crs <- analysis_default(layer$crs, "EPSG:4326")
+  aoi_crs <- sf::st_crs(crs)
+  bbox <- sf::st_bbox(sf::st_transform(aoi_geom, aoi_crs))
+  bbox_param <- paste(
+    c(
+      as.numeric(bbox["xmin"]),
+      as.numeric(bbox["ymin"]),
+      as.numeric(bbox["xmax"]),
+      as.numeric(bbox["ymax"])
+    ),
+    collapse = ","
+  )
+  resolution <- analysis_parse_wcs_resolution(layer$resolution)
+  dims <- analysis_wcs_dimensions(
+    bbox = bbox,
+    resolution = resolution,
+    width = layer$width,
+    height = layer$height,
+    max_dim = layer$max_dim
+  )
+
+  query <- list(
+    service = "WCS",
+    request = "GetCoverage",
+    version = version,
+    coverage = coverage,
+    crs = crs,
+    bbox = bbox_param,
+    format = format,
+    width = dims$width,
+    height = dims$height
+  )
+
+  tmp <- tempfile(fileext = ".tif")
+  req <- httr2::request(layer$url)
+  req <- httr2::req_url_query(req, !!!query)
+  resp <- try(httr2::req_perform(req, path = tmp), silent = TRUE)
+  if (inherits(resp, "try-error")) {
+    downloaded <- analysis_wcs_download_file(layer$url, query, tmp)
+    if (!downloaded) {
+      return(analysis_wcs_fallback(layer, aoi_geom, cache_dir, "request_failed"))
+    }
+  } else if (httr2::resp_status(resp) >= 400) {
+    return(analysis_wcs_fallback(layer, aoi_geom, cache_dir, "http_error"))
+  }
+
+  raster <- try(terra::rast(tmp), silent = TRUE)
+  if (inherits(raster, "try-error")) {
+    return(analysis_wcs_fallback(layer, aoi_geom, cache_dir, "read_failed"))
+  }
+  raster
+}
+
+fetch_geodata_raster <- function(layer, aoi_geom, cache_dir = NULL) {
+  if (!localmap_network_allowed()) {
+    if (!isTRUE(layer$offline)) {
+      rlang::warn(
+        sprintf(
+          paste0(
+            "Network access disabled; geodata raster layer '%s' requires a fixture ",
+            "or LOCALMAP_ALLOW_NETWORK=1."
+          ),
+          layer$id
+        )
+      )
+    }
+    layer$offline <- TRUE
+  }
+  if (isTRUE(layer$offline)) {
+    fixture <- layer$fixture_path
+    if (is.null(fixture) || !nzchar(fixture)) {
+      rlang::abort(
+        sprintf("Geodata raster layer '%s' offline without fixture.", layer$id),
+        class = "analysis_geodata_offline_missing_fixture"
+      )
+    }
+    return(read_raster_layer(fixture))
+  }
+
+  if (!requireNamespace("geodata", quietly = TRUE)) {
+    rlang::abort(
+      "Package 'geodata' is required for raster_geodata layers.",
+      class = "analysis_geodata_missing_package"
+    )
+  }
+
+  resolution <- analysis_default(layer$resolution, "3s")
+  resolution <- tolower(as.character(resolution))
+  if (!resolution %in% c("3s", "30s")) {
+    rlang::abort(
+      sprintf(
+        "Geodata raster layer '%s' requires resolution '3s' or '30s'.",
+        layer$id
+      ),
+      class = "analysis_geodata_resolution_invalid"
+    )
+  }
+
+  if (is.null(cache_dir) || !nzchar(cache_dir)) {
+    cache_dir <- here::here("data", "cache", "geodata")
+  }
+  cache_dir <- analysis_normalize_path(layer$geodata_path %||% cache_dir, cache_dir)
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+
+  aoi_4326 <- sf::st_transform(aoi_geom, 4326)
+  centroid <- sf::st_coordinates(sf::st_centroid(aoi_4326))[1, ]
+  lon <- centroid[1]
+  lat <- centroid[2]
+
+  if (identical(resolution, "3s")) {
+    geodata::elevation_3s(lon, lat, path = cache_dir)
+  } else {
+    geodata::elevation_30s(lon, lat, path = cache_dir)
+  }
+}
+
+analysis_parse_wcs_resolution <- function(resolution) {
+  if (is.null(resolution)) {
+    return(NA_real_)
+  }
+  if (is.numeric(resolution)) {
+    return(as.numeric(resolution)[1])
+  }
+  resolution <- tolower(trimws(as.character(resolution)))
+  if (!nzchar(resolution)) {
+    return(NA_real_)
+  }
+  if (grepl("s$", resolution)) {
+    val <- suppressWarnings(as.numeric(sub("s$", "", resolution)))
+    if (is.finite(val)) {
+      return(val / 3600)
+    }
+  }
+  suppressWarnings(as.numeric(resolution))
+}
+
+analysis_wcs_dimensions <- function(bbox, resolution, width, height, max_dim) {
+  if (!is.null(width) && !is.null(height)) {
+    return(list(width = as.integer(width), height = as.integer(height)))
+  }
+  if (!is.finite(resolution) || resolution <= 0) {
+    return(list(width = as.integer(width %||% 256L), height = as.integer(height %||% 256L)))
+  }
+  span_x <- as.numeric(bbox["xmax"]) - as.numeric(bbox["xmin"])
+  span_y <- as.numeric(bbox["ymax"]) - as.numeric(bbox["ymin"])
+  width_calc <- max(1L, as.integer(ceiling(span_x / resolution)))
+  height_calc <- max(1L, as.integer(ceiling(span_y / resolution)))
+  max_dim <- as.integer(max_dim %||% 4096L)
+  if (is.finite(max_dim) && max_dim > 0) {
+    width_calc <- min(width_calc, max_dim)
+    height_calc <- min(height_calc, max_dim)
+  }
+  list(width = width_calc, height = height_calc)
+}
+
+analysis_wcs_download_file <- function(base_url, query, dest_path) {
+  if (is.null(base_url) || !nzchar(base_url)) {
+    return(FALSE)
+  }
+  url <- try(httr2::url_parse(base_url), silent = TRUE)
+  if (inherits(url, "try-error")) {
+    return(FALSE)
+  }
+  url$query <- query
+  full_url <- try(httr2::url_build(url), silent = TRUE)
+  if (inherits(full_url, "try-error")) {
+    return(FALSE)
+  }
+  res <- try(utils::download.file(full_url, dest_path, mode = "wb", quiet = TRUE), silent = TRUE)
+  if (inherits(res, "try-error")) {
+    return(FALSE)
+  }
+  file.exists(dest_path) && file.info(dest_path)$size > 0
+}
+
+analysis_wcs_fallback <- function(layer, aoi_geom, cache_dir, reason = NULL) {
+  fallback <- layer$fallback
+  if (is.null(fallback) || !is.list(fallback)) {
+    rlang::abort(
+      sprintf("WCS raster layer '%s' failed without fallback.", layer$id),
+      class = "analysis_wcs_missing_fallback"
+    )
+  }
+  fb_type <- tolower(as.character(fallback$type %||% "raster_geodata"))
+  fb_layer <- list(
+    id = layer$id,
+    type = fb_type,
+    resolution = analysis_default(fallback$resolution, "3s"),
+    geodata_path = fallback$geodata_path,
+    path = fallback$path,
+    url = fallback$url,
+    crs = fallback$crs,
+    categorical = layer$categorical,
+    resample = layer$resample,
+    offline = analysis_default(fallback$offline, FALSE),
+    fixture_path = fallback$fixture_path %||% layer$fixture_path,
+    attribution = layer$attribution
+  )
+
+  if (identical(fb_type, "raster_geodata")) {
+    raster <- fetch_geodata_raster(fb_layer, aoi_geom, cache_dir = cache_dir)
+    fb_source <- sprintf("geodata (SRTM %s)", analysis_default(fb_layer$resolution, "3s"))
+  } else if (identical(fb_type, "raster_file")) {
+    if (is.null(fb_layer$path) || !nzchar(fb_layer$path)) {
+      rlang::abort(
+        sprintf("WCS fallback for '%s' missing `fallback$path`.", layer$id),
+        class = "analysis_wcs_fallback_missing_path"
+      )
+    }
+    raster <- read_raster_layer(fb_layer$path)
+    fb_source <- "raster_file"
+  } else if (identical(fb_type, "raster_arcgis")) {
+    raster <- fetch_arcgis_raster(fb_layer, aoi_geom)
+    fb_source <- "ArcGIS raster"
+  } else {
+    rlang::abort(
+      sprintf("Unsupported WCS fallback type '%s' for '%s'.", fb_type, layer$id),
+      class = "analysis_wcs_fallback_invalid_type"
+    )
+  }
+
+  list(
+    raster = raster,
+    meta = list(
+      status = "fallback",
+      source = fb_source,
+      params = list(
+        fallback_type = fb_type,
+        fallback_reason = reason %||% ""
+      )
+    )
+  )
 }
 
 normalize_arcgis_raster <- function(raster, layer) {

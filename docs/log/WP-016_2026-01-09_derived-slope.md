@@ -17,3 +17,8 @@ Date: 2026-01-09
 
 ## Notes
 - Provenance sidecar references the `jc_dem` source layer via `source_id`.
+
+## Addendum (2026-01-11)
+- Slope derivation now uses the GA 1 Second DEM (WCS) where available; SRTM 3s remains the fallback.
+- Derived raster cache keys now include the source cache key so slope/indices regenerate when DEM sources change.
+- Re-ran JC/TAS slope outputs and inspected updated previews (`outputs/analysis/jc/raster/jc_slope.png`, `outputs/analysis/tas/raster/tas_slope.png`).

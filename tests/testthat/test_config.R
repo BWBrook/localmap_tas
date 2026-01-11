@@ -88,6 +88,73 @@ testthat::test_that("cfg_read accepts auto AOI without explicit size", {
   testthat::expect_equal(tolower(cfg$data$aoi$mode), "auto")
 })
 
+testthat::test_that("cfg_read applies dem_variant overrides", {
+  tmp <- tempfile(fileext = ".yaml")
+  writeLines(c(
+    "default:",
+    "  schema_version: 2",
+    "  data:",
+    "    manifest: \"metadata/data_manifest.csv\"",
+    "    species_requests: \"metadata/species_requests.csv\"",
+    "    dem_variant: \"srtm_3s\"",
+    "    aoi:",
+    "      centroid:",
+    "        lat: -41.0",
+    "        lon: 145.0",
+    "      size_km: 10",
+    "    occurrence:",
+    "      fields: [decimalLatitude]",
+    "      map: {}",
+    "    camera_sites:",
+    "      path: \"data/raw/lyr_op.csv\"",
+    "      central_site: \"centre\"",
+    "      bbox_half_km: 10",
+    "    analysis_layers:",
+    "      - id: \"site_dem\"",
+    "        type: \"raster_wcs\"",
+    "        url: \"https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer\"",
+    "        coverage: \"1\"",
+    "        output_path: \"outputs/analysis/jc/raster/jc_dem.tif\"",
+    "        attribution:",
+    "          source: \"stub\"",
+    "  ala:",
+    "    email: \"test@example.com\"",
+    "    download_reason_id: 4"
+  ), tmp)
+  cfg <- localmap::cfg_read(config_path = tmp)
+  dem_layer <- cfg$data$analysis_layers[[1]]
+  testthat::expect_equal(dem_layer$type, "raster_geodata")
+  testthat::expect_equal(dem_layer$resolution, "3s")
+})
+
+testthat::test_that("cfg_read errors when elvis_2m path is missing", {
+  tmp <- tempfile(fileext = ".yaml")
+  writeLines(c(
+    "default:",
+    "  schema_version: 2",
+    "  data:",
+    "    manifest: \"metadata/data_manifest.csv\"",
+    "    species_requests: \"metadata/species_requests.csv\"",
+    "    dem_variant: \"elvis_2m\"",
+    "    aoi:",
+    "      centroid:",
+    "        lat: -41.0",
+    "        lon: 145.0",
+    "      size_km: 10",
+    "    occurrence:",
+    "      fields: [decimalLatitude]",
+    "      map: {}",
+    "    camera_sites:",
+    "      path: \"data/raw/lyr_op.csv\"",
+    "      central_site: \"centre\"",
+    "      bbox_half_km: 10"
+  ), tmp)
+  testthat::expect_error(
+    localmap::cfg_read(config_path = tmp),
+    class = "cfg_dem_variant_path_missing"
+  )
+})
+
 testthat::test_that("cfg_read fails on unsupported schema_version", {
   tmp <- tempfile(fileext = ".yaml")
   writeLines(c(

@@ -17,3 +17,8 @@ Date: 2026-01-09
 
 ## Notes
 - Multiband raster ingestion uses the same clipping + resampling path, enabling downstream indices.
+
+## Addendum (2026-01-11)
+- Added GA DEM 1 Second (WCS) as the default analysis DEM source via `raster_wcs`, with SRTM 3s fallback and offline fixtures.
+- DEM ingestion now supports `data.dem_variant` overrides so the DEM source stays consistent across profiles.
+- Re-ran JC/TAS DEM ingestion and inspected updated previews (`outputs/analysis/jc/raster/jc_dem.png`, `outputs/analysis/tas/raster/tas_dem.png`).

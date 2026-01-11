@@ -244,3 +244,24 @@
   - Purpose: avoid CI failure when `data/jc_camera_study/jc_site.csv` is unavailable (data/ is gitignored).
   - Next: re-run JC CI profile and confirm outputs complete.
   - Ran `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci targets::tar_make()` successfully; expected offline placeholder warnings only.
+
+- 2026-01-11: DEM alignment/cache + profile tracking fix.
+  - Added `config_profile` target so `{targets}` invalidates when `R_CONFIG_ACTIVE` changes.
+  - Added `params.offline` to analysis-layer cache key to avoid reusing offline fixtures when network is available.
+  - Re-ran `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 targets::tar_make()`; `tas_dem.tif` regenerated from LIST export with offline=false provenance.
+
+- 2026-01-11: Analysis outputs split by profile + JC DEM source aligned.
+  - Moved analysis outputs under `outputs/analysis/jc/` and `outputs/analysis/tas/` to avoid mixed files.
+  - Switched JC DEM to geodata SRTM (same as TAS) so DEM/slope previews align; fixtures remain for offline CI.
+  - Added `config_profile` target cue `mode=always` so profile changes invalidate pipeline.
+  - Regenerated analysis layers/previews for `jc` and `tas_canonical` profiles.
+
+- 2026-01-11: GA DEM 1 Second baseline + WCS support.
+  - Added `raster_wcs` analysis layer type with WCS GetCoverage fetch, fallback support, and provenance notes.
+  - Updated JC/TAS configs to use GA DEM 1 Second (WCS) with SRTM 3s fallback and offline fixtures.
+  - Updated config reference + output manifests to reflect GA DEM source.
+  - Added offline WCS fixture test in `tests/testthat/test_analysis_layers.R`.
+
+- 2026-01-11: DEM variant switch + derived cache invalidation.
+  - Added `data.dem_variant`/`data.dem_variant_path` support with GA/SRTM/ELVIS options and config tests.
+  - Derived raster cache keys now include source cache keys to refresh slope/indices when DEM sources change.

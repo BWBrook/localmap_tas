@@ -113,7 +113,8 @@ render_vector_preview <- function(path,
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
   grDevices::png(filename = output_path, width = width, height = height, res = dpi)
   on.exit(grDevices::dev.off(), add = TRUE)
-  graphics::par(mar = c(2, 2, 2, 2))
+  # Leave room for an outside legend to avoid overlapping the map.
+  graphics::par(mar = c(2, 2, 2, 6), xpd = NA)
   if (!is.null(fill_values) && !is.null(fill_palette)) {
     colors <- fill_palette[as.integer(fill_values)]
     graphics::plot(
@@ -124,6 +125,7 @@ render_vector_preview <- function(path,
     )
     graphics::legend(
       "topright",
+      inset = c(-0.18, 0),
       legend = levels(fill_values),
       fill = fill_palette,
       cex = 0.7,
