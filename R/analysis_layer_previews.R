@@ -162,11 +162,33 @@ render_raster_preview <- function(path,
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(mar = c(2, 2, 2, 2))
   if (terra::nlyr(rast) >= 3) {
+    if (any(is.na(names(rast)))) {
+      names(rast) <- paste0("band_", seq_len(terra::nlyr(rast)))
+    }
+    red_idx <- try(
+      resolve_band_index(rast, c("nbart_red", "red", "band_3", "band3"), "red"),
+      silent = TRUE
+    )
+    green_idx <- try(
+      resolve_band_index(rast, c("nbart_green", "green", "band_2", "band2"), "green"),
+      silent = TRUE
+    )
+    blue_idx <- try(
+      resolve_band_index(rast, c("nbart_blue", "blue", "band_1", "band1"), "blue"),
+      silent = TRUE
+    )
+    if (inherits(red_idx, "try-error") ||
+          inherits(green_idx, "try-error") ||
+          inherits(blue_idx, "try-error")) {
+      red_idx <- 1L
+      green_idx <- 2L
+      blue_idx <- 3L
+    }
     terra::plotRGB(
       rast,
-      r = 1,
-      g = 2,
-      b = 3,
+      r = red_idx,
+      g = green_idx,
+      b = blue_idx,
       stretch = "lin",
       main = tools::file_path_sans_ext(basename(path)),
       axes = FALSE
@@ -188,7 +210,6 @@ render_raster_preview <- function(path,
   if (!is.null(sites_sf)) {
     graphics::points(sf::st_coordinates(sites_sf), pch = 3, col = "#b2182b", cex = 0.8)
   }
-  graphics::box()
   invisible(output_path)
 }
 

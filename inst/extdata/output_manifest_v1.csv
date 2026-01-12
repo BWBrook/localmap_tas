@@ -1,19 +1,25 @@
 output_id,type,description,path,format,crs,profile,producer
-species_map,map,Species occurrence overview map,outputs/maps/jc_species_occurrences.png,png,EPSG:4326,jc,map_species_occurrences
-camera_sites_map,map,Camera sites basemap map,outputs/maps/jc_camera_sites.png,png,EPSG:3857,jc,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of JC maps,outputs/maps/jc_camera_sites_panel.png,png,EPSG:3857,jc,camera_sites_stack_maps
+species_map,map,Species occurrence overview map,outputs/maps/jc/species_occurrences.png,png,EPSG:4326,jc,map_species_occurrences
+camera_sites_map,map,Camera sites basemap map,outputs/maps/jc/camera_sites.png,png,EPSG:3857,jc,render_camera_sites_map
+camera_sites_panel,figure,Stacked panel of JC maps,outputs/maps/jc/camera_sites_panel.png,png,EPSG:3857,jc,camera_sites_stack_maps
 camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/jc_camera_sites_tile.png,png,EPSG:3857,jc,fetch_camera_wms_tile
-aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/jc_coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary
-site_attributes_long,table,Site attributes long table,outputs/tables/jc_site_attributes_long.parquet,parquet,NA,jc,write_site_attributes_long
-site_attributes_wide,table,Site attributes wide table,outputs/tables/jc_site_attributes_wide.csv,csv,NA,jc,write_site_attributes_wide
-wms_layer,basemap,WMS layer imagery,outputs/layers/jc_tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
-wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/jc_tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
-arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/jc_topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
-arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/jc_topography_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
-overview_map,map,Overview map panel,outputs/maps/jc_overview_map.png,png,EPSG:3857,jc,render_overview_map
-panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/jc_panel_figure.png,png,EPSG:3857,jc,assemble_panel_figure
-panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/jc_panel_figure.pdf,pdf,EPSG:3857,jc,assemble_panel_figure
+aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
+coverage_summary,table,Coverage zone summary table,outputs/tables/jc/coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/tables/jc/site_attributes_long.parquet,parquet,NA,jc,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/tables/jc/site_attributes_wide.csv,csv,NA,jc,write_site_attributes_wide
+wms_layer,basemap,WMS layer imagery,outputs/layers/jc/tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/jc/tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/jc/topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/jc/topography_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+orthophoto_arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/layers/jc/orthophoto_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+orthophoto_arcgis_layer_provenance,provenance,Orthophoto ArcGIS export provenance,outputs/layers/jc/orthophoto_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+roads_wms_layer,basemap,State Growth Roads WMS layer,outputs/layers/jc/roads_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+roads_wms_layer_provenance,provenance,State Growth Roads WMS provenance,outputs/layers/jc/roads_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+localities_wms_layer,basemap,Localities WMS layer,outputs/layers/jc/localities_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+localities_wms_layer_provenance,provenance,Localities WMS provenance,outputs/layers/jc/localities_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+overview_map,map,Overview map panel,outputs/maps/jc/overview_map.png,png,EPSG:3857,jc,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/jc/panel_figure.png,png,EPSG:3857,jc,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/jc/panel_figure.pdf,pdf,EPSG:3857,jc,assemble_panel_figure
 vector_tasveg,vector,JC TASVEG polygons (clipped),outputs/analysis/jc/vector/jc_tasveg.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
 vector_tasveg_provenance,provenance,JC TASVEG provenance,outputs/analysis/jc/vector/jc_tasveg.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
 vector_tasveg_preview,figure,JC TASVEG preview PNG,outputs/analysis/jc/vector/jc_tasveg.png,png,EPSG:28355,jc,render_analysis_layer_previews

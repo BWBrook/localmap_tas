@@ -9,8 +9,8 @@ Date: 2026-01-09
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-009_2026-01-09_wms-imagery/`
-  - `jc_tasveg_wms.png`
-  - `jc_tasveg_wms.png.yml`
+  - `outputs/layers/jc/tasveg_wms.png`
+  - `outputs/layers/jc/tasveg_wms.png.yml`
 
 ## Sanity checks
 - Live WMS imagery downloaded for the JC AOI (LIST TASVEG layer).

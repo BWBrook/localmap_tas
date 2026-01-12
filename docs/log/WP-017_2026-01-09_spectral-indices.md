@@ -20,3 +20,7 @@ Date: 2026-01-09
 
 ## Notes
 - Division-by-zero handling sets undefined pixels to NA (verified via unit tests).
+
+## Update (2026-01-12)
+- Switched `jc_multiband` to DEA Landsat 8/9 geomedian (WCS) with offline fixture fallback.
+- NDVI/NBR band mapping now resolves by name (e.g., `nbart_red`, `nbart_nir`, `nbart_swir_2`).

@@ -458,13 +458,13 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
           )
         }
         if (identical(type, "derived_ndvi")) {
-          red <- as.integer(bands$red)
-          nir <- as.integer(bands$nir)
+          red <- resolve_band_index(source, bands$red, "red")
+          nir <- resolve_band_index(source, bands$nir, "nir")
           idx <- compute_index(source, nir, red)
           names(idx) <- "ndvi"
         } else {
-          nir <- as.integer(bands$nir)
-          swir2 <- as.integer(bands$swir2)
+          nir <- resolve_band_index(source, bands$nir, "nir")
+          swir2 <- resolve_band_index(source, bands$swir2, "swir2")
           idx <- compute_index(source, nir, swir2)
           names(idx) <- "nbr"
         }
@@ -1092,6 +1092,69 @@ compute_index <- function(raster, band_a, band_b) {
   idx <- (a - b) / denom
   idx[denom == 0] <- NA
   idx
+}
+
+resolve_band_index <- function(raster, band_spec, label = "band") {
+  if (is.null(band_spec)) {
+    rlang::abort(
+      sprintf("Index %s mapping is missing.", label),
+      class = "analysis_index_missing_band"
+    )
+  }
+
+  if (is.list(band_spec)) {
+    band_spec <- unlist(band_spec, use.names = FALSE)
+  }
+
+  if (is.numeric(band_spec)) {
+    band_idx <- as.integer(band_spec[1])
+    if (!is.finite(band_idx) || band_idx < 1 || band_idx > terra::nlyr(raster)) {
+      rlang::abort(
+        sprintf("Index %s band %s is out of range.", label, band_idx),
+        class = "analysis_index_missing_band"
+      )
+    }
+    return(band_idx)
+  }
+
+  candidates <- as.character(band_spec)
+  band_names <- names(raster)
+  if (length(band_names) == 0L || all(is.na(band_names))) {
+    band_names <- paste0("band_", seq_len(terra::nlyr(raster)))
+  }
+  band_names_lower <- tolower(band_names)
+
+  for (cand in candidates) {
+    cand_lower <- tolower(cand)
+    idx <- which(band_names_lower == cand_lower)
+    if (length(idx) > 0L) {
+      return(idx[1])
+    }
+  }
+
+  for (cand in candidates) {
+    cand_lower <- tolower(cand)
+    safe <- gsub("[^a-z0-9]+", "_", cand_lower)
+    pattern <- paste0("(^|_)", safe, "($|_)")
+    idx <- which(grepl(pattern, band_names_lower))
+    if (length(idx) > 0L) {
+      pick <- idx[which.min(nchar(band_names[idx]))]
+      return(pick)
+    }
+  }
+
+  for (cand in candidates) {
+    cand_lower <- tolower(cand)
+    idx <- which(grepl(cand_lower, band_names_lower, fixed = TRUE))
+    if (length(idx) > 0L) {
+      return(idx[1])
+    }
+  }
+
+  rlang::abort(
+    sprintf("Index %s band could not be resolved from available names.", label),
+    class = "analysis_index_missing_band"
+  )
 }
 
 rtrim_slash <- function(path) {

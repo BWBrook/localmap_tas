@@ -1,19 +1,19 @@
 output_id,type,description,path,format,crs,profile,producer
-species_map,map,Species occurrence overview map,outputs/maps/demo_species_occurrences.png,png,EPSG:4326,demo,map_species_occurrences
-camera_sites_map,map,Camera sites basemap map,outputs/maps/demo_camera_sites.png,png,EPSG:3857,demo,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo_camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
+species_map,map,Species occurrence overview map,outputs/maps/demo/species_occurrences.png,png,EPSG:4326,demo,map_species_occurrences
+camera_sites_map,map,Camera sites basemap map,outputs/maps/demo/camera_sites.png,png,EPSG:3857,demo,render_camera_sites_map
+camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo/camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
 camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/demo_camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
-aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,demo,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/demo_coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
-site_attributes_long,table,Site attributes long table,outputs/tables/site_attributes_long.parquet,parquet,NA,demo,write_site_attributes_long
-site_attributes_wide,table,Site attributes wide table,outputs/tables/site_attributes_wide.csv,csv,NA,demo,write_site_attributes_wide
-wms_layer,basemap,WMS layer imagery,outputs/layers/demo_tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
-wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/demo_tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
-arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/demo_topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
-arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/demo_topography_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
-overview_map,map,Overview map panel,outputs/maps/demo_overview_map.png,png,EPSG:3857,demo,render_overview_map
-panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/demo_panel_figure.png,png,EPSG:3857,demo,assemble_panel_figure
-panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/demo_panel_figure.pdf,pdf,EPSG:3857,demo,assemble_panel_figure
+aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi/aoi_debug.png,png,EPSG:4326,demo,render_aoi_debug_plot
+coverage_summary,table,Coverage zone summary table,outputs/tables/demo/coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/tables/demo/site_attributes_long.parquet,parquet,NA,demo,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/tables/demo/site_attributes_wide.csv,csv,NA,demo,write_site_attributes_wide
+wms_layer,basemap,WMS layer imagery,outputs/layers/demo/tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
+wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/demo/tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
+arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/demo/topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/demo/topography_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
+overview_map,map,Overview map panel,outputs/maps/demo/overview_map.png,png,EPSG:3857,demo,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/demo/panel_figure.png,png,EPSG:3857,demo,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/demo/panel_figure.pdf,pdf,EPSG:3857,demo,assemble_panel_figure
 analysis_provenance,provenance,Combined layer provenance table,outputs/provenance/analysis_layers.csv,csv,NA,demo,build_layer_provenance
 attribution_report,provenance,Layer attribution report,outputs/provenance/attribution.md,md,NA,demo,write_attribution_report
 run_manifest,provenance,Run manifest metadata,outputs/provenance/run_manifest.yml,yml,NA,demo,write_run_manifest

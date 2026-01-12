@@ -66,7 +66,10 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Config schema bumped to v2 with AOI as the authoritative extent definition; v1 configs are migrated.
 - Species mapping now accepts AOI input and only falls back to bounding-box config when needed.
 - JC profile now uses AOI auto mode for a camera-scale extent.
+- JC multiband source now uses DEA Landsat 8/9 geomedian via WCS with name-based band resolution (fixture fallback retained).
 - Tasmania canonical profile now uses LIST DTM (MapServer export) for DEM with fixture fallback and adds roads/localities overlays to overview maps.
+- Layer imagery outputs now live under `outputs/layers/{jc|tas|demo}/` for a cleaner hierarchy.
+- Map outputs now live under `outputs/maps/{jc|tas|demo}/` with AOI debug plots under `outputs/maps/aoi/`.
 - Rename project metadata, Quarto site, and pkgdown home content from `rcompendium`
   to `localmap`.
 - Update vignette examples and namespace-qualified calls to use `localmap::`.

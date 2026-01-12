@@ -1,23 +1,25 @@
 output_id,type,description,path,format,crs,profile,producer
-species_map,map,Species occurrence overview map (JC AOI),outputs/maps/tas_species_occurrences.png,png,EPSG:4326,tas_canonical,map_species_occurrences
-camera_sites_map,map,Camera sites basemap map (JC AOI),outputs/maps/tas_camera_sites.png,png,EPSG:3857,tas_canonical,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of Tas canonical maps,outputs/maps/tas_camera_sites_panel.png,png,EPSG:3857,tas_canonical,camera_sites_stack_maps
+species_map,map,Species occurrence overview map (JC AOI),outputs/maps/tas/species_occurrences.png,png,EPSG:4326,tas_canonical,map_species_occurrences
+camera_sites_map,map,Camera sites basemap map (JC AOI),outputs/maps/tas/camera_sites.png,png,EPSG:3857,tas_canonical,render_camera_sites_map
+camera_sites_panel,figure,Stacked panel of Tas canonical maps,outputs/maps/tas/camera_sites_panel.png,png,EPSG:3857,tas_canonical,camera_sites_stack_maps
 camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/tas_camera_sites_tile.png,png,EPSG:3857,tas_canonical,fetch_camera_wms_tile
-aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi_debug.png,png,EPSG:4326,tas_canonical,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/tas_coverage_summary.csv,csv,EPSG:28355,tas_canonical,write_coverage_summary
-site_attributes_long,table,Site attributes long table,outputs/tables/tas_site_attributes_long.parquet,parquet,NA,tas_canonical,write_site_attributes_long
-site_attributes_wide,table,Site attributes wide table,outputs/tables/tas_site_attributes_wide.csv,csv,NA,tas_canonical,write_site_attributes_wide
-wms_layer,basemap,TASVEG 4.0 Groups WMS layer,outputs/layers/tas_tasveg_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
-wms_layer_provenance,provenance,TASVEG 4.0 Groups WMS provenance,outputs/layers/tas_tasveg_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
-roads_wms_layer,basemap,State Growth Roads WMS layer,outputs/layers/tas_roads_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
-roads_wms_layer_provenance,provenance,State Growth Roads WMS provenance,outputs/layers/tas_roads_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
-localities_wms_layer,basemap,Localities WMS layer,outputs/layers/tas_localities_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
-localities_wms_layer_provenance,provenance,Localities WMS provenance,outputs/layers/tas_localities_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
-arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/layers/tas_orthophoto_arcgis.png,png,EPSG:3857,tas_canonical,fetch_arcgis_imagery
-arcgis_layer_provenance,provenance,Orthophoto ArcGIS export provenance,outputs/layers/tas_orthophoto_arcgis.png.yml,yml,EPSG:3857,tas_canonical,fetch_arcgis_imagery
-overview_map,map,Overview map panel,outputs/maps/tas_overview_map.png,png,EPSG:3857,tas_canonical,render_overview_map
-panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/tas_panel_figure.png,png,EPSG:3857,tas_canonical,assemble_panel_figure
-panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/tas_panel_figure.pdf,pdf,EPSG:3857,tas_canonical,assemble_panel_figure
+aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi/aoi_debug.png,png,EPSG:4326,tas_canonical,render_aoi_debug_plot
+coverage_summary,table,Coverage zone summary table,outputs/tables/tas/coverage_summary.csv,csv,EPSG:28355,tas_canonical,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/tables/tas/site_attributes_long.parquet,parquet,NA,tas_canonical,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/tables/tas/site_attributes_wide.csv,csv,NA,tas_canonical,write_site_attributes_wide
+wms_layer,basemap,TASVEG 4.0 Groups WMS layer,outputs/layers/tas/tasveg_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
+wms_layer_provenance,provenance,TASVEG 4.0 Groups WMS provenance,outputs/layers/tas/tasveg_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
+roads_wms_layer,basemap,State Growth Roads WMS layer,outputs/layers/tas/roads_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
+roads_wms_layer_provenance,provenance,State Growth Roads WMS provenance,outputs/layers/tas/roads_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
+localities_wms_layer,basemap,Localities WMS layer,outputs/layers/tas/localities_wms.png,png,EPSG:3857,tas_canonical,fetch_wms_imagery
+localities_wms_layer_provenance,provenance,Localities WMS provenance,outputs/layers/tas/localities_wms.png.yml,yml,EPSG:3857,tas_canonical,fetch_wms_imagery
+arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/layers/tas/orthophoto_arcgis.png,png,EPSG:3857,tas_canonical,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,Orthophoto ArcGIS export provenance,outputs/layers/tas/orthophoto_arcgis.png.yml,yml,EPSG:3857,tas_canonical,fetch_arcgis_imagery
+topography_arcgis_layer,basemap,Topography ArcGIS export imagery,outputs/layers/tas/topography_arcgis.png,png,EPSG:3857,tas_canonical,fetch_arcgis_imagery
+topography_arcgis_layer_provenance,provenance,Topography ArcGIS export provenance,outputs/layers/tas/topography_arcgis.png.yml,yml,EPSG:3857,tas_canonical,fetch_arcgis_imagery
+overview_map,map,Overview map panel,outputs/maps/tas/overview_map.png,png,EPSG:3857,tas_canonical,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/tas/panel_figure.png,png,EPSG:3857,tas_canonical,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/tas/panel_figure.pdf,pdf,EPSG:3857,tas_canonical,assemble_panel_figure
 vector_tasveg,vector,TASVEG 4.0 Groups polygons (clipped),outputs/analysis/tas/vector/tas_tasveg.gpkg,gpkg,EPSG:28355,tas_canonical,fetch_analysis_layers
 vector_tasveg_provenance,provenance,TASVEG vector provenance,outputs/analysis/tas/vector/tas_tasveg.gpkg.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers
 vector_tasveg_preview,figure,TASVEG preview PNG,outputs/analysis/tas/vector/tas_tasveg.png,png,EPSG:28355,tas_canonical,render_analysis_layer_previews

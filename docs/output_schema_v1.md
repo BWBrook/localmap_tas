@@ -21,20 +21,26 @@ are validated in the pipeline via the `output_schema_v1` target.
 
 ### JC profile entries
 
-- `species_map` → `outputs/maps/jc_species_occurrences.png`
-- `camera_sites_map` → `outputs/maps/jc_camera_sites.png`
-- `camera_sites_panel` → `outputs/maps/jc_camera_sites_panel.png`
+- `species_map` → `outputs/maps/jc/species_occurrences.png`
+- `camera_sites_map` → `outputs/maps/jc/camera_sites.png`
+- `camera_sites_panel` → `outputs/maps/jc/camera_sites_panel.png`
 - `camera_sites_tile` → `outputs/tiles/jc_camera_sites_tile.png`
-- `coverage_summary` → `outputs/tables/jc_coverage_summary.csv`
-- `site_attributes_long` → `outputs/tables/jc_site_attributes_long.parquet`
-- `site_attributes_wide` → `outputs/tables/jc_site_attributes_wide.csv`
-- `wms_layer` → `outputs/layers/jc_tasveg_wms.png`
-- `wms_layer_provenance` → `outputs/layers/jc_tasveg_wms.png.yml`
-- `arcgis_layer` → `outputs/layers/jc_topography_arcgis.png`
-- `arcgis_layer_provenance` → `outputs/layers/jc_topography_arcgis.png.yml`
-- `overview_map` → `outputs/maps/jc_overview_map.png`
-- `panel_figure_png` → `outputs/maps/jc_panel_figure.png`
-- `panel_figure_pdf` → `outputs/maps/jc_panel_figure.pdf`
+- `coverage_summary` → `outputs/tables/jc/coverage_summary.csv`
+- `site_attributes_long` → `outputs/tables/jc/site_attributes_long.parquet`
+- `site_attributes_wide` → `outputs/tables/jc/site_attributes_wide.csv`
+- `wms_layer` → `outputs/layers/jc/tasveg_wms.png`
+- `wms_layer_provenance` → `outputs/layers/jc/tasveg_wms.png.yml`
+- `arcgis_layer` → `outputs/layers/jc/topography_arcgis.png`
+- `arcgis_layer_provenance` → `outputs/layers/jc/topography_arcgis.png.yml`
+- `orthophoto_arcgis_layer` → `outputs/layers/jc/orthophoto_arcgis.png`
+- `orthophoto_arcgis_layer_provenance` → `outputs/layers/jc/orthophoto_arcgis.png.yml`
+- `roads_wms_layer` → `outputs/layers/jc/roads_wms.png`
+- `roads_wms_layer_provenance` → `outputs/layers/jc/roads_wms.png.yml`
+- `localities_wms_layer` → `outputs/layers/jc/localities_wms.png`
+- `localities_wms_layer_provenance` → `outputs/layers/jc/localities_wms.png.yml`
+- `overview_map` → `outputs/maps/jc/overview_map.png`
+- `panel_figure_png` → `outputs/maps/jc/panel_figure.png`
+- `panel_figure_pdf` → `outputs/maps/jc/panel_figure.pdf`
 - `vector_tasveg` → `outputs/analysis/jc/vector/jc_tasveg.gpkg`
 - `vector_tasveg_provenance` → `outputs/analysis/jc/vector/jc_tasveg.gpkg.yml`
 - `vector_tasveg_preview` → `outputs/analysis/jc/vector/jc_tasveg.png`
@@ -59,7 +65,7 @@ are validated in the pipeline via the `output_schema_v1` target.
 
 ### Default profile entry
 
-- `aoi_debug_plot` → `outputs/maps/aoi_debug.png`
+- `aoi_debug_plot` → `outputs/maps/aoi/aoi_debug.png`
 
 ## Validation
 

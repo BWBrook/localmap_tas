@@ -5,7 +5,7 @@ Date: 2026-01-10
 ## Summary
 - Added quick-look PNG previews alongside AOI-clipped vector/raster outputs.
 - Vector previews colour by a categorical attribute (prefers `habitat`) and include AOI outline.
-- Raster previews overlay AOI and camera sites; multiband preview uses RGB composite (bands 1–3).
+- Raster previews overlay AOI and camera sites; multiband preview uses RGB composite from named bands.
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-018a_2026-01-10_analysis-previews/`
@@ -23,3 +23,8 @@ Date: 2026-01-10
 
 ## Notes
 - Previews are intended for rapid QC and are not publication figures.
+
+## Update (2026-01-12)
+- Removed raster preview plot frames so AOI outlines are the only border.
+- Regenerated JC multiband preview to confirm the inner black frame is gone.
+- Switched JC multiband preview to DEA Landsat 8/9 geomedian source (real RS data).

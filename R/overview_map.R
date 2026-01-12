@@ -33,6 +33,7 @@ render_overview_map <- function(aoi,
     label_nudge_y = 0,
     point_colour = "#2171b5",
     point_size = 2,
+    point_shape = 16,
     aoi_colour = "#d95f0e",
     aoi_linewidth = 0.6,
     coverage_colour = "#2ca25f",
@@ -191,7 +192,8 @@ render_overview_map <- function(aoi,
       ggplot2::geom_sf(
         data = sites_sf,
         colour = map_cfg$point_colour,
-        size = map_cfg$point_size
+        size = map_cfg$point_size,
+        shape = map_cfg$point_shape
       )
     if (isTRUE(map_cfg$show_labels)) {
       label_field <- map_cfg$label_field

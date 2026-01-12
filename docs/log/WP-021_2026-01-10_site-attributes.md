@@ -8,8 +8,8 @@ Date: 2026-01-10
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-021_2026-01-10_site-attributes/`
-  - `jc_site_attributes_long.parquet`
-  - `jc_site_attributes_wide.csv`
+  - `outputs/tables/jc/site_attributes_long.parquet`
+  - `outputs/tables/jc/site_attributes_wide.csv`
 
 ## Sanity checks
 - Wide table has 13 rows (one per site) and 9 attribute columns + `site_id`.

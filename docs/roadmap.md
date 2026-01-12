@@ -525,8 +525,8 @@ Users can add/modify layers and panels via config without editing code, using a 
 **Artefact evidence**
 - `docs/layers_guide.md` (or equivalent) exists and is referenced.
 - Canonical run: `outputs/canonical_runs/WP-011_*` includes:
-  - `jc_tasveg_wms.png`,
-  - `jc_topography_arcgis.png`.
+  - `outputs/layers/jc/tasveg_wms.png`,
+  - `outputs/layers/jc/topography_arcgis.png`.
 - Log includes: “added/validated registry model; verified by JC imagery outputs”.
 
 **Stop condition**

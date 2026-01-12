@@ -122,6 +122,11 @@ Format:
 **Rationale:** Keeps CI and offline runs deterministic while still allowing explicit opt-in for live network checks.
 **Status:** Active.
 
+## 2026-01-12 — Multiband RS baseline uses DEA Landsat 8/9 geomedian
+**Decision:** Use Digital Earth Australia Landsat 8/9 geomedian (ga_ls8cls9c_gm_cyear_3) via WCS as the default multiband source for NDVI/NBR, with the JC fixture as an offline fallback.
+**Rationale:** The geomedian composite is nationally consistent, returns data without explicit time parameters, and keeps RS-derived indices grounded in real data while remaining offline-capable.
+**Status:** Active.
+
 ## 2026-01-10 — Container bootstrap uses renv restore only
 **Decision:** Docker/Apptainer builds run `scripts/bootstrap_container.R`, which performs a renv restore only (no dependency reinstall or roxygen documentation).
 **Rationale:** Keeps container builds deterministic and tractable by relying on the lockfile and r2u binaries rather than re-installing the dependency manifest.

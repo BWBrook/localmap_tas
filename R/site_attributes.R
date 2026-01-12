@@ -60,7 +60,7 @@ build_site_attributes_long <- function(sites, analysis_layers) {
 #' @export
 write_site_attributes_long <- function(attributes, output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
-    output_path <- here::here("outputs", "tables", "site_attributes_long.parquet")
+    output_path <- here::here("outputs", "tables", "default", "site_attributes_long.parquet")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
   if (!requireNamespace("arrow", quietly = TRUE)) {
@@ -85,7 +85,7 @@ write_site_attributes_long <- function(attributes, output_path = NULL) {
 #' @export
 write_site_attributes_wide <- function(attributes, output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
-    output_path <- here::here("outputs", "tables", "site_attributes_wide.csv")
+    output_path <- here::here("outputs", "tables", "default", "site_attributes_wide.csv")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
 

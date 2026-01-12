@@ -29,7 +29,7 @@ render_aoi_debug_plot <- function(aoi,
   bbox_4326 <- sf::st_as_sfc(sf::st_bbox(aoi_4326))
 
   if (is.null(output_path)) {
-    output_path <- here::here("outputs", "maps", "aoi_debug.png")
+    output_path <- here::here("outputs", "maps", "aoi", "aoi_debug.png")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
   checkmate::assert_logical(show_centroid, len = 1L, any.missing = FALSE)

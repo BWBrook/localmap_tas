@@ -84,9 +84,9 @@
     - `devtools::test()` OK (80 passing).
     - `rcmdcheck::rcmdcheck(args = \"--no-manual\")` OK with 2 NOTEs (import usage + `import::from` checks).
     - Demo pipeline: `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` completed; outputs inspected:
-      - `outputs/maps/demo_species_occurrences.png` shows Tasmania outline with fixture points within the configured bounding box.
-      - `outputs/maps/demo_camera_sites.png` shows camera sites on placeholder basemap; extent and symbol scaling appear coherent.
-      - `outputs/maps/demo_camera_sites_panel.png` renders as expected for a 1×1 panel.
+      - `outputs/maps/demo/species_occurrences.png` shows Tasmania outline with fixture points within the configured bounding box.
+      - `outputs/maps/demo/camera_sites.png` shows camera sites on placeholder basemap; extent and symbol scaling appear coherent.
+      - `outputs/maps/demo/camera_sites_panel.png` renders as expected for a 1×1 panel.
     - Remaining: demo camera basemap intentionally uses a placeholder tile (warnings expected when provider URL is empty).
 
 - 2025-12-17: Refactor away from `{import}`/`import::from()` toward explicit `pkg::fun()` usage.
@@ -101,9 +101,9 @@
     - `rcmdcheck::rcmdcheck(args = \"--no-manual\")` OK (0 errors, 0 warnings, 0 notes).
     - Demo pipeline: `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` completed with expected warning (placeholder WMS tile when URL is empty).
   - Artefact review (demo outputs, 2025-12-17):
-    - `outputs/maps/demo_species_occurrences.png`: Tasmania outline and occurrence points appear spatially plausible (points clustered in NW TAS; graticule labels plausible).
-    - `outputs/maps/demo_camera_sites.png`: camera site points render within the expected coastal extent; scale bar + north arrow present; placeholder basemap expected in demo.
-    - `outputs/maps/demo_camera_sites_panel.png`: panel renders but contains substantial whitespace (likely config/layout choice); consider tightening demo panel layout in a follow-up.
+    - `outputs/maps/demo/species_occurrences.png`: Tasmania outline and occurrence points appear spatially plausible (points clustered in NW TAS; graticule labels plausible).
+    - `outputs/maps/demo/camera_sites.png`: camera site points render within the expected coastal extent; scale bar + north arrow present; placeholder basemap expected in demo.
+    - `outputs/maps/demo/camera_sites_panel.png`: panel renders but contains substantial whitespace (likely config/layout choice); consider tightening demo panel layout in a follow-up.
 
 - 2026-01-09: WP-001 logging + evidence conventions.
   - Added `docs/log/README.md` and documented naming conventions in `docs/workflow.md`.
@@ -140,7 +140,7 @@
   - Added `data/` to `.gitignore` per runtime-data policy; recorded decision to keep real datasets out of package defaults.
   - Documented AOI conventions (analysis CRS, units, rotation) in `docs/config_reference.md`.
   - Added `render_aoi_debug_plot()` and `aoi_debug_plot` target for AOI sanity previews (bounding box + sites).
-  - Ran `devtools::test()` (88 pass) and regenerated `outputs/maps/aoi_debug.png` for inspection.
+  - Ran `devtools::test()` (88 pass) and regenerated `outputs/maps/aoi/aoi_debug.png` for inspection.
 
 - 2026-01-09: WP-007 AOI builder + JC dataset integration.
   - Implemented `build_aoi_from_config()` with centroid/size/rotation and schema v2 migration from v1 bounding boxes.
@@ -265,3 +265,26 @@
 - 2026-01-11: DEM variant switch + derived cache invalidation.
   - Added `data.dem_variant`/`data.dem_variant_path` support with GA/SRTM/ELVIS options and config tests.
   - Derived raster cache keys now include source cache keys to refresh slope/indices when DEM sources change.
+
+- 2026-01-12: Analysis preview frame cleanup.
+  - Removed the extra raster plot frame so preview PNGs only show the AOI outline (no inner black border).
+  - Regenerated JC analysis previews to confirm AOI/points overlay without the plot box.
+
+- 2026-01-12: Multiband RS source switch to DEA Landsat 8/9 geomedian.
+  - Updated JC multiband analysis layer to use DEA Landsat 8/9 geomedian (WCS) with fixture fallback.
+  - Added band-name resolution for NDVI/NBR so mappings work for both real RS data and the offline fixture.
+  - Refreshed JC analysis previews and derived indices with the new multiband source.
+
+- 2026-01-12: Layer output tidy-up.
+  - Moved imagery outputs under `outputs/layers/{jc|tas|demo}/` to match the analysis output hierarchy.
+  - Updated manifests and schema docs to point to the new layer output paths.
+
+- 2026-01-12: Map output tidy-up + layer parity.
+  - Moved map outputs under `outputs/maps/{jc|tas|demo}/` and placed AOI debug output under `outputs/maps/aoi/`.
+  - Regenerated JC/TAS map artefacts at the new paths; removed legacy top-level map files.
+  - Added JC orthophoto/roads/localities layers and TAS topography layer to keep layer outputs consistent across profiles.
+
+- 2026-01-12: Tables output hierarchy cleanup.
+  - Moved table artefacts into `outputs/tables/{jc|tas|demo|default}/` and updated config + manifests.
+  - Fixed demo layer registry duplicates (roads/localities) and aligned demo layer output paths.
+  - Regenerated demo coverage + site attribute tables at the new paths.

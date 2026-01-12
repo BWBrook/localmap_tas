@@ -24,7 +24,7 @@ data:
       width: 1600
       height: 1600
       dpi: 96
-      output_path: "outputs/layers/tasveg_wms.png"
+      output_path: "outputs/layers/jc/tasveg_wms.png"
       offline: true
       attribution:
         source: "The LIST"
@@ -44,7 +44,7 @@ data:
       width: 1600
       height: 1600
       dpi: 96
-      output_path: "outputs/layers/topography_arcgis.png"
+      output_path: "outputs/layers/jc/topography_arcgis.png"
       offline: true
       attribution:
         source: "The LIST"
@@ -59,7 +59,7 @@ data:
     - id: "local_raster"
       type: "file"
       path: "inst/extdata/local_raster.png"
-      output_path: "outputs/layers/local_raster.png"
+      output_path: "outputs/layers/jc/local_raster.png"
       attribution:
         source: "Local raster"
 ```

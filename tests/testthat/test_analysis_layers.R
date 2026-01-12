@@ -110,6 +110,8 @@ testthat::test_that("derived slope and indices are computed", {
   slope_out <- tempfile(fileext = ".tif")
   ndvi_out <- tempfile(fileext = ".tif")
   nbr_out <- tempfile(fileext = ".tif")
+  ndvi_named_out <- tempfile(fileext = ".tif")
+  nbr_named_out <- tempfile(fileext = ".tif")
 
   layers <- list(
     list(
@@ -151,6 +153,22 @@ testthat::test_that("derived slope and indices are computed", {
       bands = list(nir = 2, swir2 = 3),
       output_path = nbr_out,
       attribution = list(source = "fixture")
+    ),
+    list(
+      id = "ndvi_named",
+      type = "derived_ndvi",
+      source_id = "multi",
+      bands = list(red = "red", nir = "nir"),
+      output_path = ndvi_named_out,
+      attribution = list(source = "fixture")
+    ),
+    list(
+      id = "nbr_named",
+      type = "derived_nbr",
+      source_id = "multi",
+      bands = list(nir = "nir", swir2 = "swir2"),
+      output_path = nbr_named_out,
+      attribution = list(source = "fixture")
     )
   )
 
@@ -158,6 +176,8 @@ testthat::test_that("derived slope and indices are computed", {
   testthat::expect_true(file.exists(res$path[res$id == "slope"]))
   testthat::expect_true(file.exists(res$path[res$id == "ndvi"]))
   testthat::expect_true(file.exists(res$path[res$id == "nbr"]))
+  testthat::expect_true(file.exists(res$path[res$id == "ndvi_named"]))
+  testthat::expect_true(file.exists(res$path[res$id == "nbr_named"]))
 
   ndvi <- terra::rast(ndvi_out)
   vals <- terra::values(ndvi, na.rm = TRUE)

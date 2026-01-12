@@ -293,9 +293,9 @@ Derived slope (`type: derived_slope`):
 
 Derived indices (`type: derived_ndvi`, `type: derived_nbr`):
 - `source_id` (string, required): multiband raster layer ID.
-- `bands` (list, required): band mapping.
-  - NDVI: `red`, `nir` band numbers.
-  - NBR: `nir`, `swir2` band numbers.
+- `bands` (list, required): band mapping (numbers or band-name strings; lists of candidates are allowed).
+  - NDVI: `red`, `nir`.
+  - NBR: `nir`, `swir2`.
 
 Resampling policy:
 - Categorical rasters use `near` (nearest neighbor).
@@ -347,7 +347,7 @@ Controls site attribute extraction outputs.
 - `show_labels` (logical, default `false`): draw site labels.
 - `label_field` (string, default `site`): site label column.
 - `label_size` (numeric): label size.
-- `point_colour`/`point_size`: site marker styling.
+- `point_colour`/`point_size`/`point_shape`: site marker styling.
 - `aoi_colour`/`coverage_colour`: outline and fill styling.
 - `scale_bar_location`/`north_arrow_location`: positions for cartographic annotations.
 

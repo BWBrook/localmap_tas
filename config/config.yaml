@@ -18,8 +18,8 @@ default:
     dem_variant_path: null
     attributes:
       enabled: true
-      output_long: "outputs/tables/site_attributes_long.parquet"
-      output_wide: "outputs/tables/site_attributes_wide.csv"
+      output_long: "outputs/tables/default/site_attributes_long.parquet"
+      output_wide: "outputs/tables/default/site_attributes_wide.csv"
     occurrence:
       min_year: 2000
       min_lat: null
@@ -160,8 +160,8 @@ demo:
   data:
     occurrence:
       map:
-        output_path: "outputs/maps/demo_species_occurrences.png"
-        topo_output_path: "outputs/maps/demo_species_topo.png"
+        output_path: "outputs/maps/demo/species_occurrences.png"
+        topo_output_path: "outputs/maps/demo/species_topo.png"
         additional_points:
           path: null
         enable_topo_tiles: false
@@ -175,18 +175,18 @@ demo:
         overlays: []
         output_path: "outputs/tiles/demo_camera_sites_tile.png"
       map:
-        output_path: "outputs/maps/demo_camera_sites.png"
+        output_path: "outputs/maps/demo/camera_sites.png"
         legend:
           show: false
       stack:
         paths:
-          - "outputs/maps/demo_species_occurrences.png"
-          - "outputs/maps/demo_camera_sites.png"
+          - "outputs/maps/demo/species_occurrences.png"
+          - "outputs/maps/demo/camera_sites.png"
         glob: []
         input_dir: []
         columns: 1
         rows: 2
-        output_path: "outputs/maps/demo_camera_sites_panel.png"
+        output_path: "outputs/maps/demo/camera_sites_panel.png"
         gap_px: 8
         labels:
           values: ["a)", "b)"]
@@ -196,8 +196,25 @@ demo:
     coverage:
       enabled: true
       buffer_m: 250
-      summary_path: "outputs/tables/demo_coverage_summary.csv"
+      summary_path: "outputs/tables/demo/coverage_summary.csv"
+    attributes:
+      output_long: "outputs/tables/demo/site_attributes_long.parquet"
+      output_wide: "outputs/tables/demo/site_attributes_wide.csv"
     layers:
+      - id: "orthophoto_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Basemaps/Orthophoto/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 2000
+        height: 2000
+        dpi: 96
+        output_path: "outputs/layers/jc/orthophoto_arcgis.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Orthophoto"
       - id: "tasveg_wms"
         type: "wms"
         url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
@@ -209,7 +226,7 @@ demo:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/demo_tasveg_wms.png"
+        output_path: "outputs/layers/demo/tasveg_wms.png"
         offline: true
         attribution:
           source: "The LIST"
@@ -225,14 +242,48 @@ demo:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/demo_topography_arcgis.png"
+        output_path: "outputs/layers/demo/topography_arcgis.png"
         offline: true
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "Topography"
+      - id: "roads_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer"
+        layers:
+          - "State_Growth_Roads26192"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/demo/roads_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "State Growth Roads"
+      - id: "localities_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/CadastreAndAdministrative/MapServer/WMSServer"
+        layers:
+          - "Localities"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/demo/localities_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Localities"
     overview_map:
-      output_path: "outputs/maps/demo_overview_map.png"
+      output_path: "outputs/maps/demo/overview_map.png"
       width: 7
       height: 7
       dpi: 300
@@ -241,8 +292,9 @@ demo:
         - id: "topography_arcgis"
           opacity: 0.35
       show_labels: false
-      point_colour: "#2171b5"
+      point_colour: "#d73027"
       point_size: 2
+      point_shape: 3
       aoi_colour: "#d95f0e"
       coverage_colour: "#2ca25f"
       coverage_alpha: 0.15
@@ -250,10 +302,10 @@ demo:
       north_arrow_location: "tr"
     panel_figure:
       paths:
-        - "outputs/maps/demo_overview_map.png"
-        - "outputs/maps/demo_species_occurrences.png"
-        - "outputs/maps/demo_camera_sites.png"
-        - "outputs/maps/demo_species_topo.png"
+        - "outputs/maps/demo/overview_map.png"
+        - "outputs/maps/demo/species_occurrences.png"
+        - "outputs/maps/demo/camera_sites.png"
+        - "outputs/maps/demo/species_topo.png"
       order:
         - "demo_overview_map"
         - "demo_species_occurrences"
@@ -261,8 +313,8 @@ demo:
         - "demo_species_topo"
       columns: 2
       rows: 2
-      output_path: "outputs/maps/demo_panel_figure.png"
-      output_pdf: "outputs/maps/demo_panel_figure.pdf"
+      output_path: "outputs/maps/demo/panel_figure.png"
+      output_pdf: "outputs/maps/demo/panel_figure.pdf"
       gap_px: 8
       labels:
         values: ["a)", "b)", "c)", "d)"]
@@ -279,8 +331,11 @@ jc:
     species_requests: "metadata/species_requests_jc.csv"
     occurrence:
       map:
-        output_path: "outputs/maps/jc_species_occurrences.png"
-        topo_output_path: "outputs/maps/jc_species_topo.png"
+        output_path: "outputs/maps/jc/species_occurrences.png"
+        topo_output_path: "outputs/maps/jc/species_topo.png"
+        tile_provider: "OpenTopoMap"
+        tile_zoom: 12
+        tile_graticule: true
     aoi:
       mode: "auto"
       buffer_multiplier: 1
@@ -289,8 +344,22 @@ jc:
     coverage:
       enabled: true
       buffer_m: 50
-      summary_path: "outputs/tables/jc_coverage_summary.csv"
+      summary_path: "outputs/tables/jc/coverage_summary.csv"
     layers:
+      - id: "orthophoto_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Basemaps/Orthophoto/MapServer/export"
+        crs: "EPSG:3857"
+        format: "png"
+        width: 2000
+        height: 2000
+        dpi: 96
+        output_path: "outputs/layers/jc/orthophoto_arcgis.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Orthophoto"
       - id: "tasveg_wms"
         type: "wms"
         url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
@@ -302,7 +371,7 @@ jc:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/jc_tasveg_wms.png"
+        output_path: "outputs/layers/jc/tasveg_wms.png"
         offline: false
         attribution:
           source: "The LIST"
@@ -318,24 +387,61 @@ jc:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/jc_topography_arcgis.png"
+        output_path: "outputs/layers/jc/topography_arcgis.png"
         offline: false
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "Topography"
+      - id: "roads_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer"
+        layers:
+          - "State_Growth_Roads26192"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc/roads_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "State Growth Roads"
+      - id: "localities_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/CadastreAndAdministrative/MapServer/WMSServer"
+        layers:
+          - "Localities"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc/localities_wms.png"
+        offline: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Localities"
     overview_map:
-      output_path: "outputs/maps/jc_overview_map.png"
+      output_path: "outputs/maps/jc/overview_map.png"
       width: 7
       height: 7
       dpi: 300
-      base_layer_id: "tasveg_wms"
+      base_layer_id: "orthophoto_arcgis"
       overlays:
+        - id: "tasveg_wms"
+          opacity: 0.35
         - id: "topography_arcgis"
           opacity: 0.35
       show_labels: false
-      point_colour: "#2171b5"
+      point_colour: "#d73027"
       point_size: 2
+      point_shape: 3
       aoi_colour: "#d95f0e"
       coverage_colour: "#2ca25f"
       coverage_alpha: 0.15
@@ -343,10 +449,10 @@ jc:
       north_arrow_location: "tr"
     panel_figure:
       paths:
-        - "outputs/maps/jc_overview_map.png"
-        - "outputs/maps/jc_species_occurrences.png"
-        - "outputs/maps/jc_camera_sites.png"
-        - "outputs/maps/jc_species_topo.png"
+        - "outputs/maps/jc/overview_map.png"
+        - "outputs/maps/jc/species_occurrences.png"
+        - "outputs/maps/jc/camera_sites.png"
+        - "outputs/maps/jc/species_topo.png"
       order:
         - "jc_overview_map"
         - "jc_species_occurrences"
@@ -354,8 +460,8 @@ jc:
         - "jc_species_topo"
       columns: 2
       rows: 2
-      output_path: "outputs/maps/jc_panel_figure.png"
-      output_pdf: "outputs/maps/jc_panel_figure.pdf"
+      output_path: "outputs/maps/jc/panel_figure.png"
+      output_pdf: "outputs/maps/jc/panel_figure.pdf"
       gap_px: 8
       labels:
         values: ["a)", "b)", "c)", "d)"]
@@ -374,16 +480,16 @@ jc:
       basemap:
         output_path: "outputs/tiles/jc_camera_sites_tile.png"
       map:
-        output_path: "outputs/maps/jc_camera_sites.png"
+        output_path: "outputs/maps/jc/camera_sites.png"
       stack:
         paths:
-          - "outputs/maps/jc_species_occurrences.png"
-          - "outputs/maps/jc_camera_sites.png"
+          - "outputs/maps/jc/species_occurrences.png"
+          - "outputs/maps/jc/camera_sites.png"
         glob: []
         input_dir: []
         columns: 1
         rows: 2
-        output_path: "outputs/maps/jc_camera_sites_panel.png"
+        output_path: "outputs/maps/jc/camera_sites_panel.png"
         gap_px: 8
         labels:
           values: ["a)", "b)"]
@@ -424,15 +530,25 @@ jc:
           license: "CC BY 4.0"
           credit: "DEM SRTM 1 Second 2024"
       - id: "jc_multiband"
-        type: "raster_file"
-        path: "inst/extdata/jc_multiband.tif"
+        type: "raster_wcs"
+        url: "https://ows.dea.ga.gov.au/wcs"
+        coverage: "ga_ls8cls9c_gm_cyear_3"
+        version: "1.0.0"
+        crs: "EPSG:4326"
+        format: "GeoTIFF"
+        resolution: 0.00027
         output_path: "outputs/analysis/jc/raster/jc_multiband.tif"
         categorical: false
-        units: "index"
+        units: "reflectance"
+        offline: false
+        fixture_path: "inst/extdata/jc_multiband.tif"
+        fallback:
+          type: "raster_file"
+          path: "inst/extdata/jc_multiband.tif"
         attribution:
-          source: "JC fixture"
+          source: "Digital Earth Australia"
           license: "CC BY 4.0"
-          credit: "Synthetic multiband"
+          credit: "DEA Landsat 8/9 Geomedian (ga_ls8cls9c_gm_cyear_3)"
       - id: "jc_slope"
         type: "derived_slope"
         source_id: "jc_dem"
@@ -446,8 +562,8 @@ jc:
         type: "derived_ndvi"
         source_id: "jc_multiband"
         bands:
-          red: 1
-          nir: 2
+          red: ["nbart_red", "red"]
+          nir: ["nbart_nir", "nir"]
         output_path: "outputs/analysis/jc/raster/jc_ndvi.tif"
         units: "index"
         attribution:
@@ -458,8 +574,8 @@ jc:
         type: "derived_nbr"
         source_id: "jc_multiband"
         bands:
-          nir: 2
-          swir2: 3
+          nir: ["nbart_nir", "nir"]
+          swir2: ["nbart_swir_2", "swir2", "swir_2"]
         output_path: "outputs/analysis/jc/raster/jc_nbr.tif"
         units: "index"
         attribution:
@@ -468,8 +584,8 @@ jc:
           credit: "NBR"
     attributes:
       enabled: true
-      output_long: "outputs/tables/jc_site_attributes_long.parquet"
-      output_wide: "outputs/tables/jc_site_attributes_wide.csv"
+      output_long: "outputs/tables/jc/site_attributes_long.parquet"
+      output_wide: "outputs/tables/jc/site_attributes_wide.csv"
 
 jc_ci:
   inherits: jc
@@ -496,7 +612,7 @@ jc_ci:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/jc_tasveg_wms.png"
+        output_path: "outputs/layers/jc/tasveg_wms.png"
         offline: true
         attribution:
           source: "The LIST"
@@ -512,7 +628,7 @@ jc_ci:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/jc_topography_arcgis.png"
+        output_path: "outputs/layers/jc/topography_arcgis.png"
         offline: true
         attribution:
           source: "The LIST"
@@ -528,8 +644,11 @@ tas_canonical:
     species_requests: "metadata/species_requests_jc.csv"
     occurrence:
       map:
-        output_path: "outputs/maps/tas_species_occurrences.png"
-        topo_output_path: "outputs/maps/tas_species_topo.png"
+        output_path: "outputs/maps/tas/species_occurrences.png"
+        topo_output_path: "outputs/maps/tas/species_topo.png"
+        tile_provider: "OpenTopoMap"
+        tile_zoom: 12
+        tile_graticule: true
     aoi:
       mode: "auto"
       buffer_multiplier: 1
@@ -539,7 +658,7 @@ tas_canonical:
     coverage:
       enabled: true
       buffer_m: 50
-      summary_path: "outputs/tables/tas_coverage_summary.csv"
+      summary_path: "outputs/tables/tas/coverage_summary.csv"
     camera_sites:
       source: "jc"
       jc:
@@ -552,16 +671,16 @@ tas_canonical:
       basemap:
         output_path: "outputs/tiles/tas_camera_sites_tile.png"
       map:
-        output_path: "outputs/maps/tas_camera_sites.png"
+        output_path: "outputs/maps/tas/camera_sites.png"
       stack:
         paths:
-          - "outputs/maps/tas_species_occurrences.png"
-          - "outputs/maps/tas_camera_sites.png"
+          - "outputs/maps/tas/species_occurrences.png"
+          - "outputs/maps/tas/camera_sites.png"
         glob: []
         input_dir: []
         columns: 1
         rows: 2
-        output_path: "outputs/maps/tas_camera_sites_panel.png"
+        output_path: "outputs/maps/tas/camera_sites_panel.png"
         gap_px: 8
         labels:
           values: ["a)", "b)"]
@@ -577,12 +696,28 @@ tas_canonical:
         width: 2000
         height: 2000
         dpi: 96
-        output_path: "outputs/layers/tas_orthophoto_arcgis.png"
+        output_path: "outputs/layers/tas/orthophoto_arcgis.png"
         offline: false
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "Orthophoto"
+      - id: "topography_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
+        layers:
+          - 65
+        crs: "EPSG:3857"
+        format: "png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas/topography_arcgis.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Topography"
       - id: "tasveg_wms"
         type: "wms"
         url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
@@ -594,7 +729,7 @@ tas_canonical:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/tas_tasveg_wms.png"
+        output_path: "outputs/layers/tas/tasveg_wms.png"
         offline: false
         attribution:
           source: "The LIST"
@@ -611,7 +746,7 @@ tas_canonical:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/tas_roads_wms.png"
+        output_path: "outputs/layers/tas/roads_wms.png"
         offline: false
         attribution:
           source: "The LIST"
@@ -628,14 +763,14 @@ tas_canonical:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/tas_localities_wms.png"
+        output_path: "outputs/layers/tas/localities_wms.png"
         offline: false
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "Localities"
     overview_map:
-      output_path: "outputs/maps/tas_overview_map.png"
+      output_path: "outputs/maps/tas/overview_map.png"
       width: 7
       height: 7
       dpi: 300
@@ -648,8 +783,9 @@ tas_canonical:
         - id: "localities_wms"
           opacity: 0.75
       show_labels: false
-      point_colour: "#2171b5"
+      point_colour: "#d73027"
       point_size: 2
+      point_shape: 3
       aoi_colour: "#d95f0e"
       coverage_colour: "#2ca25f"
       coverage_alpha: 0.15
@@ -657,10 +793,10 @@ tas_canonical:
       north_arrow_location: "tr"
     panel_figure:
       paths:
-        - "outputs/maps/tas_overview_map.png"
-        - "outputs/maps/tas_species_occurrences.png"
-        - "outputs/maps/tas_camera_sites.png"
-        - "outputs/maps/tas_species_topo.png"
+        - "outputs/maps/tas/overview_map.png"
+        - "outputs/maps/tas/species_occurrences.png"
+        - "outputs/maps/tas/camera_sites.png"
+        - "outputs/maps/tas/species_topo.png"
       order:
         - "tas_overview_map"
         - "tas_species_occurrences"
@@ -668,8 +804,8 @@ tas_canonical:
         - "tas_species_topo"
       columns: 2
       rows: 2
-      output_path: "outputs/maps/tas_panel_figure.png"
-      output_pdf: "outputs/maps/tas_panel_figure.pdf"
+      output_path: "outputs/maps/tas/panel_figure.png"
+      output_pdf: "outputs/maps/tas/panel_figure.pdf"
       gap_px: 8
       labels:
         values: ["a)", "b)", "c)", "d)"]
@@ -720,8 +856,8 @@ tas_canonical:
           credit: "Slope"
     attributes:
       enabled: true
-      output_long: "outputs/tables/tas_site_attributes_long.parquet"
-      output_wide: "outputs/tables/tas_site_attributes_wide.csv"
+      output_long: "outputs/tables/tas/site_attributes_long.parquet"
+      output_wide: "outputs/tables/tas/site_attributes_wide.csv"
 
 tas_canonical_ci:
   inherits: tas_canonical
@@ -738,7 +874,7 @@ tas_canonical_ci:
         width: 2000
         height: 2000
         dpi: 96
-        output_path: "outputs/layers/tas_orthophoto_arcgis.png"
+        output_path: "outputs/layers/tas/orthophoto_arcgis.png"
         offline: true
         attribution:
           source: "The LIST"
@@ -755,7 +891,7 @@ tas_canonical_ci:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/tas_tasveg_wms.png"
+        output_path: "outputs/layers/tas/tasveg_wms.png"
         offline: true
         attribution:
           source: "The LIST"
@@ -772,7 +908,7 @@ tas_canonical_ci:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/tas_roads_wms.png"
+        output_path: "outputs/layers/tas/roads_wms.png"
         offline: true
         attribution:
           source: "The LIST"
@@ -789,7 +925,7 @@ tas_canonical_ci:
         width: 1600
         height: 1600
         dpi: 96
-        output_path: "outputs/layers/tas_localities_wms.png"
+        output_path: "outputs/layers/tas/localities_wms.png"
         offline: true
         attribution:
           source: "The LIST"

@@ -390,7 +390,7 @@ generate_topo_tile_map <- function(occurrences,
     tile_zoom = 8,
     tile_outline_colour = "#ffffff",
     topo_output_path = NULL,
-    tile_graticule = FALSE
+  tile_graticule = TRUE
   )
   mapping_settings <- utils::modifyList(defaults, mapping_settings)
 
@@ -458,10 +458,15 @@ generate_topo_tile_map <- function(occurrences,
   }
   occurrences_sf <- sf::st_transform(occurrences_sf, 3857)
 
-  additional_points_sf <- if (!is.null(additional_points_sf) && nrow(additional_points_sf) > 0L) {
-    sf::st_transform(additional_points_sf, 3857)
+  if (!is.null(additional_points_sf) && nrow(additional_points_sf) > 0L) {
+    additional_points_sf <- sf::st_filter(additional_points_sf, bbox, .predicate = sf::st_within)
+    if (nrow(additional_points_sf) > 0L) {
+      additional_points_sf <- sf::st_transform(additional_points_sf, 3857)
+    } else {
+      additional_points_sf <- NULL
+    }
   } else {
-    NULL
+    additional_points_sf <- NULL
   }
 
   outline_sf <- get_basemap_tasmania(bbox)
