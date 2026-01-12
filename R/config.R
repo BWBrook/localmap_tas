@@ -544,7 +544,10 @@ resolve_dem_variant_config <- function(variant, dem_path, dem_attr_override) {
   if (identical(variant, "ga_1s_hydro")) {
     return(list(
       type = "raster_wcs",
-      url = "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_Hydro_Enforced_2024/MapServer/WCSServer",
+      url = paste0(
+        "https://services.ga.gov.au/gis/services/",
+        "DEM_SRTM_1Second_Hydro_Enforced_2024/MapServer/WCSServer"
+      ),
       coverage = "1",
       version = "1.0.0",
       crs = "EPSG:4326",

@@ -112,7 +112,12 @@ testthat::test_that("cfg_read applies dem_variant overrides", {
     "    analysis_layers:",
     "      - id: \"site_dem\"",
     "        type: \"raster_wcs\"",
-    "        url: \"https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer\"",
+    paste0(
+      "        url: \"",
+      "https://services.ga.gov.au/gis/services/",
+      "DEM_SRTM_1Second_2024/MapServer/WCSServer",
+      "\""
+    ),
     "        coverage: \"1\"",
     "        output_path: \"outputs/analysis/jc/raster/jc_dem.tif\"",
     "        attribution:",
