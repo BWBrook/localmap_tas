@@ -4,9 +4,16 @@
 #'
 #' @param sites Data frame with `site`, `lat`, `lon`.
 #' @param analysis_layers Tibble from `fetch_analysis_layers()`.
+#' @param aoi Optional AOI list from `build_aoi_from_config()`.
+#' @param analysis_crs Optional CRS string for distance calculations.
+#' @param distance_layers Optional list of distance-layer configs.
 #' @return Tibble of site attributes in long form.
 #' @export
-build_site_attributes_long <- function(sites, analysis_layers) {
+build_site_attributes_long <- function(sites,
+                                       analysis_layers,
+                                       aoi = NULL,
+                                       analysis_crs = NULL,
+                                       distance_layers = NULL) {
   if (is.null(sites) || !is.data.frame(sites) || nrow(sites) == 0L) {
     return(empty_site_attributes())
   }
@@ -22,16 +29,40 @@ build_site_attributes_long <- function(sites, analysis_layers) {
     return(empty_site_attributes())
   }
 
-  raster_types <- c("raster_file", "raster_arcgis", "derived_slope", "derived_ndvi", "derived_nbr")
+  raster_types <- c(
+    "raster_file",
+    "raster_arcgis",
+    "raster_wcs",
+    "raster_geodata",
+    "derived_slope",
+    "derived_ndvi",
+    "derived_nbr"
+  )
   vector_types <- c("vector_file", "vector_arcgis")
 
   raster_layers <- analysis_layers[analysis_layers$type %in% raster_types, , drop = FALSE]
+  if ("skip_attributes" %in% names(raster_layers)) {
+    skip_vals <- raster_layers$skip_attributes
+    skip_vals[is.na(skip_vals)] <- FALSE
+    raster_layers <- raster_layers[!skip_vals, , drop = FALSE]
+  }
   vector_layers <- analysis_layers[analysis_layers$type %in% vector_types, , drop = FALSE]
+  if ("skip_attributes" %in% names(vector_layers)) {
+    skip_vals <- vector_layers$skip_attributes
+    skip_vals[is.na(skip_vals)] <- FALSE
+    vector_layers <- vector_layers[!skip_vals, , drop = FALSE]
+  }
 
   raster_long <- extract_raster_attributes(sites, raster_layers)
   vector_long <- extract_vector_attributes(sites, vector_layers)
+  distance_long <- extract_distance_attributes(
+    sites = sites,
+    distance_layers = distance_layers,
+    aoi = aoi,
+    analysis_crs = analysis_crs
+  )
 
-  combined <- dplyr::bind_rows(raster_long, vector_long)
+  combined <- dplyr::bind_rows(raster_long, vector_long, distance_long)
   if (nrow(combined) == 0L) {
     return(empty_site_attributes())
   }
@@ -60,7 +91,7 @@ build_site_attributes_long <- function(sites, analysis_layers) {
 #' @export
 write_site_attributes_long <- function(attributes, output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
-    output_path <- here::here("outputs", "tables", "default", "site_attributes_long.parquet")
+    output_path <- here::here("outputs", "tables", "jc", "site_attributes_long.parquet")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
   if (!requireNamespace("arrow", quietly = TRUE)) {
@@ -80,29 +111,101 @@ write_site_attributes_long <- function(attributes, output_path = NULL) {
 #' Write convenience wide table as CSV
 #'
 #' @param attributes Long attributes tibble.
+#' @param sites Optional sites data frame with `site`, `lat`, `lon`.
 #' @param output_path Output CSV path.
 #' @return Output path.
 #' @export
-write_site_attributes_wide <- function(attributes, output_path = NULL) {
+write_site_attributes_wide <- function(attributes, sites = NULL, output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
-    output_path <- here::here("outputs", "tables", "default", "site_attributes_wide.csv")
+    output_path <- here::here("outputs", "tables", "jc", "site_attributes_wide.csv")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
 
-  if (nrow(attributes) == 0L) {
-    wide <- tibble::tibble(site_id = character())
+  if (!is.null(sites) &&
+    is.data.frame(sites) &&
+    all(c("site", "lat", "lon") %in% names(sites))) {
+    site_tbl <- sites |>
+      dplyr::transmute(
+        site_id = as.character(.data$site),
+        lat = as.numeric(.data$lat),
+        lon = as.numeric(.data$lon)
+      )
   } else {
-    wide <- attributes |>
+    site_tbl <- tibble::tibble(
+      site_id = as.character(unique(attributes$site_id)),
+      lat = NA_real_,
+      lon = NA_real_
+    )
+  }
+
+  if (nrow(attributes) == 0L) {
+    wide <- site_tbl
+  } else {
+    attributes <- attributes |>
       dplyr::mutate(
-        column_id = paste0(.data$layer_id, "__", .data$attribute_name)
+        attribute_norm = gsub("[^a-z0-9]+", "_", tolower(.data$attribute_name)),
+        target = dplyr::case_when(
+          grepl("_dem$", .data$layer_id) & .data$attribute_name == "value" ~ "dem",
+          grepl("_slope$", .data$layer_id) & .data$attribute_name == "slope" ~ "slope",
+          grepl("_ndvi$", .data$layer_id) & .data$attribute_name == "ndvi" ~ "ndvi",
+          grepl("_nbr$", .data$layer_id) & .data$attribute_name == "nbr" ~ "nbr",
+          grepl("tasveg", .data$layer_id) &
+            grepl("veg", .data$attribute_norm) &
+            grepl("group", .data$attribute_norm) ~ "tasveg_category",
+          grepl("tasveg", .data$layer_id) &
+            .data$attribute_name == "VEGCODE" ~ "tasveg_class",
+          .data$layer_id %in% c("distance_to_road", "distance_to_locality") &
+            .data$attribute_name == "distance_m" ~ .data$layer_id,
+          TRUE ~ NA_character_
+        )
       ) |>
-      dplyr::select(dplyr::all_of(c("site_id", "column_id", "value"))) |>
+      dplyr::filter(!is.na(.data$target)) |>
+      dplyr::group_by(.data$site_id, .data$target) |>
+      dplyr::summarise(value = dplyr::first(.data$value), .groups = "drop")
+
+    wide <- attributes |>
+      dplyr::select(dplyr::all_of(c("site_id", "target", "value"))) |>
       tidyr::pivot_wider(
-        names_from = "column_id",
+        names_from = "target",
         values_from = "value",
         values_fill = NA_character_
       ) |>
+      dplyr::right_join(site_tbl, by = "site_id") |>
       dplyr::arrange(.data$site_id)
+  }
+
+  desired_cols <- c(
+    "site_id",
+    "lat",
+    "lon",
+    "dem",
+    "slope",
+    "ndvi",
+    "nbr",
+    "tasveg_category",
+    "tasveg_class",
+    "distance_to_road",
+    "distance_to_locality"
+  )
+  missing_cols <- setdiff(desired_cols, names(wide))
+  if (length(missing_cols) > 0L) {
+    for (col in missing_cols) {
+      wide[[col]] <- NA_character_
+    }
+  }
+  wide <- wide[, desired_cols, drop = FALSE]
+  numeric_cols <- c(
+    "lat",
+    "lon",
+    "dem",
+    "slope",
+    "ndvi",
+    "nbr",
+    "distance_to_road",
+    "distance_to_locality"
+  )
+  for (col in intersect(numeric_cols, names(wide))) {
+    wide[[col]] <- suppressWarnings(as.numeric(wide[[col]]))
   }
 
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
@@ -139,11 +242,14 @@ extract_raster_attributes <- function(sites, raster_layers) {
       names(values_mat) <- band_names_raw
     }
     band_names <- band_names_raw
-    if (terra::nlyr(rast) == 1L &&
-          length(band_names_raw) == 1L &&
-          grepl("^lyr\\.", band_names_raw)) {
-      band_names <- "value"
-      names(values_mat) <- band_names
+    if (terra::nlyr(rast) == 1L && length(band_names_raw) == 1L) {
+      raw_name <- band_names_raw[[1]]
+      generic_name <- is.na(raw_name) || !nzchar(raw_name) ||
+        grepl("^(lyr\\.|file)", raw_name) || raw_name == "band_1"
+      if (isTRUE(generic_name)) {
+        band_names <- "value"
+        names(values_mat) <- band_names
+      }
     }
     values_mat$site_id <- sites$site[vals$ID]
     values_long <- tidyr::pivot_longer(
@@ -189,6 +295,17 @@ extract_vector_attributes <- function(sites, vector_layers) {
       geom_col <- "geometry"
     }
     fields <- setdiff(names(vec), geom_col)
+    requested <- NULL
+    if ("attribute_fields" %in% names(layer)) {
+      requested <- layer$attribute_fields[[1]]
+      if (!is.null(requested)) {
+        requested <- unlist(requested, use.names = FALSE)
+        requested <- requested[!is.na(requested)]
+      }
+    }
+    if (!is.null(requested) && length(requested) > 0L) {
+      fields <- intersect(fields, requested)
+    }
     if (length(fields) == 0L) {
       return(NULL)
     }
@@ -230,6 +347,109 @@ extract_vector_attributes <- function(sites, vector_layers) {
     }
     values_long$provenance_path <- layer$provenance_path[[1]]
     values_long
+  })
+
+  dplyr::bind_rows(output)
+}
+
+extract_distance_attributes <- function(sites,
+                                        distance_layers = NULL,
+                                        aoi = NULL,
+                                        analysis_crs = NULL) {
+  if (is.null(distance_layers)) {
+    return(empty_site_attributes())
+  }
+  if (!is.list(distance_layers)) {
+    rlang::abort("distance_layers must be a list.", class = "distance_layers_invalid")
+  }
+  if (!is.null(distance_layers$id)) {
+    distance_layers <- list(distance_layers)
+  }
+  if (length(distance_layers) == 0L) {
+    return(empty_site_attributes())
+  }
+
+  if (is.null(analysis_crs) || !nzchar(analysis_crs)) {
+    analysis_crs <- if (!is.null(aoi) && is.list(aoi) && !is.null(aoi$crs)) {
+      as.character(aoi$crs)
+    } else {
+      "EPSG:28355"
+    }
+  }
+
+  sites_sf <- sf::st_as_sf(sites, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+  aoi_geom <- NULL
+  if (!is.null(aoi) && is.list(aoi) && !is.null(aoi$aoi)) {
+    aoi_geom <- aoi$aoi
+  }
+  if (is.null(aoi_geom)) {
+    aoi_geom <- sf::st_as_sfc(sf::st_bbox(sites_sf))
+  }
+
+  output <- lapply(distance_layers, function(layer) {
+    if (is.null(layer) || !is.list(layer)) {
+      return(NULL)
+    }
+    distance_to <- layer$distance_to %||% layer$label
+    if (is.null(distance_to) || !nzchar(distance_to)) {
+      return(NULL)
+    }
+    layer_id <- paste0("distance_to_", distance_to)
+    layer$id <- layer$id %||% distance_to
+    layer$type <- layer$type %||% "vector_arcgis"
+    if (is.null(layer$url) || !nzchar(layer$url)) {
+      rlang::abort(
+        sprintf("Distance layer '%s' requires a url.", layer$id),
+        class = "distance_layer_missing_url"
+      )
+    }
+    layer$crs <- layer$crs %||% "EPSG:4326"
+    layer$out_fields <- layer$out_fields %||% "OBJECTID"
+    layer$offline <- isTRUE(layer$offline)
+
+    vec <- fetch_arcgis_vector(layer, aoi_geom)
+    if (!is.null(vec) && nrow(vec) > 0L && !is.null(aoi_geom)) {
+      aoi_proj <- aoi_geom
+      if (!inherits(aoi_proj, "sfc")) {
+        aoi_proj <- sf::st_as_sfc(aoi_proj)
+      }
+      aoi_proj <- sf::st_transform(aoi_proj, sf::st_crs(vec))
+      hits <- sf::st_intersects(vec, aoi_proj, sparse = FALSE)
+      keep <- apply(hits, 1, any)
+      vec <- vec[keep, , drop = FALSE]
+    }
+    distances <- rep(NA_real_, nrow(sites))
+    if (!is.null(vec) && nrow(vec) > 0L) {
+      sites_proj <- sf::st_transform(sites_sf, sf::st_crs(analysis_crs))
+      vec_proj <- sf::st_transform(vec, sf::st_crs(analysis_crs))
+      idx <- sf::st_nearest_feature(sites_proj, vec_proj)
+      if (length(idx) == nrow(sites_proj)) {
+        nearest <- vec_proj[idx, , drop = FALSE]
+        distances <- sf::st_distance(sites_proj, nearest, by_element = TRUE)
+        distances <- as.numeric(distances)
+      }
+    }
+    if (identical(distance_to, "locality") &&
+      any(is.finite(distances)) &&
+      all(distances[is.finite(distances)] == 0) &&
+      !is.null(vec) &&
+      nrow(vec) > 0L) {
+      geom_types <- unique(as.character(sf::st_geometry_type(vec)))
+      if (any(geom_types %in% c("POLYGON", "MULTIPOLYGON"))) {
+        distances <- rep(NA_real_, nrow(sites))
+      }
+    }
+
+    tibble::tibble(
+      site_id = as.character(sites$site),
+      layer_id = layer_id,
+      layer_type = "derived_distance",
+      attribute_name = "distance_m",
+      value = as.character(distances),
+      units = "m",
+      source_id = as.character(layer$id),
+      provenance_path = as.character(layer$provenance_path %||% NA_character_)
+    )
   })
 
   dplyr::bind_rows(output)

@@ -35,7 +35,8 @@ Imports:
     tidyterra,
     terra,
     geodata,
-    arrow
+    arrow,
+    base64enc
 Suggests:
     targets,
     tarchetypes,

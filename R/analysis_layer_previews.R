@@ -108,7 +108,12 @@ render_vector_preview <- function(path,
     fill_values <- vec[[attr_name]]
     fill_values <- as.factor(fill_values)
     levels_used <- levels(fill_values)
-    fill_palette <- grDevices::hcl.colors(length(levels_used), "Set2")
+    if (length(levels_used) > 0L) {
+      fill_palette <- grDevices::hcl.colors(length(levels_used), "Set2")
+    } else {
+      fill_values <- NULL
+      fill_palette <- NULL
+    }
   }
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
   grDevices::png(filename = output_path, width = width, height = height, res = dpi)

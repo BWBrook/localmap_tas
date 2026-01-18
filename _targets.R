@@ -155,6 +155,11 @@ list(
     description = "Named vector of layer provenance paths."
   ),
   targets::tar_target(
+    layer_legend_paths,
+    stats::setNames(layer_outputs$legend_path, layer_outputs$id),
+    description = "Named vector of layer legend paths."
+  ),
+  targets::tar_target(
     layer_files,
     layer_outputs$path,
     format = "file",
@@ -165,6 +170,12 @@ list(
     layer_outputs$provenance_path,
     format = "file",
     description = "Layer provenance sidecars."
+  ),
+  targets::tar_target(
+    layer_legend_files,
+    layer_outputs$legend_path[!is.na(layer_outputs$legend_path)],
+    format = "file",
+    description = "Layer legend files from the registry."
   ),
   targets::tar_target(
     analysis_layers,
@@ -214,12 +225,107 @@ list(
     description = "Analysis layer preview PNGs."
   ),
   targets::tar_target(
+    tasveg_class_outputs,
+    {
+      analysis_layer_files
+      profile <- attr(cfg, "config")
+      if (is.null(profile) || !nzchar(profile)) {
+        profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
+      }
+      class_id <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
+        "tasveg_class_vector"
+      } else if (profile %in% c("demo")) {
+        "demo_tasveg_class"
+      } else {
+        "jc_tasveg_class"
+      }
+      safe_lookup <- function(values, key) {
+        if (is.null(values) || is.null(key) || !nzchar(key)) {
+          return("")
+        }
+        if (!key %in% names(values)) {
+          return("")
+        }
+        values[[key]]
+      }
+      find_cfg_layer <- function(layers_cfg, id) {
+        if (is.null(layers_cfg)) {
+          return(NULL)
+        }
+        for (layer in layers_cfg) {
+          if (!is.null(layer$id) && identical(layer$id, id)) {
+            return(layer)
+          }
+        }
+        NULL
+      }
+      layer_cfg <- find_cfg_layer(cfg$data$analysis_layers, class_id)
+      vector_path <- safe_lookup(analysis_layer_paths, class_id)
+      legend_path <- safe_lookup(layer_legend_paths, "tasveg_class_wms")
+      profile_dir <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
+        "tas"
+      } else if (profile %in% c("demo")) {
+        "demo"
+      } else {
+        "jc"
+      }
+      if (is.null(legend_path) || !nzchar(legend_path)) {
+        legend_path <- file.path("outputs", "layers", profile_dir, "tasveg_class_wms_legend.png")
+      }
+      lookup_path <- NULL
+      if (!is.null(vector_path) && nzchar(vector_path)) {
+        lookup_path <- sub("\\.gpkg$", "_lookup.csv", vector_path)
+      } else {
+        prefix <- if (identical(profile_dir, "tas")) {
+          "tas"
+        } else if (identical(profile_dir, "demo")) {
+          "demo"
+        } else {
+          "jc"
+        }
+        lookup_path <- file.path(
+          "outputs",
+          "analysis",
+          profile_dir,
+          "vector",
+          paste0(prefix, "_tasveg_class_lookup.csv")
+        )
+      }
+      render_tasveg_class_legend(
+        vector_path = vector_path,
+        legend_path = legend_path,
+        lookup_path = lookup_path,
+        layer_url = layer_cfg$url %||% "",
+        offline = isTRUE(layer_cfg$offline)
+      )
+    },
+    description = "Custom TASVEG class legend + lookup for AOI classes."
+  ),
+  targets::tar_target(
+    tasveg_class_legend,
+    tasveg_class_outputs$legend_path,
+    format = "file",
+    description = "TASVEG class legend PNG (AOI classes only)."
+  ),
+  targets::tar_target(
+    tasveg_class_lookup,
+    tasveg_class_outputs$lookup_path,
+    format = "file",
+    description = "TASVEG class lookup CSV (code to label)."
+  ),
+  targets::tar_target(
     site_attributes_long,
     {
       attributes_cfg <- cfg$data$attributes
       enabled <- is.null(attributes_cfg$enabled) || isTRUE(attributes_cfg$enabled)
       if (isTRUE(enabled)) {
-        build_site_attributes_long(sites = camera_sites_data, analysis_layers = analysis_layers)
+        build_site_attributes_long(
+          sites = camera_sites_data,
+          analysis_layers = analysis_layers,
+          aoi = aoi,
+          analysis_crs = cfg$data$aoi$crs,
+          distance_layers = cfg$data$distance_layers
+        )
       } else {
         empty_site_attributes()
       }
@@ -247,7 +353,11 @@ list(
       if (!is.null(attributes_cfg$output_wide)) {
         output_path <- attributes_cfg$output_wide
       }
-      write_site_attributes_wide(site_attributes_long, output_path = output_path)
+      write_site_attributes_wide(
+        site_attributes_long,
+        sites = camera_sites_data,
+        output_path = output_path
+      )
     },
     format = "file",
     description = "Convenience CSV output for site attributes (wide)."
@@ -419,6 +529,9 @@ list(
           coverage_summary = coverage_summary,
           wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
           wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
+          tasveg_class_wms_layer = safe_lookup(layer_output_paths, "tasveg_class_wms"),
+          tasveg_class_wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_class_wms"),
+          tasveg_class_wms_legend = tasveg_class_legend,
           arcgis_layer = safe_lookup(layer_output_paths, "orthophoto_arcgis"),
           arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "orthophoto_arcgis"),
           topography_arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
@@ -428,11 +541,21 @@ list(
           panel_figure_pdf = panel_figure_pdf,
           vector_tasveg = safe_lookup(analysis_layer_paths, "tasveg_vector"),
           vector_tasveg_provenance = safe_lookup(analysis_layer_provenance_paths, "tasveg_vector"),
+          vector_tasveg_class = safe_lookup(analysis_layer_paths, "tasveg_class_vector"),
+          vector_tasveg_class_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "tasveg_class_vector"
+          ),
           raster_dem = safe_lookup(analysis_layer_paths, "tas_dem"),
           raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_dem"),
           raster_slope = safe_lookup(analysis_layer_paths, "tas_slope"),
           raster_slope_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_slope"),
           vector_tasveg_preview = safe_lookup(analysis_layer_preview_paths, "tasveg_vector"),
+          vector_tasveg_class_preview = safe_lookup(
+            analysis_layer_preview_paths,
+            "tasveg_class_vector"
+          ),
+          tasveg_class_lookup = tasveg_class_lookup,
           raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "tas_dem"),
           raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "tas_slope"),
           site_attributes_long = site_attributes_long_file,
@@ -451,6 +574,9 @@ list(
           coverage_summary = coverage_summary,
           wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
           wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
+          tasveg_class_wms_layer = safe_lookup(layer_output_paths, "tasveg_class_wms"),
+          tasveg_class_wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_class_wms"),
+          tasveg_class_wms_legend = tasveg_class_legend,
           arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
           arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "topography_arcgis"),
           orthophoto_arcgis_layer = safe_lookup(layer_output_paths, "orthophoto_arcgis"),
@@ -464,6 +590,11 @@ list(
           panel_figure_pdf = panel_figure_pdf,
           vector_tasveg = safe_lookup(analysis_layer_paths, "jc_tasveg"),
           vector_tasveg_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_tasveg"),
+          vector_tasveg_class = safe_lookup(analysis_layer_paths, "jc_tasveg_class"),
+          vector_tasveg_class_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "jc_tasveg_class"
+          ),
           raster_dem = safe_lookup(analysis_layer_paths, "jc_dem"),
           raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_dem"),
           raster_multiband = safe_lookup(analysis_layer_paths, "jc_multiband"),
@@ -475,6 +606,11 @@ list(
           raster_nbr = safe_lookup(analysis_layer_paths, "jc_nbr"),
           raster_nbr_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_nbr"),
           vector_tasveg_preview = safe_lookup(analysis_layer_preview_paths, "jc_tasveg"),
+          vector_tasveg_class_preview = safe_lookup(
+            analysis_layer_preview_paths,
+            "jc_tasveg_class"
+          ),
+          tasveg_class_lookup = tasveg_class_lookup,
           raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "jc_dem"),
           raster_multiband_preview = safe_lookup(analysis_layer_preview_paths, "jc_multiband"),
           raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "jc_slope"),

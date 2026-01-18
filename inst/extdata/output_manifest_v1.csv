@@ -9,6 +9,9 @@ site_attributes_long,table,Site attributes long table,outputs/tables/jc/site_att
 site_attributes_wide,table,Site attributes wide table,outputs/tables/jc/site_attributes_wide.csv,csv,NA,jc,write_site_attributes_wide
 wms_layer,basemap,WMS layer imagery,outputs/layers/jc/tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
 wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/jc/tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+tasveg_class_wms_layer,basemap,TASVEG 4.0 Classes WMS layer,outputs/layers/jc/tasveg_class_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+tasveg_class_wms_layer_provenance,provenance,TASVEG 4.0 Classes WMS provenance,outputs/layers/jc/tasveg_class_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+tasveg_class_wms_legend,figure,TASVEG 4.0 Classes WMS legend,outputs/layers/jc/tasveg_class_wms_legend.png,png,EPSG:3857,jc,render_tasveg_class_legend
 arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/jc/topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
 arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/jc/topography_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
 orthophoto_arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/layers/jc/orthophoto_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
@@ -23,6 +26,10 @@ panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/jc/panel_figure.pdf,
 vector_tasveg,vector,JC TASVEG polygons (clipped),outputs/analysis/jc/vector/jc_tasveg.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
 vector_tasveg_provenance,provenance,JC TASVEG provenance,outputs/analysis/jc/vector/jc_tasveg.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
 vector_tasveg_preview,figure,JC TASVEG preview PNG,outputs/analysis/jc/vector/jc_tasveg.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_tasveg_class,vector,JC TASVEG classes polygons (clipped),outputs/analysis/jc/vector/jc_tasveg_class.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_tasveg_class_provenance,provenance,JC TASVEG classes provenance,outputs/analysis/jc/vector/jc_tasveg_class.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_tasveg_class_preview,figure,JC TASVEG classes preview PNG,outputs/analysis/jc/vector/jc_tasveg_class.png,png,EPSG:28355,jc,render_analysis_layer_previews
+tasveg_class_lookup,table,TASVEG class code lookup (AOI),outputs/analysis/jc/vector/jc_tasveg_class_lookup.csv,csv,EPSG:28355,jc,render_tasveg_class_legend
 raster_dem,raster,JC DEM (GA DEM 1 Second; clipped),outputs/analysis/jc/raster/jc_dem.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_dem_provenance,provenance,JC DEM provenance (GA DEM 1 Second),outputs/analysis/jc/raster/jc_dem.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
 raster_dem_preview,figure,JC DEM preview PNG,outputs/analysis/jc/raster/jc_dem.png,png,EPSG:28355,jc,render_analysis_layer_previews

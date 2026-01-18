@@ -90,7 +90,12 @@ fetch_wms_imagery <- function(wms_cfg,
     path <- imagery_normalize_path(output_path, default_output)
     imagery_write_placeholder(path, width = 512, height = 512)
     prov <- imagery_write_provenance(paste0(path, ".yml"), list(status = "placeholder"))
-    return(list(path = path, provenance_path = prov, cache_path = NA_character_))
+    return(list(
+      path = path,
+      provenance_path = prov,
+      cache_path = NA_character_,
+      legend_path = NULL
+    ))
   }
 
   output_path <- imagery_normalize_path(output_path %||% wms_cfg$output_path, default_output)
@@ -108,12 +113,31 @@ fetch_wms_imagery <- function(wms_cfg,
     offline <- TRUE
   }
 
+  legend_cfg <- wms_cfg$legend %||% list()
+  legend_source <- legend_cfg$source %||% "wms"
+  legend_show <- legend_source != "custom" &&
+    (isTRUE(legend_cfg$show) ||
+      (!is.null(wms_cfg$legend_path) && nzchar(wms_cfg$legend_path)))
+  legend_path <- NULL
+  if (isTRUE(legend_show)) {
+    legend_path <- fetch_wms_legend_graphic(
+      wms_cfg = wms_cfg,
+      output_path = wms_cfg$legend_path,
+      offline = offline
+    )
+  }
+
   query_info <- try(wms_build_query(wms_cfg, bbox), silent = TRUE)
   if (inherits(query_info, "try-error")) {
     rlang::warn("Failed to build WMS query; creating placeholder.")
     imagery_write_placeholder(output_path, width = 512, height = 512)
     prov <- imagery_write_provenance(paste0(output_path, ".yml"), list(status = "placeholder"))
-    return(list(path = output_path, provenance_path = prov, cache_path = NA_character_))
+    return(list(
+      path = output_path,
+      provenance_path = prov,
+      cache_path = NA_character_,
+      legend_path = legend_path
+    ))
   }
 
   cache_key <- imagery_cache_key(c(list(url = query_info$url), query_info$query))
@@ -137,7 +161,12 @@ fetch_wms_imagery <- function(wms_cfg,
         bbox = query_info$bbox_param
       )
     )
-    return(list(path = output_path, provenance_path = provenance_path, cache_path = cache_path))
+    return(list(
+      path = output_path,
+      provenance_path = provenance_path,
+      cache_path = cache_path,
+      legend_path = legend_path
+    ))
   }
 
   if (offline) {
@@ -158,7 +187,12 @@ fetch_wms_imagery <- function(wms_cfg,
         bbox = query_info$bbox_param
       )
     )
-    return(list(path = output_path, provenance_path = provenance_path, cache_path = cache_path))
+    return(list(
+      path = output_path,
+      provenance_path = provenance_path,
+      cache_path = cache_path,
+      legend_path = legend_path
+    ))
   }
 
   req <- httr2::request(query_info$url)
@@ -182,7 +216,12 @@ fetch_wms_imagery <- function(wms_cfg,
         bbox = query_info$bbox_param
       )
     )
-    return(list(path = output_path, provenance_path = provenance_path, cache_path = cache_path))
+    return(list(
+      path = output_path,
+      provenance_path = provenance_path,
+      cache_path = cache_path,
+      legend_path = legend_path
+    ))
   }
   httr2::resp_check_status(resp)
   body <- httr2::resp_body_raw(resp)
@@ -208,7 +247,12 @@ fetch_wms_imagery <- function(wms_cfg,
         bbox = query_info$bbox_param
       )
     )
-    return(list(path = output_path, provenance_path = provenance_path, cache_path = cache_path))
+    return(list(
+      path = output_path,
+      provenance_path = provenance_path,
+      cache_path = cache_path,
+      legend_path = legend_path
+    ))
   }
 
   dir.create(dirname(cache_path), recursive = TRUE, showWarnings = FALSE)
@@ -230,9 +274,102 @@ fetch_wms_imagery <- function(wms_cfg,
       bbox = query_info$bbox_param
     )
   )
-  list(path = output_path, provenance_path = provenance_path, cache_path = cache_path)
+  list(
+    path = output_path,
+    provenance_path = provenance_path,
+    cache_path = cache_path,
+    legend_path = legend_path
+  )
 }
 
 `%||%` <- function(x, y) {
   if (is.null(x)) y else x
+}
+
+fetch_wms_legend_graphic <- function(wms_cfg,
+                                     output_path = NULL,
+                                     offline = FALSE) {
+  if (is.null(wms_cfg) || !is.list(wms_cfg)) {
+    return(NULL)
+  }
+  path <- output_path %||% wms_cfg$legend_path
+  if (is.null(path) || !nzchar(path)) {
+    return(NULL)
+  }
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+
+  url <- wms_cfg$url
+  layers <- wms_cfg$layers
+  if (is.null(url) || !nzchar(url) || is.null(layers) || length(layers) == 0L) {
+    rlang::warn("WMS legend requested but URL or layer missing; using placeholder legend.")
+    imagery_write_placeholder(path, width = 300, height = 300)
+    return(path)
+  }
+
+  if (!localmap_network_allowed()) {
+    offline <- TRUE
+  }
+  if (isTRUE(offline)) {
+    rlang::warn("WMS legend fetch skipped (offline); using placeholder legend.")
+    imagery_write_placeholder(path, width = 300, height = 300)
+    return(path)
+  }
+
+  layer <- trimws(as.character(layers[[1]]))
+  if (!nzchar(layer)) {
+    rlang::warn("WMS legend requested but layer name empty; using placeholder legend.")
+    imagery_write_placeholder(path, width = 300, height = 300)
+    return(path)
+  }
+
+  legend_cfg <- wms_cfg$legend %||% list()
+  version <- legend_cfg$version %||% wms_cfg$version %||% "1.3.0"
+  format <- legend_cfg$format %||% "image/png"
+  styles <- wms_cfg$styles %||% ""
+  width <- legend_cfg$graphic_width
+  height <- legend_cfg$graphic_height
+
+  query <- list(
+    service = "WMS",
+    request = "GetLegendGraphic",
+    version = version,
+    layer = layer,
+    format = format
+  )
+  if (!is.null(styles) && nzchar(styles)) {
+    query$style <- styles
+  }
+  if (!is.null(width) && is.finite(width)) {
+    query$width <- as.integer(width)
+  }
+  if (!is.null(height) && is.finite(height)) {
+    query$height <- as.integer(height)
+  }
+
+  resp <- try(
+    httr2::req_url_query(httr2::request(url), !!!query) |> httr2::req_perform(),
+    silent = TRUE
+  )
+  if (inherits(resp, "try-error")) {
+    rlang::warn("Failed to fetch WMS legend; using placeholder legend.")
+    imagery_write_placeholder(path, width = 300, height = 300)
+    return(path)
+  }
+  httr2::resp_check_status(resp)
+  body <- httr2::resp_body_raw(resp)
+  if (length(body) == 0L) {
+    rlang::warn("Empty WMS legend response; using placeholder legend.")
+    imagery_write_placeholder(path, width = 300, height = 300)
+    return(path)
+  }
+  png_signature <- as.raw(c(0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
+  is_png <- length(body) >= length(png_signature) &&
+    identical(body[seq_along(png_signature)], png_signature)
+  if (!is_png) {
+    rlang::warn("Legend response was not a PNG; using placeholder legend.")
+    imagery_write_placeholder(path, width = 300, height = 300)
+    return(path)
+  }
+  writeBin(body, path)
+  path
 }

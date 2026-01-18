@@ -18,8 +18,8 @@ default:
     dem_variant_path: null
     attributes:
       enabled: true
-      output_long: "outputs/tables/default/site_attributes_long.parquet"
-      output_wide: "outputs/tables/default/site_attributes_wide.csv"
+      output_long: "outputs/tables/jc/site_attributes_long.parquet"
+      output_wide: "outputs/tables/jc/site_attributes_wide.csv"
     occurrence:
       min_year: 2000
       min_lat: null
@@ -196,10 +196,10 @@ demo:
     coverage:
       enabled: true
       buffer_m: 250
-      summary_path: "outputs/tables/demo/coverage_summary.csv"
+      summary_path: "outputs/tables/jc/coverage_summary.csv"
     attributes:
-      output_long: "outputs/tables/demo/site_attributes_long.parquet"
-      output_wide: "outputs/tables/demo/site_attributes_wide.csv"
+      output_long: "outputs/tables/jc/site_attributes_long.parquet"
+      output_wide: "outputs/tables/jc/site_attributes_wide.csv"
     layers:
       - id: "orthophoto_arcgis"
         type: "arcgis_export"
@@ -377,6 +377,28 @@ jc:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG"
+      - id: "tasveg_class_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.017789"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc/tasveg_class_wms.png"
+        legend_path: "outputs/layers/jc/tasveg_class_wms_legend.png"
+        legend:
+          show: true
+          source: "custom"
+          format: "image/png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Classes"
       - id: "topography_arcgis"
         type: "arcgis_export"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
@@ -501,6 +523,8 @@ jc:
         type: "vector_arcgis"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
         crs: "EPSG:4326"
+        attribute_fields:
+          - "VEG_GROUP"
         output_path: "outputs/analysis/jc/vector/jc_tasveg.gpkg"
         offline: false
         fixture_path: "inst/extdata/jc_habitats.gpkg"
@@ -509,6 +533,21 @@ jc:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups (vector)"
+      - id: "jc_tasveg_class"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/85"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "VEGCODE"
+          - "VEGCODE_D"
+        output_path: "outputs/analysis/jc/vector/jc_tasveg_class.gpkg"
+        offline: false
+        fixture_path: "inst/extdata/jc_tasveg_class.gpkg"
+        fixture_layer: "jc_tasveg_class"
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Classes (vector)"
       - id: "jc_dem"
         type: "raster_wcs"
         url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"
@@ -540,6 +579,7 @@ jc:
         output_path: "outputs/analysis/jc/raster/jc_multiband.tif"
         categorical: false
         units: "reflectance"
+        skip_attributes: true
         offline: false
         fixture_path: "inst/extdata/jc_multiband.tif"
         fallback:
@@ -582,6 +622,33 @@ jc:
           source: "Derived from jc_multiband"
           license: "CC BY 4.0"
           credit: "NBR"
+    distance_layers:
+      - id: "roads"
+        distance_to: "road"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/39"
+        crs: "EPSG:4326"
+        out_fields: "OBJECTID"
+        fixture_path: "inst/extdata/jc_roads.gpkg"
+        fixture_layer: "roads"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "State Growth Roads"
+      - id: "localities"
+        distance_to: "locality"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/CadastreAndAdministrative/MapServer/7"
+        crs: "EPSG:4326"
+        out_fields: "OBJECTID"
+        fixture_path: "inst/extdata/jc_localities.gpkg"
+        fixture_layer: "localities"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Localities"
     attributes:
       enabled: true
       output_long: "outputs/tables/jc/site_attributes_long.parquet"
@@ -735,6 +802,28 @@ tas_canonical:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups"
+      - id: "tasveg_class_wms"
+        type: "wms"
+        url: "https://services.thelist.tas.gov.au/arcgis/services/Public/NaturalEnvironment/MapServer/WMSServer"
+        layers:
+          - "TASVEG_4.017789"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas/tasveg_class_wms.png"
+        legend_path: "outputs/layers/tas/tasveg_class_wms_legend.png"
+        legend:
+          show: true
+          source: "custom"
+          format: "image/png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Classes"
       - id: "roads_wms"
         type: "wms"
         url: "https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer"
@@ -817,6 +906,8 @@ tas_canonical:
         type: "vector_arcgis"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/84"
         crs: "EPSG:4326"
+        attribute_fields:
+          - "VEG_GROUP"
         output_path: "outputs/analysis/tas/vector/tas_tasveg.gpkg"
         offline: false
         fixture_path: "inst/extdata/jc_habitats.gpkg"
@@ -825,6 +916,21 @@ tas_canonical:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Groups (vector)"
+      - id: "tasveg_class_vector"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/85"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "VEGCODE"
+          - "VEGCODE_D"
+        output_path: "outputs/analysis/tas/vector/tas_tasveg_class.gpkg"
+        offline: false
+        fixture_path: "inst/extdata/jc_habitats.gpkg"
+        fixture_layer: "habitats"
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Classes (vector)"
       - id: "tas_dem"
         type: "raster_wcs"
         url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"
@@ -845,6 +951,27 @@ tas_canonical:
           source: "Geoscience Australia"
           license: "CC BY 4.0"
           credit: "DEM SRTM 1 Second 2024"
+      - id: "tas_multiband"
+        type: "raster_wcs"
+        url: "https://ows.dea.ga.gov.au/wcs"
+        coverage: "ga_ls8cls9c_gm_cyear_3"
+        version: "1.0.0"
+        crs: "EPSG:4326"
+        format: "GeoTIFF"
+        resolution: 0.00027
+        output_path: "outputs/analysis/tas/raster/tas_multiband.tif"
+        categorical: false
+        units: "reflectance"
+        skip_attributes: true
+        offline: false
+        fixture_path: "inst/extdata/jc_multiband.tif"
+        fallback:
+          type: "raster_file"
+          path: "inst/extdata/jc_multiband.tif"
+        attribution:
+          source: "Digital Earth Australia"
+          license: "CC BY 4.0"
+          credit: "DEA Landsat 8/9 Geomedian (ga_ls8cls9c_gm_cyear_3)"
       - id: "tas_slope"
         type: "derived_slope"
         source_id: "tas_dem"
@@ -854,6 +981,57 @@ tas_canonical:
           source: "Derived from tas_dem"
           license: "CC BY 4.0"
           credit: "Slope"
+      - id: "tas_ndvi"
+        type: "derived_ndvi"
+        source_id: "tas_multiband"
+        bands:
+          red: ["nbart_red", "red"]
+          nir: ["nbart_nir", "nir"]
+        output_path: "outputs/analysis/tas/raster/tas_ndvi.tif"
+        units: "index"
+        attribution:
+          source: "Derived from tas_multiband"
+          license: "CC BY 4.0"
+          credit: "NDVI"
+      - id: "tas_nbr"
+        type: "derived_nbr"
+        source_id: "tas_multiband"
+        bands:
+          nir: ["nbart_nir", "nir"]
+          swir2: ["nbart_swir_2", "swir2", "swir_2"]
+        output_path: "outputs/analysis/tas/raster/tas_nbr.tif"
+        units: "index"
+        attribution:
+          source: "Derived from tas_multiband"
+          license: "CC BY 4.0"
+          credit: "NBR"
+    distance_layers:
+      - id: "roads"
+        distance_to: "road"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/39"
+        crs: "EPSG:4326"
+        out_fields: "OBJECTID"
+        fixture_path: "inst/extdata/jc_roads.gpkg"
+        fixture_layer: "roads"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "State Growth Roads"
+      - id: "localities"
+        distance_to: "locality"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/CadastreAndAdministrative/MapServer/7"
+        crs: "EPSG:4326"
+        out_fields: "OBJECTID"
+        fixture_path: "inst/extdata/jc_localities.gpkg"
+        fixture_layer: "localities"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Localities"
     attributes:
       enabled: true
       output_long: "outputs/tables/tas/site_attributes_long.parquet"

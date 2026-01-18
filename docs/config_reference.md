@@ -27,6 +27,7 @@ Required:
 - `coverage` (list, optional): coverage polygon settings.
 - `layers` (list, optional): registry of imagery layers (WMS/ArcGIS/file).
 - `analysis_layers` (list, optional): analysis-grade vector/raster layers and derived products.
+- `distance_layers` (list, optional): vector layers used to compute distance-to features.
 - `overview_map` (list, optional): overview map rendering settings.
 - `panel_figure` (list, optional): multi-panel figure assembly settings.
 
@@ -90,6 +91,21 @@ Notes:
     - `lat` (numeric, degrees, EPSG:4326).
     - `lon` (numeric, degrees, EPSG:4326).
   - `length_km` (numeric, km): side length in kilometres.
+
+### `data.distance_layers`
+
+Optional vector layers used to derive `distance_to_*` attributes in site tables.
+
+Each entry supports:
+- `id` (string): internal layer identifier.
+- `distance_to` (string): label used in output columns (e.g., `road`, `locality`).
+- `type` (string): should be `vector_arcgis`.
+- `url` (string): ArcGIS REST layer URL (ending in `/MapServer/<layer_id>`).
+- `crs` (string, default: `"EPSG:4326"`): query CRS.
+- `out_fields` (string, default: `"OBJECTID"`): minimal fields to request.
+- `fixture_path`/`fixture_layer` (optional): offline fixture for CI.
+- `offline` (logical, default: `false`): force fixture usage.
+- `attribution` (list): attribution metadata (at least `source`).
 
 ### `data.camera_sites`
 
@@ -200,6 +216,8 @@ WMS fields:
 - `url` (string): WMS endpoint.
 - `layers` (string or list): WMS layer names.
 - `styles` (string, optional), `crs` (string, optional), `width`/`height` (integer px), `format` (string).
+- `legend_path` (string, optional): output path for a fetched legend graphic.
+- `legend` (list, optional): legend fetch settings (`show`, `format`, `graphic_width`, `graphic_height`, `source`).
 - `offline` (logical, optional): skip network fetch and generate a placeholder.
 
 ArcGIS export fields:
@@ -227,6 +245,7 @@ Common fields:
   `raster_arcgis`, `raster_wcs`, `raster_geodata`, `derived_slope`, `derived_ndvi`, `derived_nbr`.
 - `output_path` (string, required): output GeoPackage/GeoTIFF path.
 - `attribution` (list, required): at least `source`, plus optional `license`, `credit`.
+- `skip_attributes` (logical, optional): if TRUE, omit this layer from site-attribute extraction.
 
 Vector file fields (`type: vector_file`):
 - `path` (string, required): input vector file path (e.g., GeoPackage).
@@ -236,6 +255,7 @@ Vector ArcGIS fields (`type: vector_arcgis`):
 - `url` (string, required): ArcGIS REST layer URL (MapServer/FeatureServer).
 - `where` (string, optional): filter clause (default `1=1`).
 - `out_fields` (string, optional): field list (default `*`).
+- `attribute_fields` (list, optional): restrict extracted attributes to these fields.
 - `crs` (string, optional): request CRS (default `EPSG:4326`).
 - `offline` (logical, optional): skip network fetch.
 - `fixture_path` (string, optional): local vector fixture for offline mode.

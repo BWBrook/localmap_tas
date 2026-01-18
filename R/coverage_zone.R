@@ -96,12 +96,11 @@ build_coverage_zone <- function(sites,
 write_coverage_summary <- function(coverage,
                                    output_path = NULL) {
   if (is.null(output_path)) {
-    output_path <- here::here("outputs", "tables", "coverage_summary.csv")
+    output_path <- here::here("outputs", "tables", "jc", "coverage_summary.csv")
   }
   checkmate::assert_string(output_path, min.chars = 1L)
 
   enabled <- FALSE
-  area_m2 <- NA_real_
   area_km2 <- NA_real_
   n_sites <- 0L
   buffer_m <- NA_real_
@@ -109,7 +108,6 @@ write_coverage_summary <- function(coverage,
 
   if (!is.null(coverage) && is.list(coverage)) {
     enabled <- isTRUE(coverage$enabled)
-    area_m2 <- coverage$area_m2
     area_km2 <- coverage$area_km2
     n_sites <- coverage$n_sites
     buffer_m <- coverage$buffer_m
@@ -118,7 +116,6 @@ write_coverage_summary <- function(coverage,
 
   summary_tbl <- tibble::tibble(
     enabled = enabled,
-    area_m2 = area_m2,
     area_km2 = area_km2,
     n_sites = n_sites,
     buffer_m = buffer_m,

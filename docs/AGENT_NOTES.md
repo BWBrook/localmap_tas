@@ -288,3 +288,37 @@
   - Moved table artefacts into `outputs/tables/{jc|tas|demo|default}/` and updated config + manifests.
   - Fixed demo layer registry duplicates (roads/localities) and aligned demo layer output paths.
   - Regenerated demo coverage + site attribute tables at the new paths.
+
+- 2026-01-12: Tables output consolidation.
+  - Removed default/demo table directories; tables now only under `outputs/tables/jc/` and `outputs/tables/tas/`.
+  - Updated config + manifests + fallback paths to align with JC/TAS-only table layout.
+
+- 2026-01-12: Table schema + distance metrics.
+  - Coverage summaries now report `area_km2` only (no `area_m2`).
+  - Site attributes now include raster_wcs layers (DEM + multiband) and derived distance columns (`distance_to_road`, `distance_to_locality`).
+  - Added distance-layer config + fixtures for roads/localities; regenerated JC/TAS site attribute tables.
+
+- 2026-01-12: Site attribute curation + TAS multiband.
+  - Site attribute CSVs now emit a curated column set (lat/lon, DEM, slope, NDVI, NBR, TASVEG category, distances).
+  - Multiband stacks are still produced but skipped for attribute extraction by default.
+  - Added TAS multiband + NDVI/NBR analysis layers to mirror JC outputs; distance-to-locality now stays NA if no features intersect the AOI.
+
+- 2026-01-12: TASVEG classes layer + site attributes.
+  - Added TASVEG 4.0 Classes vector layers for JC and TAS profiles (MapServer/85) with class attribute extraction.
+  - Site attribute tables now include `tasveg_class` alongside the existing `tasveg_category`.
+  - Updated manifests/schema docs for the new class vector outputs.
+
+- 2026-01-12: TASVEG classes WMS overlays + legend.
+  - Added TASVEG 4.0 Classes WMS layers for JC/TAS with legend graphics via GetLegendGraphic.
+  - Layer registry now tracks legend paths; output manifests updated accordingly.
+  - Verified class WMS tiles + legend PNGs are non-empty for JC/TAS (file sizes ~130 KB and ~79 KB).
+
+- 2026-01-12: TASVEG class legend refinement.
+  - Switched TASVEG class legends to custom AOI-only legends (codes only) derived from class vectors.
+  - Added per-AOI lookup CSV mapping code → full class name for reference.
+  - Legend swatches now use LIST service colors when online, with greyscale fallback offline.
+
+- 2026-01-18: TASVEG class legend defaults.
+  - Updated legend rendering to attempt LIST legend colors by default (no opt-in), with grey fallback on failed fetch.
+  - Added a JC TASVEG class fixture (`inst/extdata/jc_tasveg_class.gpkg`) so offline runs still have VEGCODE fields.
+  - Regenerated JC/TAS class legends; confirmed legends include non-grey swatches when network available.

@@ -75,7 +75,11 @@ testthat::test_that("site attributes outputs write long + wide products", {
   wide_path <- tempfile(fileext = ".csv")
 
   long_out <- localmap::write_site_attributes_long(long_tbl, output_path = long_path)
-  wide_out <- localmap::write_site_attributes_wide(long_tbl, output_path = wide_path)
+  wide_out <- localmap::write_site_attributes_wide(
+    long_tbl,
+    sites = sites,
+    output_path = wide_path
+  )
 
   testthat::expect_true(file.exists(long_out))
   testthat::expect_true(file.exists(wide_out))

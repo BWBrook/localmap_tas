@@ -30,6 +30,9 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `site_attributes_wide` → `outputs/tables/jc/site_attributes_wide.csv`
 - `wms_layer` → `outputs/layers/jc/tasveg_wms.png`
 - `wms_layer_provenance` → `outputs/layers/jc/tasveg_wms.png.yml`
+- `tasveg_class_wms_layer` → `outputs/layers/jc/tasveg_class_wms.png`
+- `tasveg_class_wms_layer_provenance` → `outputs/layers/jc/tasveg_class_wms.png.yml`
+- `tasveg_class_wms_legend` → `outputs/layers/jc/tasveg_class_wms_legend.png`
 - `arcgis_layer` → `outputs/layers/jc/topography_arcgis.png`
 - `arcgis_layer_provenance` → `outputs/layers/jc/topography_arcgis.png.yml`
 - `orthophoto_arcgis_layer` → `outputs/layers/jc/orthophoto_arcgis.png`
@@ -44,6 +47,10 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `vector_tasveg` → `outputs/analysis/jc/vector/jc_tasveg.gpkg`
 - `vector_tasveg_provenance` → `outputs/analysis/jc/vector/jc_tasveg.gpkg.yml`
 - `vector_tasveg_preview` → `outputs/analysis/jc/vector/jc_tasveg.png`
+- `vector_tasveg_class` → `outputs/analysis/jc/vector/jc_tasveg_class.gpkg`
+- `vector_tasveg_class_provenance` → `outputs/analysis/jc/vector/jc_tasveg_class.gpkg.yml`
+- `vector_tasveg_class_preview` → `outputs/analysis/jc/vector/jc_tasveg_class.png`
+- `tasveg_class_lookup` → `outputs/analysis/jc/vector/jc_tasveg_class_lookup.csv`
 - `raster_dem` → `outputs/analysis/jc/raster/jc_dem.tif`
 - `raster_dem_provenance` → `outputs/analysis/jc/raster/jc_dem.tif.yml`
 - `raster_dem_preview` → `outputs/analysis/jc/raster/jc_dem.png`

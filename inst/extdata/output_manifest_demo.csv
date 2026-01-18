@@ -4,9 +4,9 @@ camera_sites_map,map,Camera sites basemap map,outputs/maps/demo/camera_sites.png
 camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo/camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
 camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/demo_camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
 aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi/aoi_debug.png,png,EPSG:4326,demo,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/demo/coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
-site_attributes_long,table,Site attributes long table,outputs/tables/demo/site_attributes_long.parquet,parquet,NA,demo,write_site_attributes_long
-site_attributes_wide,table,Site attributes wide table,outputs/tables/demo/site_attributes_wide.csv,csv,NA,demo,write_site_attributes_wide
+coverage_summary,table,Coverage zone summary table,outputs/tables/jc/coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/tables/jc/site_attributes_long.parquet,parquet,NA,demo,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/tables/jc/site_attributes_wide.csv,csv,NA,demo,write_site_attributes_wide
 wms_layer,basemap,WMS layer imagery,outputs/layers/demo/tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
 wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/demo/tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
 arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/demo/topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery

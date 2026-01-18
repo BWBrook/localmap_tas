@@ -390,7 +390,7 @@ generate_topo_tile_map <- function(occurrences,
     tile_zoom = 8,
     tile_outline_colour = "#ffffff",
     topo_output_path = NULL,
-  tile_graticule = TRUE
+    tile_graticule = TRUE
   )
   mapping_settings <- utils::modifyList(defaults, mapping_settings)
 

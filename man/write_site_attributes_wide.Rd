@@ -4,10 +4,12 @@
 \alias{write_site_attributes_wide}
 \title{Write convenience wide table as CSV}
 \usage{
-write_site_attributes_wide(attributes, output_path = NULL)
+write_site_attributes_wide(attributes, sites = NULL, output_path = NULL)
 }
 \arguments{
 \item{attributes}{Long attributes tibble.}
+
+\item{sites}{Optional sites data frame with `site`, `lat`, `lon`.}
 
 \item{output_path}{Output CSV path.}
 }
