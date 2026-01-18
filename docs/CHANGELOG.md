@@ -22,6 +22,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Coverage zone polygons (convex hull + buffer) with summary tables.
 - WMS imagery fetch with caching, provenance, and offline placeholders.
 - ArcGIS export imagery fetch with caching, provenance, and offline placeholders.
+- RS layer expansion: canopy height (LIST CHM), soil pH (SoilGrids), WorldClim BIO1/BIO12 normals, TASVEG fire attributes, and geology/tenure/reserve vectors, with output previews and attribute extraction.
+- `raster_remote` analysis-layer type with large-download gating and placeholder handling.
 - Layer registry v1 with config-driven imagery definitions and `docs/layers_guide.md`.
 - Overview map renderer with AOI/sites/coverage and cartographic annotations.
 - Multi-panel figure assembler with PNG + PDF outputs.

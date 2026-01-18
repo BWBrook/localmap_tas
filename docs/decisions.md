@@ -156,3 +156,12 @@ Format:
 **Decision:** Add a config-level `data.dem_variant` switch to select DEM sources (GA 1s, GA 1s hydro, SRTM 3s/30s, or ELVIS 2m file) and apply overrides to `_dem` analysis layers.
 **Rationale:** Keeps DEM selection consistent across profiles without duplicating WCS/paths in every layer definition.
 **Status:** Active.
+
+## 2026-01-18 — RS layer expansion (CHM, fire, soils, climate)
+**Decision:** Expand analysis layers with TASVEG fire attributes, geology/tenure/reserve vectors, soil pH, and climate normals (WorldClim), plus a canopy height model.
+**Rationale:** Adds ecologically relevant covariates for JC/TAS while preserving reproducibility.
+**Details:**
+- **CHM source:** LIST Tree Canopy Height Model (2 m) via a cached `raster_remote` download, gated by `data.large_downloads.allow` (skips if disabled or unavailable).
+- **Soil pH:** SoilGrids global `phh2o` (0–15 cm, mean) via `geodata::soil_world` because Tasmanian pH layers are not exposed via WCS/GeoTIFF for automated extraction.
+- **Climate normals:** WorldClim v2.1 bioclim tiles via `geodata::worldclim_tile`; BIO1 values scaled by 0.1 to report °C.
+**Status:** Active.

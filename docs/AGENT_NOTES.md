@@ -322,3 +322,11 @@
   - Updated legend rendering to attempt LIST legend colors by default (no opt-in), with grey fallback on failed fetch.
   - Added a JC TASVEG class fixture (`inst/extdata/jc_tasveg_class.gpkg`) so offline runs still have VEGCODE fields.
   - Regenerated JC/TAS class legends; confirmed legends include non-grey swatches when network available.
+
+- 2026-01-18: RS layer expansion (CHM, fire, soils, climate normals).
+  - Added `raster_remote` support (CHM) with large-download gating + placeholder handling; switched WorldClim to tile downloads; optimized raster clipping (crop before reprojection).
+  - Added soil pH + WorldClim BIO1/BIO12 rasters, fire/geology/tenure/reserve vectors, and TAS fire/soil WMS overlays; updated site-attributes mapping + ordering.
+  - Ran `R_CONFIG_ACTIVE=jc LOCALMAP_ALLOW_NETWORK=1 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript -e 'targets::tar_make()'` and `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript -e 'targets::tar_make()'`.
+  - Artefacts inspected: `outputs/analysis/jc/raster/jc_soil_ph.png`, `outputs/analysis/jc/raster/jc_bio1.png`, `outputs/analysis/jc/raster/jc_bio12.png`, `outputs/analysis/jc/raster/jc_chm.png`, `outputs/analysis/jc/vector/jc_fire_attributes.png`, `outputs/analysis/jc/vector/jc_geology.png`, `outputs/layers/jc/fire_attributes_arcgis.png`, `outputs/layers/jc/soil_ph_wms.png`, `outputs/tables/jc/site_attributes_wide.csv` (and TAS equivalents in `outputs/analysis/tas/`).
+  - Sanity notes: soil pH values ~5.4–5.7; BIO1 ~10–11 °C after scaling; BIO12 ~900–1078 mm; NDVI/NBR within expected ranges. CHM preview is placeholder due to large-download gating. Fire/geology/tenure/reserve vectors return multiple classes; distance-to-road/locality remain NA at current AOI.
+  - Next steps: run once with `LOCALMAP_ALLOW_LARGE_DOWNLOADS=1` to fetch CHM when bandwidth permits; review CHM alignment and consider finer climate resolution if needed.

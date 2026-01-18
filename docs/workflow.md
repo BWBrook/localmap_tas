@@ -100,6 +100,7 @@ Fix and repeat until coherent.
 - Network fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
 - When network is disabled, imagery fetches fall back to placeholders with a warning.
 - ArcGIS vector layers must provide a `fixture_path` when offline; otherwise the run fails with an actionable error.
+- Large downloads (e.g., canopy height) are gated by `LOCALMAP_ALLOW_LARGE_DOWNLOADS`; when disabled, placeholder rasters are written with a warning and no cache is saved.
 
 ## 5) When to ask the human
 

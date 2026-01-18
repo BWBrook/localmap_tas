@@ -5,7 +5,7 @@
 \alias{analysis_layer_types}
 \title{Analysis-grade vector and raster layer acquisition}
 \format{
-An object of class \code{character} of length 6.
+An object of class \code{character} of length 10.
 }
 \usage{
 analysis_layer_types

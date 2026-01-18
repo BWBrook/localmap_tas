@@ -11,12 +11,13 @@ analysis_layer_types <- c(
   "raster_arcgis",
   "raster_wcs",
   "raster_file",
+  "raster_remote",
   "raster_geodata",
   "derived_slope",
   "derived_ndvi",
   "derived_nbr"
 )
-analysis_cache_version <- "v5"
+analysis_cache_version <- "v7"
 
 analysis_default <- function(value, fallback) {
   if (is.null(value)) fallback else value
@@ -107,6 +108,15 @@ validate_analysis_layers <- function(layers) {
         rlang::abort(
           sprintf("Analysis layer '%s' requires `path`.", id),
           class = "analysis_layer_missing_path"
+        )
+      }
+    }
+
+    if (identical(type, "raster_remote")) {
+      if (is.null(layer$download_url) || !nzchar(layer$download_url)) {
+        rlang::abort(
+          sprintf("Analysis layer '%s' requires `download_url`.", id),
+          class = "analysis_layer_missing_url"
         )
       }
     }
@@ -294,6 +304,24 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       wcs_fallback_type = layer$fallback$type,
       resolution = layer$resolution,
       geodata_path = layer$geodata_path,
+      geodata_type = layer$geodata_type,
+      geodata_var = layer$geodata_var,
+      geodata_depth = layer$geodata_depth,
+      geodata_stat = layer$geodata_stat,
+      geodata_res = layer$geodata_res,
+      geodata_version = layer$geodata_version,
+      download_url = layer$download_url,
+      download_dir = layer$download_dir,
+      download_path = layer$download_path,
+      extract_dir = layer$extract_dir,
+      extract_pattern = layer$extract_pattern,
+      extract_file = layer$extract_file,
+      extract_path = layer$extract_path,
+      download_zip = layer$download_zip,
+      download_size_mb = layer$download_size_mb,
+      large_download = layer$large_download,
+      scale = layer$scale,
+      offset = layer$offset,
       units = layer$units,
       source_id = layer$source_id
     )
@@ -405,7 +433,15 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         terra::writeRaster(clipped, output_path, overwrite = TRUE)
         raster_store[[layer$id]] <- clipped
       } else if (identical(type, "raster_geodata")) {
-        raster <- fetch_geodata_raster(layer, aoi_geom, cache_dir = cache_dir)
+        raster <- fetch_geodata_raster(
+          layer,
+          aoi_geom,
+          cache_dir = cache_dir,
+          analysis_crs = analysis_crs
+        )
+        if (isTRUE(attr(raster, "localmap_placeholder"))) {
+          prov_status <- "placeholder"
+        }
         clipped <- clip_raster_to_aoi(
           raster,
           aoi_geom,
@@ -416,6 +452,42 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
         terra::writeRaster(clipped, output_path, overwrite = TRUE)
         raster_store[[layer$id]] <- clipped
+      } else if (identical(type, "raster_remote")) {
+        remote <- fetch_remote_raster(layer, cache_dir = cache_dir)
+        if (is.null(remote$raster)) {
+          rlang::warn(sprintf(
+            "Remote raster '%s' unavailable; writing placeholder raster.",
+            layer$id
+          ))
+          placeholder <- analysis_placeholder_raster(aoi_geom, analysis_crs)
+          if (is.null(placeholder)) {
+            rlang::abort(
+              sprintf("Failed to create placeholder raster for '%s'.", layer$id),
+              class = "analysis_remote_placeholder_failed"
+            )
+          }
+          prov_meta <- remote$meta %||% list()
+          prov_meta$status <- prov_meta$status %||% "placeholder"
+          prov_meta$params <- utils::modifyList(
+            prov_meta$params %||% list(),
+            list(placeholder = TRUE)
+          )
+          dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+          terra::writeRaster(placeholder, output_path, overwrite = TRUE)
+          raster_store[[layer$id]] <- placeholder
+        } else {
+          prov_meta <- remote$meta
+          clipped <- clip_raster_to_aoi(
+            remote$raster,
+            aoi_geom,
+            analysis_crs,
+            categorical = isTRUE(layer$categorical),
+            resample = layer$resample
+          )
+          dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+          terra::writeRaster(clipped, output_path, overwrite = TRUE)
+          raster_store[[layer$id]] <- clipped
+        }
       } else if (identical(type, "raster_file")) {
         raster <- read_raster_layer(layer$path)
         clipped <- clip_raster_to_aoi(
@@ -493,12 +565,17 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
           class = "analysis_layer_missing_output"
         )
       }
-      dir.create(dirname(cache_path), recursive = TRUE, showWarnings = FALSE)
-      if (!identical(
-        normalizePath(cache_path, mustWork = FALSE),
-        normalizePath(output_path, mustWork = FALSE)
-      )) {
-        file.copy(output_path, cache_path, overwrite = TRUE)
+      skip_cache <- prov_status %in% c("skipped_large_download", "offline_skipped", "placeholder")
+      if (!isTRUE(skip_cache)) {
+        dir.create(dirname(cache_path), recursive = TRUE, showWarnings = FALSE)
+        if (!identical(
+          normalizePath(cache_path, mustWork = FALSE),
+          normalizePath(output_path, mustWork = FALSE)
+        )) {
+          file.copy(output_path, cache_path, overwrite = TRUE)
+        }
+      } else {
+        cache_path <- NA_character_
       }
       imagery_write_provenance(
         provenance_path,
@@ -819,7 +896,7 @@ fetch_wcs_raster <- function(layer, aoi_geom, cache_dir = NULL) {
   raster
 }
 
-fetch_geodata_raster <- function(layer, aoi_geom, cache_dir = NULL) {
+fetch_geodata_raster <- function(layer, aoi_geom, cache_dir = NULL, analysis_crs = NULL) {
   if (!localmap_network_allowed()) {
     if (!isTRUE(layer$offline)) {
       rlang::warn(
@@ -837,31 +914,23 @@ fetch_geodata_raster <- function(layer, aoi_geom, cache_dir = NULL) {
   if (isTRUE(layer$offline)) {
     fixture <- layer$fixture_path
     if (is.null(fixture) || !nzchar(fixture)) {
-      rlang::abort(
-        sprintf("Geodata raster layer '%s' offline without fixture.", layer$id),
-        class = "analysis_geodata_offline_missing_fixture"
+      rlang::warn(
+        sprintf(
+          "Geodata raster layer '%s' offline without fixture; using placeholder.",
+          layer$id
+        )
       )
+      placeholder <- analysis_placeholder_raster(aoi_geom, analysis_crs)
+      if (is.null(placeholder)) {
+        rlang::abort(
+          sprintf("Geodata raster layer '%s' offline without fixture.", layer$id),
+          class = "analysis_geodata_offline_missing_fixture"
+        )
+      }
+      attr(placeholder, "localmap_placeholder") <- TRUE
+      return(placeholder)
     }
     return(read_raster_layer(fixture))
-  }
-
-  if (!requireNamespace("geodata", quietly = TRUE)) {
-    rlang::abort(
-      "Package 'geodata' is required for raster_geodata layers.",
-      class = "analysis_geodata_missing_package"
-    )
-  }
-
-  resolution <- analysis_default(layer$resolution, "3s")
-  resolution <- tolower(as.character(resolution))
-  if (!resolution %in% c("3s", "30s")) {
-    rlang::abort(
-      sprintf(
-        "Geodata raster layer '%s' requires resolution '3s' or '30s'.",
-        layer$id
-      ),
-      class = "analysis_geodata_resolution_invalid"
-    )
   }
 
   if (is.null(cache_dir) || !nzchar(cache_dir)) {
@@ -870,16 +939,254 @@ fetch_geodata_raster <- function(layer, aoi_geom, cache_dir = NULL) {
   cache_dir <- analysis_normalize_path(layer$geodata_path %||% cache_dir, cache_dir)
   dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
 
-  aoi_4326 <- sf::st_transform(aoi_geom, 4326)
-  centroid <- sf::st_coordinates(sf::st_centroid(aoi_4326))[1, ]
-  lon <- centroid[1]
-  lat <- centroid[2]
-
-  if (identical(resolution, "3s")) {
-    geodata::elevation_3s(lon, lat, path = cache_dir)
-  } else {
-    geodata::elevation_30s(lon, lat, path = cache_dir)
+  if (!requireNamespace("geodata", quietly = TRUE)) {
+    rlang::abort(
+      "Package 'geodata' is required for raster_geodata layers.",
+      class = "analysis_geodata_missing_package"
+    )
   }
+
+  geodata_type <- tolower(as.character(layer$geodata_type %||% "elevation"))
+  if (identical(geodata_type, "soil_world")) {
+    var <- layer$geodata_var %||% "phh2o"
+    depth <- layer$geodata_depth %||% 15
+    stat <- layer$geodata_stat %||% "mean"
+    geodata::soil_world(var = var, depth = depth, stat = stat, path = cache_dir)
+  } else if (identical(geodata_type, "worldclim")) {
+    var <- layer$geodata_var %||% "bio"
+    version <- layer$geodata_version %||% "2.1"
+    aoi_4326 <- sf::st_transform(aoi_geom, 4326)
+    centroid <- sf::st_coordinates(sf::st_centroid(aoi_4326))[1, ]
+    lon <- centroid[1]
+    lat <- centroid[2]
+    clim <- geodata::worldclim_tile(
+      var = var,
+      lon = lon,
+      lat = lat,
+      path = cache_dir,
+      version = version
+    )
+    if (!is.null(layer$band) && nzchar(layer$band)) {
+      band <- as.character(layer$band)
+      if (grepl("^bio\\d+$", band)) {
+        band <- sub("^bio(\\d+)$", "bio_\\1", band)
+      }
+      clim <- try(terra::subset(clim, band), silent = TRUE)
+      if (inherits(clim, "try-error")) {
+        rlang::abort(
+          sprintf("WorldClim band '%s' not found for layer '%s'.", band, layer$id),
+          class = "analysis_geodata_missing_band"
+        )
+      }
+    }
+    if (!is.null(layer$scale) || !is.null(layer$offset)) {
+      scale <- layer$scale %||% 1
+      offset <- layer$offset %||% 0
+      clim <- clim * scale + offset
+    }
+    clim
+  } else {
+    resolution <- analysis_default(layer$resolution, "3s")
+    resolution <- tolower(as.character(resolution))
+    if (!resolution %in% c("3s", "30s")) {
+      rlang::abort(
+        sprintf(
+          "Geodata raster layer '%s' requires resolution '3s' or '30s'.",
+          layer$id
+        ),
+        class = "analysis_geodata_resolution_invalid"
+      )
+    }
+
+    aoi_4326 <- sf::st_transform(aoi_geom, 4326)
+    centroid <- sf::st_coordinates(sf::st_centroid(aoi_4326))[1, ]
+    lon <- centroid[1]
+    lat <- centroid[2]
+
+    if (identical(resolution, "3s")) {
+      geodata::elevation_3s(lon, lat, path = cache_dir)
+    } else {
+      geodata::elevation_30s(lon, lat, path = cache_dir)
+    }
+  }
+}
+
+analysis_remote_file_candidates <- function(layer, cache_root) {
+  candidates <- character()
+  if (!is.null(layer$extract_path) && nzchar(layer$extract_path)) {
+    candidates <- c(candidates, layer$extract_path)
+  }
+  if (!is.null(layer$extract_file) && nzchar(layer$extract_file)) {
+    candidates <- c(candidates, file.path(cache_root, layer$extract_file))
+  }
+  if (length(candidates) > 0L) {
+    return(unique(candidates))
+  }
+  pattern <- layer$extract_pattern %||% "\\.tif$"
+  list.files(cache_root, pattern = pattern, full.names = TRUE, recursive = TRUE)
+}
+
+analysis_placeholder_raster <- function(aoi_geom, analysis_crs, n = 10L) {
+  if (is.null(aoi_geom)) {
+    return(NULL)
+  }
+  target_crs <- if (!is.null(analysis_crs)) {
+    sf::st_crs(analysis_crs)
+  } else {
+    sf::st_crs(aoi_geom)
+  }
+  if (is.na(target_crs)) {
+    target_crs <- sf::st_crs(aoi_geom)
+  }
+  bbox <- sf::st_bbox(sf::st_transform(aoi_geom, target_crs))
+  ext <- terra::ext(bbox$xmin, bbox$xmax, bbox$ymin, bbox$ymax)
+  raster <- terra::rast(ext, ncols = n, nrows = n, crs = target_crs$wkt)
+  terra::values(raster) <- NA_real_
+  raster
+}
+
+analysis_download_file <- function(url, dest_path, expected_size_mb = NULL) {
+  dir.create(dirname(dest_path), recursive = TRUE, showWarnings = FALSE)
+  if (file.exists(dest_path)) {
+    if (!is.null(expected_size_mb) && is.finite(expected_size_mb)) {
+      size_mb <- file.info(dest_path)$size / 1024^2
+      if (!is.na(size_mb) && size_mb < (expected_size_mb * 0.95)) {
+        rlang::warn(
+          sprintf(
+            "Download for %s appears incomplete (%.1f MB < %.1f MB); re-downloading.",
+            basename(dest_path),
+            size_mb,
+            expected_size_mb
+          )
+        )
+      } else {
+        return(dest_path)
+      }
+    } else {
+      return(dest_path)
+    }
+  }
+  if (!localmap_network_allowed()) {
+    rlang::warn(sprintf("Network access disabled; cannot download %s.", url))
+    return(NA_character_)
+  }
+  cli::cli_inform(sprintf("Downloading large raster: %s", url))
+  res <- try(utils::download.file(url, dest_path, mode = "wb", quiet = TRUE), silent = TRUE)
+  if (inherits(res, "try-error")) {
+    rlang::warn(sprintf("Download failed for %s.", url))
+    return(NA_character_)
+  }
+  dest_path
+}
+
+analysis_unzip_archive <- function(archive_path, extract_dir) {
+  dir.create(extract_dir, recursive = TRUE, showWarnings = FALSE)
+  utils::unzip(archive_path, exdir = extract_dir)
+  extract_dir
+}
+
+fetch_remote_raster <- function(layer, cache_dir = NULL) {
+  url <- layer$download_url %||% layer$url
+  if (is.null(url) || !nzchar(url)) {
+    rlang::abort(
+      sprintf("Remote raster layer '%s' missing download_url.", layer$id),
+      class = "analysis_remote_missing_url"
+    )
+  }
+  if (!localmap_network_allowed()) {
+    if (!isTRUE(layer$offline)) {
+      rlang::warn(
+        sprintf(
+          paste0(
+            "Network access disabled; remote raster '%s' requires a fixture ",
+            "or LOCALMAP_ALLOW_NETWORK=1."
+          ),
+          layer$id
+        )
+      )
+    }
+    layer$offline <- TRUE
+  }
+  if (isTRUE(layer$offline)) {
+    fixture <- layer$fixture_path
+    if (!is.null(fixture) && nzchar(fixture) && file.exists(fixture)) {
+      raster <- terra::rast(fixture)
+      return(list(
+        raster = raster,
+        meta = list(status = "offline_fixture", source = fixture)
+      ))
+    }
+    return(list(raster = NULL, meta = list(status = "offline_skipped")))
+  }
+  if (is.null(cache_dir) || !nzchar(cache_dir)) {
+    cache_dir <- here::here("data", "cache", "remote")
+  }
+  cache_root <- analysis_normalize_path(layer$download_dir %||% cache_dir, cache_dir)
+  dir.create(cache_root, recursive = TRUE, showWarnings = FALSE)
+
+  archive_path <- layer$download_path %||% file.path(cache_root, basename(url))
+  is_zip <- isTRUE(layer$download_zip) || grepl("\\.zip$", archive_path, ignore.case = TRUE)
+  extract_dir <- analysis_normalize_path(layer$extract_dir %||% cache_root, cache_root)
+
+  candidates <- analysis_remote_file_candidates(layer, extract_dir)
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) > 0L) {
+    raster <- terra::rast(existing[[1]])
+    return(list(
+      raster = raster,
+      meta = list(
+        status = "local_cached",
+        source = url,
+        archive_path = archive_path,
+        extract_path = existing[[1]]
+      )
+    ))
+  }
+
+  if (isTRUE(layer$large_download) && !localmap_large_downloads_allowed()) {
+    rlang::warn(
+      sprintf(
+        paste0(
+          "Large download disabled; skipping raster '%s'. ",
+          "Set LOCALMAP_ALLOW_LARGE_DOWNLOADS=1 to enable."
+        ),
+        layer$id
+      )
+    )
+    return(list(raster = NULL, meta = list(status = "skipped_large_download")))
+  }
+
+  archive_path <- analysis_download_file(url, archive_path, layer$download_size_mb)
+  if (is.na(archive_path) || !nzchar(archive_path)) {
+    return(list(raster = NULL, meta = list(status = "download_failed")))
+  }
+
+  extract_path <- NULL
+  if (is_zip) {
+    analysis_unzip_archive(archive_path, extract_dir)
+    candidates <- analysis_remote_file_candidates(layer, extract_dir)
+    existing <- candidates[file.exists(candidates)]
+    if (length(existing) == 0L) {
+      rlang::abort(
+        sprintf("Remote raster '%s' extracted but no files matched.", layer$id),
+        class = "analysis_remote_extract_missing"
+      )
+    }
+    extract_path <- existing[[1]]
+  } else {
+    extract_path <- archive_path
+  }
+
+  raster <- terra::rast(extract_path)
+  list(
+    raster = raster,
+    meta = list(
+      status = "downloaded",
+      source = url,
+      archive_path = archive_path,
+      extract_path = extract_path
+    )
+  )
 }
 
 analysis_parse_wcs_resolution <- function(resolution) {
@@ -1069,13 +1376,25 @@ clip_raster_to_aoi <- function(raster,
     )
   }
 
-  target_crs <- analysis_crs
-  if (!is.null(terra::crs(raster)) && !identical(terra::crs(raster), target_crs)) {
-    raster <- terra::project(raster, target_crs, method = resample)
+  raster_crs <- sf::st_crs(terra::crs(raster))
+  target_crs <- if (!is.null(analysis_crs) && nzchar(analysis_crs)) {
+    sf::st_crs(analysis_crs)
+  } else {
+    raster_crs
   }
-  aoi_vect <- terra::vect(sf::st_transform(aoi_geom, sf::st_crs(target_crs)))
+  if (is.na(raster_crs)) {
+    raster_crs <- target_crs
+  }
+  aoi_vect <- terra::vect(sf::st_transform(aoi_geom, raster_crs))
   cropped <- terra::crop(raster, aoi_vect, snap = "out")
-  terra::mask(cropped, aoi_vect)
+  masked <- terra::mask(cropped, aoi_vect)
+  if (!is.na(target_crs) && !isTRUE(raster_crs == target_crs)) {
+    projected <- terra::project(masked, target_crs$wkt, method = resample)
+    aoi_target <- terra::vect(sf::st_transform(aoi_geom, target_crs))
+    cropped <- terra::crop(projected, aoi_target, snap = "out")
+    return(terra::mask(cropped, aoi_target))
+  }
+  masked
 }
 
 compute_index <- function(raster, band_a, band_b) {

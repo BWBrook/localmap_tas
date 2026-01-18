@@ -4,6 +4,8 @@ default:
   db_path: "data/interim/local.duckdb"
   sample_frac: 1.0
   data:
+    large_downloads:
+      allow: true
     aoi:
       centroid:
         lat: -41.97708
@@ -145,6 +147,9 @@ local:
 ci:
   inherits: default
   sample_frac: 0.02
+  data:
+    large_downloads:
+      allow: false
 
 slurm:
   inherits: default
@@ -399,6 +404,39 @@ jc:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Classes"
+      - id: "fire_attributes_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/export"
+        layers:
+          - 91
+        crs: "EPSG:3857"
+        format: "png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc/fire_attributes_arcgis.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Fire Attributes"
+      - id: "soil_ph_wms"
+        type: "wms"
+        url: "https://spatial.dpipwe.tas.gov.au/naturalassets/Soil/wms"
+        layers:
+          - "pH_0to15cm"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/jc/soil_ph_wms.png"
+        offline: false
+        attribution:
+          source: "DPIPWE"
+          license: "CC BY 4.0"
+          credit: "Soil pH 0–15 cm"
       - id: "topography_arcgis"
         type: "arcgis_export"
         url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/TopographyAndRelief/MapServer/export"
@@ -548,6 +586,115 @@ jc:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Classes (vector)"
+      - id: "jc_fire_attributes"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/91"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "FIRESENS"
+          - "FLAMMAB"
+        output_path: "outputs/analysis/jc/vector/jc_fire_attributes.gpkg"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Fire Attributes"
+      - id: "jc_geology"
+        type: "vector_arcgis"
+        url: "https://data.stategrowth.tas.gov.au/ags/rest/services/MRT/GeologyLIST/MapServer/11"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "description"
+        output_path: "outputs/analysis/jc/vector/jc_geology.gpkg"
+        offline: false
+        attribution:
+          source: "Mineral Resources Tasmania"
+          license: "CC BY 4.0"
+          credit: "GeologyLIST 250K geology units"
+      - id: "jc_land_tenure"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/OpenDataWFS/MapServer/26"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "TEN_CLASS"
+        output_path: "outputs/analysis/jc/vector/jc_land_tenure.gpkg"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Land Tenure"
+      - id: "jc_reserve_estate"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/CadastreAndAdministrative/MapServer/29"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "RES_CLASS"
+        output_path: "outputs/analysis/jc/vector/jc_reserve_estate.gpkg"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Tasmanian Reserve Estate"
+      - id: "jc_chm"
+        type: "raster_remote"
+        download_url: "https://listdata.thelist.tas.gov.au/opendata/data/LIST_TREE_CANOPY_HEIGHT_STATEWIDE.zip"
+        download_dir: "data/cache/rasters/chm"
+        download_size_mb: 8100
+        extract_pattern: "\\\\.tif$"
+        extract_dir: "data/cache/rasters/chm"
+        output_path: "outputs/analysis/jc/raster/jc_chm.tif"
+        categorical: false
+        units: "m"
+        large_download: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Tree Canopy Height Model (2m)"
+      - id: "jc_soil_ph"
+        type: "raster_geodata"
+        geodata_type: "soil_world"
+        geodata_var: "phh2o"
+        geodata_depth: 15
+        geodata_stat: "mean"
+        output_path: "outputs/analysis/jc/raster/jc_soil_ph.tif"
+        categorical: false
+        units: "pH"
+        offline: false
+        attribution:
+          source: "SoilGrids"
+          license: "CC BY 4.0"
+          credit: "Soil pH (0–15 cm, mean)"
+      - id: "jc_bio1"
+        type: "raster_geodata"
+        geodata_type: "worldclim"
+        geodata_var: "bio"
+        geodata_res: 0.5
+        geodata_version: "2.1"
+        band: "bio1"
+        scale: 0.1
+        output_path: "outputs/analysis/jc/raster/jc_bio1.tif"
+        categorical: false
+        units: "degC"
+        offline: false
+        attribution:
+          source: "WorldClim"
+          license: "CC BY 4.0"
+          credit: "Bioclim BIO1 (annual mean temperature)"
+      - id: "jc_bio12"
+        type: "raster_geodata"
+        geodata_type: "worldclim"
+        geodata_var: "bio"
+        geodata_res: 0.5
+        geodata_version: "2.1"
+        band: "bio12"
+        output_path: "outputs/analysis/jc/raster/jc_bio12.tif"
+        categorical: false
+        units: "mm"
+        offline: false
+        attribution:
+          source: "WorldClim"
+          license: "CC BY 4.0"
+          credit: "Bioclim BIO12 (annual precipitation)"
       - id: "jc_dem"
         type: "raster_wcs"
         url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"
@@ -824,6 +971,39 @@ tas_canonical:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Classes"
+      - id: "fire_attributes_arcgis"
+        type: "arcgis_export"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/export"
+        layers:
+          - 91
+        crs: "EPSG:3857"
+        format: "png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas/fire_attributes_arcgis.png"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Fire Attributes"
+      - id: "soil_ph_wms"
+        type: "wms"
+        url: "https://spatial.dpipwe.tas.gov.au/naturalassets/Soil/wms"
+        layers:
+          - "pH_0to15cm"
+        styles: ""
+        crs: "EPSG:3857"
+        format: "image/png"
+        width: 1600
+        height: 1600
+        dpi: 96
+        output_path: "outputs/layers/tas/soil_ph_wms.png"
+        offline: false
+        attribution:
+          source: "DPIPWE"
+          license: "CC BY 4.0"
+          credit: "Soil pH 0–15 cm"
       - id: "roads_wms"
         type: "wms"
         url: "https://services.thelist.tas.gov.au/arcgis/services/Public/TopographyAndRelief/MapServer/WMSServer"
@@ -925,12 +1105,121 @@ tas_canonical:
           - "VEGCODE_D"
         output_path: "outputs/analysis/tas/vector/tas_tasveg_class.gpkg"
         offline: false
-        fixture_path: "inst/extdata/jc_habitats.gpkg"
-        fixture_layer: "habitats"
+        fixture_path: "inst/extdata/jc_tasveg_class.gpkg"
+        fixture_layer: "jc_tasveg_class"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
           credit: "TASVEG 4.0 Classes (vector)"
+      - id: "tas_fire_attributes"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/NaturalEnvironment/MapServer/91"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "FIRESENS"
+          - "FLAMMAB"
+        output_path: "outputs/analysis/tas/vector/tas_fire_attributes.gpkg"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "TASVEG 4.0 Fire Attributes"
+      - id: "tas_geology"
+        type: "vector_arcgis"
+        url: "https://data.stategrowth.tas.gov.au/ags/rest/services/MRT/GeologyLIST/MapServer/11"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "description"
+        output_path: "outputs/analysis/tas/vector/tas_geology.gpkg"
+        offline: false
+        attribution:
+          source: "Mineral Resources Tasmania"
+          license: "CC BY 4.0"
+          credit: "GeologyLIST 250K geology units"
+      - id: "tas_land_tenure"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/OpenDataWFS/MapServer/26"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "TEN_CLASS"
+        output_path: "outputs/analysis/tas/vector/tas_land_tenure.gpkg"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Land Tenure"
+      - id: "tas_reserve_estate"
+        type: "vector_arcgis"
+        url: "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/CadastreAndAdministrative/MapServer/29"
+        crs: "EPSG:4326"
+        attribute_fields:
+          - "RES_CLASS"
+        output_path: "outputs/analysis/tas/vector/tas_reserve_estate.gpkg"
+        offline: false
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Tasmanian Reserve Estate"
+      - id: "tas_chm"
+        type: "raster_remote"
+        download_url: "https://listdata.thelist.tas.gov.au/opendata/data/LIST_TREE_CANOPY_HEIGHT_STATEWIDE.zip"
+        download_dir: "data/cache/rasters/chm"
+        download_size_mb: 8100
+        extract_pattern: "\\\\.tif$"
+        extract_dir: "data/cache/rasters/chm"
+        output_path: "outputs/analysis/tas/raster/tas_chm.tif"
+        categorical: false
+        units: "m"
+        large_download: true
+        attribution:
+          source: "The LIST"
+          license: "CC BY 4.0"
+          credit: "Tree Canopy Height Model (2m)"
+      - id: "tas_soil_ph"
+        type: "raster_geodata"
+        geodata_type: "soil_world"
+        geodata_var: "phh2o"
+        geodata_depth: 15
+        geodata_stat: "mean"
+        output_path: "outputs/analysis/tas/raster/tas_soil_ph.tif"
+        categorical: false
+        units: "pH"
+        offline: false
+        attribution:
+          source: "SoilGrids"
+          license: "CC BY 4.0"
+          credit: "Soil pH (0–15 cm, mean)"
+      - id: "tas_bio1"
+        type: "raster_geodata"
+        geodata_type: "worldclim"
+        geodata_var: "bio"
+        geodata_res: 0.5
+        geodata_version: "2.1"
+        band: "bio1"
+        scale: 0.1
+        output_path: "outputs/analysis/tas/raster/tas_bio1.tif"
+        categorical: false
+        units: "degC"
+        offline: false
+        attribution:
+          source: "WorldClim"
+          license: "CC BY 4.0"
+          credit: "Bioclim BIO1 (annual mean temperature)"
+      - id: "tas_bio12"
+        type: "raster_geodata"
+        geodata_type: "worldclim"
+        geodata_var: "bio"
+        geodata_res: 0.5
+        geodata_version: "2.1"
+        band: "bio12"
+        output_path: "outputs/analysis/tas/raster/tas_bio12.tif"
+        categorical: false
+        units: "mm"
+        offline: false
+        attribution:
+          source: "WorldClim"
+          license: "CC BY 4.0"
+          credit: "Bioclim BIO12 (annual precipitation)"
       - id: "tas_dem"
         type: "raster_wcs"
         url: "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer"

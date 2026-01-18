@@ -45,6 +45,34 @@ raster_ndvi_preview,figure,JC NDVI preview PNG,outputs/analysis/jc/raster/jc_ndv
 raster_nbr,raster,JC NBR derived raster,outputs/analysis/jc/raster/jc_nbr.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_nbr_provenance,provenance,JC NBR provenance,outputs/analysis/jc/raster/jc_nbr.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
 raster_nbr_preview,figure,JC NBR preview PNG,outputs/analysis/jc/raster/jc_nbr.png,png,EPSG:28355,jc,render_analysis_layer_previews
+fire_attributes_arcgis_layer,basemap,Fire attributes ArcGIS export layer,outputs/layers/jc/fire_attributes_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+fire_attributes_arcgis_layer_provenance,provenance,Fire attributes ArcGIS export provenance,outputs/layers/jc/fire_attributes_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+soil_ph_wms_layer,basemap,Soil pH WMS layer,outputs/layers/jc/soil_ph_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+soil_ph_wms_layer_provenance,provenance,Soil pH WMS provenance,outputs/layers/jc/soil_ph_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+vector_fire_attributes,vector,JC fire attributes polygons (clipped),outputs/analysis/jc/vector/jc_fire_attributes.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_fire_attributes_provenance,provenance,JC fire attributes provenance,outputs/analysis/jc/vector/jc_fire_attributes.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_fire_attributes_preview,figure,JC fire attributes preview PNG,outputs/analysis/jc/vector/jc_fire_attributes.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_geology,vector,JC geology units (clipped),outputs/analysis/jc/vector/jc_geology.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_geology_provenance,provenance,JC geology provenance,outputs/analysis/jc/vector/jc_geology.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_geology_preview,figure,JC geology preview PNG,outputs/analysis/jc/vector/jc_geology.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_land_tenure,vector,JC land tenure polygons (clipped),outputs/analysis/jc/vector/jc_land_tenure.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_land_tenure_provenance,provenance,JC land tenure provenance,outputs/analysis/jc/vector/jc_land_tenure.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_land_tenure_preview,figure,JC land tenure preview PNG,outputs/analysis/jc/vector/jc_land_tenure.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_reserve_estate,vector,JC reserve estate polygons (clipped),outputs/analysis/jc/vector/jc_reserve_estate.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_reserve_estate_provenance,provenance,JC reserve estate provenance,outputs/analysis/jc/vector/jc_reserve_estate.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_reserve_estate_preview,figure,JC reserve estate preview PNG,outputs/analysis/jc/vector/jc_reserve_estate.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_chm,raster,JC canopy height model (clipped),outputs/analysis/jc/raster/jc_chm.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_chm_provenance,provenance,JC canopy height provenance,outputs/analysis/jc/raster/jc_chm.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_chm_preview,figure,JC canopy height preview PNG,outputs/analysis/jc/raster/jc_chm.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_soil_ph,raster,JC soil pH raster (0-15 cm),outputs/analysis/jc/raster/jc_soil_ph.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_soil_ph_provenance,provenance,JC soil pH provenance,outputs/analysis/jc/raster/jc_soil_ph.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_soil_ph_preview,figure,JC soil pH preview PNG,outputs/analysis/jc/raster/jc_soil_ph.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_bio1,raster,JC WorldClim BIO1 raster,outputs/analysis/jc/raster/jc_bio1.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_bio1_provenance,provenance,JC WorldClim BIO1 provenance,outputs/analysis/jc/raster/jc_bio1.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_bio1_preview,figure,JC WorldClim BIO1 preview PNG,outputs/analysis/jc/raster/jc_bio1.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_bio12,raster,JC WorldClim BIO12 raster,outputs/analysis/jc/raster/jc_bio12.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_bio12_provenance,provenance,JC WorldClim BIO12 provenance,outputs/analysis/jc/raster/jc_bio12.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_bio12_preview,figure,JC WorldClim BIO12 preview PNG,outputs/analysis/jc/raster/jc_bio12.png,png,EPSG:28355,jc,render_analysis_layer_previews
 analysis_provenance,provenance,Combined layer provenance table,outputs/provenance/analysis_layers.csv,csv,NA,jc,build_layer_provenance
 attribution_report,provenance,Layer attribution report,outputs/provenance/attribution.md,md,NA,jc,write_attribution_report
 run_manifest,provenance,Run manifest metadata,outputs/provenance/run_manifest.yml,yml,NA,jc,write_run_manifest

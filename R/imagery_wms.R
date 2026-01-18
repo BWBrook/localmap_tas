@@ -117,7 +117,7 @@ fetch_wms_imagery <- function(wms_cfg,
   legend_source <- legend_cfg$source %||% "wms"
   legend_show <- legend_source != "custom" &&
     (isTRUE(legend_cfg$show) ||
-      (!is.null(wms_cfg$legend_path) && nzchar(wms_cfg$legend_path)))
+       (!is.null(wms_cfg$legend_path) && nzchar(wms_cfg$legend_path)))
   legend_path <- NULL
   if (isTRUE(legend_show)) {
     legend_path <- fetch_wms_legend_graphic(

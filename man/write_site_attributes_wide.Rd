@@ -9,7 +9,7 @@ write_site_attributes_wide(attributes, sites = NULL, output_path = NULL)
 \arguments{
 \item{attributes}{Long attributes tibble.}
 
-\item{sites}{Optional sites data frame with `site`, `lat`, `lon`.}
+\item{sites}{Optional sites data frame with \code{site}, \code{lat}, \code{lon}.}
 
 \item{output_path}{Output CSV path.}
 }

@@ -122,8 +122,8 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
   checkmate::assert_string(output_path, min.chars = 1L)
 
   if (!is.null(sites) &&
-    is.data.frame(sites) &&
-    all(c("site", "lat", "lon") %in% names(sites))) {
+        is.data.frame(sites) &&
+        all(c("site", "lat", "lon") %in% names(sites))) {
     site_tbl <- sites |>
       dplyr::transmute(
         site_id = as.character(.data$site),
@@ -146,14 +146,33 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
         attribute_norm = gsub("[^a-z0-9]+", "_", tolower(.data$attribute_name)),
         target = dplyr::case_when(
           grepl("_dem$", .data$layer_id) & .data$attribute_name == "value" ~ "dem",
+          grepl("_chm$", .data$layer_id) & .data$attribute_name == "value" ~ "canopy_height_m",
           grepl("_slope$", .data$layer_id) & .data$attribute_name == "slope" ~ "slope",
+          grepl("_soil_ph$", .data$layer_id) &
+            (.data$attribute_name == "value" | grepl("^phh2o", .data$attribute_norm)) ~ "soil_ph",
           grepl("_ndvi$", .data$layer_id) & .data$attribute_name == "ndvi" ~ "ndvi",
           grepl("_nbr$", .data$layer_id) & .data$attribute_name == "nbr" ~ "nbr",
+          grepl("_bio1$", .data$layer_id) &
+            (.data$attribute_name == "value" | .data$attribute_name %in% c("bio1", "bio_1")) ~
+            "bio1_mean_temp_c",
+          grepl("_bio12$", .data$layer_id) &
+            (.data$attribute_name == "value" | .data$attribute_name %in% c("bio12", "bio_12")) ~
+            "bio12_annual_precip_mm",
           grepl("tasveg", .data$layer_id) &
             grepl("veg", .data$attribute_norm) &
             grepl("group", .data$attribute_norm) ~ "tasveg_category",
           grepl("tasveg", .data$layer_id) &
             .data$attribute_name == "VEGCODE" ~ "tasveg_class",
+          grepl("fire_attributes", .data$layer_id) &
+            .data$attribute_name == "FIRESENS" ~ "fire_sensitivity",
+          grepl("fire_attributes", .data$layer_id) &
+            .data$attribute_name == "FLAMMAB" ~ "fire_flammability",
+          grepl("geology", .data$layer_id) &
+            .data$attribute_name == "description" ~ "geology_description",
+          grepl("land_tenure", .data$layer_id) &
+            .data$attribute_name == "TEN_CLASS" ~ "land_tenure_class",
+          grepl("reserve_estate", .data$layer_id) &
+            .data$attribute_name == "RES_CLASS" ~ "reserve_estate_class",
           .data$layer_id %in% c("distance_to_road", "distance_to_locality") &
             .data$attribute_name == "distance_m" ~ .data$layer_id,
           TRUE ~ NA_character_
@@ -184,6 +203,15 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
     "nbr",
     "tasveg_category",
     "tasveg_class",
+    "canopy_height_m",
+    "soil_ph",
+    "bio1_mean_temp_c",
+    "bio12_annual_precip_mm",
+    "fire_sensitivity",
+    "fire_flammability",
+    "geology_description",
+    "land_tenure_class",
+    "reserve_estate_class",
     "distance_to_road",
     "distance_to_locality"
   )
@@ -197,10 +225,14 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
   numeric_cols <- c(
     "lat",
     "lon",
+    "canopy_height_m",
     "dem",
     "slope",
+    "soil_ph",
     "ndvi",
     "nbr",
+    "bio1_mean_temp_c",
+    "bio12_annual_precip_mm",
     "distance_to_road",
     "distance_to_locality"
   )
@@ -430,10 +462,10 @@ extract_distance_attributes <- function(sites,
       }
     }
     if (identical(distance_to, "locality") &&
-      any(is.finite(distances)) &&
-      all(distances[is.finite(distances)] == 0) &&
-      !is.null(vec) &&
-      nrow(vec) > 0L) {
+          any(is.finite(distances)) &&
+          all(distances[is.finite(distances)] == 0) &&
+          !is.null(vec) &&
+          nrow(vec) > 0L) {
       geom_types <- unique(as.character(sf::st_geometry_type(vec)))
       if (any(geom_types %in% c("POLYGON", "MULTIPOLYGON"))) {
         distances <- rep(NA_real_, nrow(sites))

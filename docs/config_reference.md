@@ -242,7 +242,8 @@ Analysis layers describe AOI-clipped vector/raster inputs and derived rasters.
 Common fields:
 - `id` (string, required): unique layer ID.
 - `type` (string, required): one of `vector_file`, `vector_arcgis`, `raster_file`,
-  `raster_arcgis`, `raster_wcs`, `raster_geodata`, `derived_slope`, `derived_ndvi`, `derived_nbr`.
+  `raster_arcgis`, `raster_wcs`, `raster_geodata`, `raster_remote`,
+  `derived_slope`, `derived_ndvi`, `derived_nbr`.
 - `output_path` (string, required): output GeoPackage/GeoTIFF path.
 - `attribution` (list, required): at least `source`, plus optional `license`, `credit`.
 - `skip_attributes` (logical, optional): if TRUE, omit this layer from site-attribute extraction.
@@ -299,13 +300,34 @@ Raster WCS fields (`type: raster_wcs`):
 - `units` (string, optional): units for extracted values (e.g., `m`).
 
 Raster geodata fields (`type: raster_geodata`):
-- `resolution` (string, optional): `3s` (default) or `30s` (arc-second resolution).
+- `geodata_type` (string, optional): `elevation` (default), `soil_world`, or `worldclim`.
+- `geodata_var` (string, optional): dataset variable (e.g., `phh2o` for SoilGrids, `bio` for WorldClim).
+- `geodata_depth` (numeric, optional): SoilGrids depth in cm (e.g., 15 for 0–15 cm).
+- `geodata_stat` (string, optional): SoilGrids statistic (`mean`, `uncertainty`, etc.).
+- `geodata_res` (numeric, optional): WorldClim resolution in minutes (e.g., `0.5` for 30 arc‑sec).
+- `geodata_version` (string, optional): WorldClim version (default `2.1`).
+- `band` (string/integer, optional): band name/number to select from multiband outputs.
+- `scale` (numeric, optional): scale factor applied after download (e.g., `0.1` for BIO1).
+- `offset` (numeric, optional): additive offset applied after scaling.
+- `resolution` (string, optional): for elevation only; `3s` (default) or `30s` (arc-second resolution).
 - `geodata_path` (string, optional): cache directory for downloaded tiles.
 - `offline` (logical, optional): skip network fetch.
 - `fixture_path` (string, optional): local raster fixture used when offline.
 - `categorical` (logical, default `false`): if TRUE, use nearest-neighbor resampling.
 - `resample` (string, optional): `near`, `bilinear`, or `cubic` (overrides `categorical`).
 - `units` (string, optional): units for extracted values (e.g., `m`).
+
+Raster remote fields (`type: raster_remote`):
+- `download_url` (string, required): URL to a downloadable raster archive or file.
+- `download_dir` (string, optional): cache directory for downloaded archives.
+- `download_path` (string, optional): explicit archive filename (overrides basename of URL).
+- `download_size_mb` (numeric, optional): expected download size; triggers re-download if smaller.
+- `download_zip` (logical, optional): treat download as zip (auto-detected by extension).
+- `extract_dir` (string, optional): extraction directory (defaults to `download_dir`).
+- `extract_pattern` (string, optional): regex to locate the extracted raster (default `\\.tif$`).
+- `extract_file` (string, optional): explicit extracted filename relative to `extract_dir`.
+- `extract_path` (string, optional): full path to extracted raster file.
+- `large_download` (logical, optional): mark as large download (gated by `data.large_downloads.allow`).
 
 Derived slope (`type: derived_slope`):
 - `source_id` (string, required): raster layer ID (DEM).
@@ -327,10 +349,18 @@ Ordering note:
 Network access:
 - Remote imagery/vector fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
 - When network is disabled, imagery uses placeholders; ArcGIS vectors/rasters require a `fixture_path`.
+- Large raster downloads are gated by `LOCALMAP_ALLOW_LARGE_DOWNLOADS` (set automatically from config).
 
 Cache invalidation:
 - Delete `data/cache/` to force a refetch, or set a new `cache_dir` in the layer config.
 - For analysis layers, bump `analysis_cache_version` in `R/analysis_layers.R` if the cache key logic changes.
+
+### `data.large_downloads`
+
+Controls whether large, one-off raster downloads (e.g., statewide CHM) are allowed.
+
+- `allow` (logical, default `true`): when `false`, any analysis layer marked
+  `large_download: true` is skipped unless a cached file already exists.
 
 ### `data.dem_variant`
 

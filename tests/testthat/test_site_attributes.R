@@ -83,4 +83,17 @@ testthat::test_that("site attributes outputs write long + wide products", {
 
   testthat::expect_true(file.exists(long_out))
   testthat::expect_true(file.exists(wide_out))
+  wide_tbl <- utils::read.csv(wide_out, stringsAsFactors = FALSE)
+  expected_cols <- c(
+    "canopy_height_m",
+    "soil_ph",
+    "bio1_mean_temp_c",
+    "bio12_annual_precip_mm",
+    "fire_sensitivity",
+    "fire_flammability",
+    "geology_description",
+    "land_tenure_class",
+    "reserve_estate_class"
+  )
+  testthat::expect_true(all(expected_cols %in% names(wide_tbl)))
 })

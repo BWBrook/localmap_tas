@@ -4,12 +4,24 @@
 \alias{build_site_attributes_long}
 \title{Build canonical long table of site attributes}
 \usage{
-build_site_attributes_long(sites, analysis_layers)
+build_site_attributes_long(
+  sites,
+  analysis_layers,
+  aoi = NULL,
+  analysis_crs = NULL,
+  distance_layers = NULL
+)
 }
 \arguments{
 \item{sites}{Data frame with \code{site}, \code{lat}, \code{lon}.}
 
 \item{analysis_layers}{Tibble from \code{fetch_analysis_layers()}.}
+
+\item{aoi}{Optional AOI list from \code{build_aoi_from_config()}.}
+
+\item{analysis_crs}{Optional CRS string for distance calculations.}
+
+\item{distance_layers}{Optional list of distance-layer configs.}
 }
 \value{
 Tibble of site attributes in long form.

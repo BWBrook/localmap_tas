@@ -125,6 +125,7 @@ Every WP must create or update:
 - [x] **WP-024:** Cache correctness audit (deterministic keys; cache hit guarantees) (completed 2026-01-10; evidence: docs/log/WP-024_2026-01-10_cache-audit.md; canonical run: outputs/canonical_runs/WP-024_2026-01-10_cache-audit)  
 - [x] **WP-025 (Large):** Container parity (Docker and/or Apptainer JC run) + docs (completed 2026-01-10; evidence: docs/log/WP-025_2026-01-10_container-parity.md; canonical run: outputs/canonical_runs/WP-025_2026-01-10_container-parity)  
 - [x] **WP-026:** “Tasmania canonical example” layer set (Orthophoto + TASVEG + DEM) runs end-to-end (completed 2026-01-10; evidence: docs/log/WP-026_2026-01-10_tas-canonical.md; canonical run: outputs/canonical_runs/WP-026_2026-01-10_tas-canonical)
+- [x] **WP-026b:** RS layer expansion (CHM, fire, soils, geology/tenure/reserve, climate normals) (completed 2026-01-18; evidence: docs/log/WP-026b_2026-01-18_rs-layers.md; canonical run: outputs/canonical_runs/WP-026b_2026-01-18_rs-layers)
 
 ### Line 1.0.x — Release readiness
 - [ ] **WP-027 (Large):** Public API freeze + docs polish (user-facing)  
@@ -1040,6 +1041,38 @@ Provide a canonical Tasmania-focused configuration that matches typical ecologic
 
 ---
 
+### WP-026b — RS layer expansion (CHM, fire, soils, geology/tenure/reserve, climate normals)
+**Outcome**  
+Extend the canonical JC/TAS workflows with ecologically relevant RS covariates while keeping provenance and offline controls intact.
+
+**Scope**
+- In scope:
+  - Canopy height (CHM) with large-download gating and placeholders when disabled.
+  - Fire attributes (FIRESENS/FLAMMAB) from TASVEG fire layers.
+  - Soil pH (0–15 cm) raster and climate normals (WorldClim BIO1/BIO12).
+  - Geology, land tenure, and reserve estate vectors.
+  - Updated site-attributes extraction + previews for the new layers.
+- Out of scope:
+  - Full statewide tiling or bulk ingest of other LIST layers.
+
+**Acceptance criteria**
+- New analysis layers are configured for JC/TAS and fetchable when network is enabled.
+- New site-attribute columns are populated (or NA where coverage is absent/disabled).
+- WMS/ArcGIS overlays for fire/soil are rendered with provenance sidecars.
+
+**Artefact evidence**
+- Canonical run: `outputs/canonical_runs/WP-026b_*` includes:
+  - JC/TAS previews for CHM, soil pH, BIO1/BIO12,
+  - vector previews for fire/geology/tenure/reserve,
+  - updated site attribute tables.
+- Log includes:
+  - sanity inspection notes (value ranges + alignment).
+
+**Stop condition**
+- Stop when new RS layers are wired end-to-end and inspected with the canonical run.
+
+---
+
 ### WP-027 (Large) — Public API freeze + docs polish (user-facing)
 **Outcome**  
 Make the package feel “real” to external users: stable exported API, clean docs, and a coherent README quickstart aligned with the actual workflow.
@@ -1115,7 +1148,7 @@ Codex must stop and request a PI ZIP review when any of the following occur:
 - After completing **Line 0.4.x** (WP-007 through WP-013).
 - After completing **Line 0.5.x** (WP-014 through WP-018).
 - After completing **Line 0.6.x** (WP-019 through WP-022).
-- After completing **Line 0.7.x** (WP-023 through WP-026).
+- After completing **Line 0.7.x** (WP-023 through WP-026b).
 - After completing **Line 1.0.x** (WP-027 through WP-028).
 
 ### 5.2 Safety gates (must stop immediately)

@@ -43,6 +43,15 @@ localmap_network_allowed <- function() {
   flag %in% c("1", "true", "yes", "y")
 }
 
+localmap_large_downloads_allowed <- function() {
+  flag <- Sys.getenv("LOCALMAP_ALLOW_LARGE_DOWNLOADS", "")
+  flag <- tolower(trimws(flag))
+  if (!nzchar(flag)) {
+    return(TRUE)
+  }
+  flag %in% c("1", "true", "yes", "y")
+}
+
 imagery_write_placeholder <- function(path, width, height, colour = "#f0f0f0") {
   width <- as.integer(width)
   height <- as.integer(height)
