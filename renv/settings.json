@@ -8,6 +8,7 @@
     "LinkingTo",
     "Suggests"
   ],
+  "pak.enabled": false,
   "ppm.enabled": null,
   "ppm.ignored.urls": [],
   "r.version": null,

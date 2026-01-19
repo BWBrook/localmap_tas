@@ -671,7 +671,6 @@ jc:
         geodata_res: 0.5
         geodata_version: "2.1"
         band: "bio1"
-        scale: 0.1
         output_path: "outputs/analysis/jc/raster/jc_bio1.tif"
         categorical: false
         units: "degC"
@@ -1196,7 +1195,6 @@ tas_canonical:
         geodata_res: 0.5
         geodata_version: "2.1"
         band: "bio1"
-        scale: 0.1
         output_path: "outputs/analysis/tas/raster/tas_bio1.tif"
         categorical: false
         units: "degC"

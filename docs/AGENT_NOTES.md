@@ -330,3 +330,8 @@
   - Artefacts inspected: `outputs/analysis/jc/raster/jc_soil_ph.png`, `outputs/analysis/jc/raster/jc_bio1.png`, `outputs/analysis/jc/raster/jc_bio12.png`, `outputs/analysis/jc/raster/jc_chm.png`, `outputs/analysis/jc/vector/jc_fire_attributes.png`, `outputs/analysis/jc/vector/jc_geology.png`, `outputs/layers/jc/fire_attributes_arcgis.png`, `outputs/layers/jc/soil_ph_wms.png`, `outputs/tables/jc/site_attributes_wide.csv` (and TAS equivalents in `outputs/analysis/tas/`).
   - Sanity notes: soil pH values ~5.4–5.7; BIO1 ~10–11 °C after scaling; BIO12 ~900–1078 mm; NDVI/NBR within expected ranges. CHM preview is placeholder due to large-download gating. Fire/geology/tenure/reserve vectors return multiple classes; distance-to-road/locality remain NA at current AOI.
   - Next steps: run once with `LOCALMAP_ALLOW_LARGE_DOWNLOADS=1` to fetch CHM when bandwidth permits; review CHM alignment and consider finer climate resolution if needed.
+
+- 2026-01-19: BIO1 scaling + grid check.
+  - Removed the extra 0.1 scale on WorldClim BIO1 so values are in deg C (now ~10.6–11.4 for JC).
+  - Rebuilt JC/TAS analysis layers, previews, and site attribute tables with the corrected BIO1 scale.
+  - Checked WorldClim grid alignment: closest camera to a cell intersection is ~0.00157 deg lon and ~0.00021 deg lat away (~130 m x 23 m), so the near-center intersection is coincidence, not a misalignment.
