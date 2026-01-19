@@ -30,6 +30,10 @@ vector_tasveg_class,vector,JC TASVEG classes polygons (clipped),outputs/analysis
 vector_tasveg_class_provenance,provenance,JC TASVEG classes provenance,outputs/analysis/jc/vector/jc_tasveg_class.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
 vector_tasveg_class_preview,figure,JC TASVEG classes preview PNG,outputs/analysis/jc/vector/jc_tasveg_class.png,png,EPSG:28355,jc,render_analysis_layer_previews
 tasveg_class_lookup,table,TASVEG class code lookup (AOI),outputs/analysis/jc/vector/jc_tasveg_class_lookup.csv,csv,EPSG:28355,jc,render_tasveg_class_legend
+tasveg_group_lookup,table,TASVEG group code lookup (AOI),outputs/analysis/jc/vector/jc_tasveg_group_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+geology_lookup,table,Geology code lookup (AOI),outputs/analysis/jc/vector/jc_geology_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+land_tenure_lookup,table,Land tenure code lookup (AOI),outputs/analysis/jc/vector/jc_land_tenure_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+reserve_estate_lookup,table,Reserve estate code lookup (AOI),outputs/analysis/jc/vector/jc_reserve_estate_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
 raster_dem,raster,JC DEM (GA DEM 1 Second; clipped),outputs/analysis/jc/raster/jc_dem.tif,tif,EPSG:28355,jc,fetch_analysis_layers
 raster_dem_provenance,provenance,JC DEM provenance (GA DEM 1 Second),outputs/analysis/jc/raster/jc_dem.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
 raster_dem_preview,figure,JC DEM preview PNG,outputs/analysis/jc/raster/jc_dem.png,png,EPSG:28355,jc,render_analysis_layer_previews

@@ -55,6 +55,10 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `vector_tasveg_class_provenance` → `outputs/analysis/jc/vector/jc_tasveg_class.gpkg.yml`
 - `vector_tasveg_class_preview` → `outputs/analysis/jc/vector/jc_tasveg_class.png`
 - `tasveg_class_lookup` → `outputs/analysis/jc/vector/jc_tasveg_class_lookup.csv`
+- `tasveg_group_lookup` → `outputs/analysis/jc/vector/jc_tasveg_group_lookup.csv`
+- `geology_lookup` → `outputs/analysis/jc/vector/jc_geology_lookup.csv`
+- `land_tenure_lookup` → `outputs/analysis/jc/vector/jc_land_tenure_lookup.csv`
+- `reserve_estate_lookup` → `outputs/analysis/jc/vector/jc_reserve_estate_lookup.csv`
 - `vector_fire_attributes` → `outputs/analysis/jc/vector/jc_fire_attributes.gpkg`
 - `vector_fire_attributes_provenance` → `outputs/analysis/jc/vector/jc_fire_attributes.gpkg.yml`
 - `vector_fire_attributes_preview` → `outputs/analysis/jc/vector/jc_fire_attributes.png`

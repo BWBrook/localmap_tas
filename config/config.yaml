@@ -604,6 +604,7 @@ jc:
         url: "https://data.stategrowth.tas.gov.au/ags/rest/services/MRT/GeologyLIST/MapServer/11"
         crs: "EPSG:4326"
         attribute_fields:
+          - "map_symb"
           - "description"
         output_path: "outputs/analysis/jc/vector/jc_geology.gpkg"
         offline: false
@@ -1128,6 +1129,7 @@ tas_canonical:
         url: "https://data.stategrowth.tas.gov.au/ags/rest/services/MRT/GeologyLIST/MapServer/11"
         crs: "EPSG:4326"
         attribute_fields:
+          - "map_symb"
           - "description"
         output_path: "outputs/analysis/tas/vector/tas_geology.gpkg"
         offline: false

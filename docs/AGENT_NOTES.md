@@ -340,3 +340,8 @@
   - Fixed CHM extract pattern (`\\.tif$`) so cached TAS_CHM_2m.tif is detected.
   - Added 7z fallback for deflate64 ZIP extraction to avoid base unzip failures.
   - Rebuilt JC/TAS CHM outputs with `LOCALMAP_ALLOW_LARGE_DOWNLOADS=1`; CHM rasters now contain values (0–45 m) and site attributes populate `canopy_height_m`.
+
+- 2026-01-19: Attribute code lookups.
+  - Added lookup CSVs for TASVEG groups, geology, land tenure, and reserve estate classes.
+  - Site attributes now use compact codes for `tasveg_category`, `land_tenure_class`, and `reserve_estate_class`; geology uses `map_symb`.
+  - Full labels are preserved in the new lookup tables alongside the analysis vectors.

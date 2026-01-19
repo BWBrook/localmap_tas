@@ -30,6 +30,10 @@ vector_tasveg_class,vector,TASVEG 4.0 Classes polygons (clipped),outputs/analysi
 vector_tasveg_class_provenance,provenance,TASVEG classes provenance,outputs/analysis/tas/vector/tas_tasveg_class.gpkg.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers
 vector_tasveg_class_preview,figure,TASVEG classes preview PNG,outputs/analysis/tas/vector/tas_tasveg_class.png,png,EPSG:28355,tas_canonical,render_analysis_layer_previews
 tasveg_class_lookup,table,TASVEG class code lookup (AOI),outputs/analysis/tas/vector/tas_tasveg_class_lookup.csv,csv,EPSG:28355,tas_canonical,render_tasveg_class_legend
+tasveg_group_lookup,table,TASVEG group code lookup (AOI),outputs/analysis/tas/vector/tas_tasveg_group_lookup.csv,csv,EPSG:28355,tas_canonical,render_attribute_lookups
+geology_lookup,table,Geology code lookup (AOI),outputs/analysis/tas/vector/tas_geology_lookup.csv,csv,EPSG:28355,tas_canonical,render_attribute_lookups
+land_tenure_lookup,table,Land tenure code lookup (AOI),outputs/analysis/tas/vector/tas_land_tenure_lookup.csv,csv,EPSG:28355,tas_canonical,render_attribute_lookups
+reserve_estate_lookup,table,Reserve estate code lookup (AOI),outputs/analysis/tas/vector/tas_reserve_estate_lookup.csv,csv,EPSG:28355,tas_canonical,render_attribute_lookups
 raster_dem,raster,TAS DEM (GA DEM 1 Second; clipped),outputs/analysis/tas/raster/tas_dem.tif,tif,EPSG:28355,tas_canonical,fetch_analysis_layers
 raster_dem_provenance,provenance,TAS DEM provenance (GA DEM 1 Second),outputs/analysis/tas/raster/tas_dem.tif.yml,yml,EPSG:28355,tas_canonical,fetch_analysis_layers
 raster_dem_preview,figure,TAS DEM preview PNG,outputs/analysis/tas/raster/tas_dem.png,png,EPSG:28355,tas_canonical,render_analysis_layer_previews

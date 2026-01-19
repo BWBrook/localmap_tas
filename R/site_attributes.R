@@ -169,7 +169,7 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
           grepl("fire_attributes", .data$layer_id) &
             .data$attribute_name == "FLAMMAB" ~ "fire_flammability",
           grepl("geology", .data$layer_id) &
-            .data$attribute_name == "description" ~ "geology_description",
+            tolower(.data$attribute_name) == "map_symb" ~ "geology_description",
           grepl("land_tenure", .data$layer_id) &
             .data$attribute_name == "TEN_CLASS" ~ "land_tenure_class",
           grepl("reserve_estate", .data$layer_id) &
@@ -192,6 +192,14 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
       ) |>
       dplyr::right_join(site_tbl, by = "site_id") |>
       dplyr::arrange(.data$site_id)
+
+    code_cols <- intersect(
+      c("tasveg_category", "land_tenure_class", "reserve_estate_class"),
+      names(wide)
+    )
+    for (col in code_cols) {
+      wide[[col]] <- attribute_code_from_label(wide[[col]])
+    }
   }
 
   desired_cols <- c(

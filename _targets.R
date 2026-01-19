@@ -322,6 +322,26 @@ list(
     description = "TASVEG class lookup CSV (code to label)."
   ),
   targets::tar_target(
+    analysis_attribute_lookups,
+    render_attribute_lookups(analysis_layers),
+    description = "Lookup tables for coded vector attributes."
+  ),
+  targets::tar_target(
+    analysis_attribute_lookup_files,
+    {
+      lookup_paths <- analysis_attribute_lookups
+      if (is.null(lookup_paths)) {
+        lookup_paths <- character()
+      } else {
+        lookup_paths <- unname(unlist(lookup_paths, use.names = FALSE))
+      }
+      lookup_paths <- lookup_paths[!is.na(lookup_paths) & nzchar(lookup_paths)]
+      lookup_paths
+    },
+    format = "file",
+    description = "Attribute lookup CSVs (vector code to label)."
+  ),
+  targets::tar_target(
     site_attributes_long,
     {
       attributes_cfg <- cfg$data$attributes
@@ -599,6 +619,10 @@ list(
             "tasveg_class_vector"
           ),
           tasveg_class_lookup = tasveg_class_lookup,
+          tasveg_group_lookup = analysis_attribute_lookups$tasveg_group_lookup,
+          geology_lookup = analysis_attribute_lookups$geology_lookup,
+          land_tenure_lookup = analysis_attribute_lookups$land_tenure_lookup,
+          reserve_estate_lookup = analysis_attribute_lookups$reserve_estate_lookup,
           vector_fire_attributes_preview = safe_lookup(
             analysis_layer_preview_paths,
             "tas_fire_attributes"
@@ -706,6 +730,10 @@ list(
             "jc_tasveg_class"
           ),
           tasveg_class_lookup = tasveg_class_lookup,
+          tasveg_group_lookup = analysis_attribute_lookups$tasveg_group_lookup,
+          geology_lookup = analysis_attribute_lookups$geology_lookup,
+          land_tenure_lookup = analysis_attribute_lookups$land_tenure_lookup,
+          reserve_estate_lookup = analysis_attribute_lookups$reserve_estate_lookup,
           vector_fire_attributes_preview = safe_lookup(
             analysis_layer_preview_paths,
             "jc_fire_attributes"

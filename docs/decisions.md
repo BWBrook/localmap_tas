@@ -165,3 +165,12 @@ Format:
 - **Soil pH:** SoilGrids global `phh2o` (0–15 cm, mean) via `geodata::soil_world` because Tasmanian pH layers are not exposed via WCS/GeoTIFF for automated extraction.
 - **Climate normals:** WorldClim v2.1 bioclim tiles via `geodata::worldclim_tile`; BIO1 values scaled by 0.1 to report °C.
 **Status:** Active.
+
+## 2026-01-19 — Coded site-attribute values with lookup CSVs
+**Decision:** Use abbreviated codes in `site_attributes_wide.csv` for TASVEG groups, land tenure classes, reserve estate classes, and geology units, with CSV lookup tables saved alongside analysis vectors to preserve full descriptors.
+**Rationale:** Tables are easier to scan and join when using compact codes while keeping full labels available via lookups, mirroring the TASVEG class approach.
+**Details:**
+- **TASVEG groups:** Derived codes from `VEG_GROUP` (e.g., DEFW, WEFW, ML) because no official group code is supplied in the vector.
+- **Geology:** Use `map_symb` as the code and store `description` in the lookup.
+- **Land tenure / reserve estate:** Derived codes from `TEN_CLASS` / `RES_CLASS` when no official code is present.
+**Status:** Active.
