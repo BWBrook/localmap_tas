@@ -27,7 +27,13 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-renv@v2
+      - name: Install renv
+        run: Rscript -e 'install.packages("renv")'
+
+      - name: Restore renv (pak disabled)
+        env:
+          RENV_CONFIG_PAK_ENABLED: "FALSE"
+        run: Rscript -e 'options(renv.config.pak.enabled = FALSE); renv::restore(prompt = FALSE)'
 
       - name: Prepare CI artifacts
         run: |
