@@ -640,7 +640,7 @@ jc:
         download_url: "https://listdata.thelist.tas.gov.au/opendata/data/LIST_TREE_CANOPY_HEIGHT_STATEWIDE.zip"
         download_dir: "data/cache/rasters/chm"
         download_size_mb: 8100
-        extract_pattern: "\\\\.tif$"
+        extract_pattern: "\\.tif$"
         extract_dir: "data/cache/rasters/chm"
         output_path: "outputs/analysis/jc/raster/jc_chm.tif"
         categorical: false
@@ -1164,7 +1164,7 @@ tas_canonical:
         download_url: "https://listdata.thelist.tas.gov.au/opendata/data/LIST_TREE_CANOPY_HEIGHT_STATEWIDE.zip"
         download_dir: "data/cache/rasters/chm"
         download_size_mb: 8100
-        extract_pattern: "\\\\.tif$"
+        extract_pattern: "\\.tif$"
         extract_dir: "data/cache/rasters/chm"
         output_path: "outputs/analysis/tas/raster/tas_chm.tif"
         categorical: false

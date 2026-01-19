@@ -335,3 +335,8 @@
   - Removed the extra 0.1 scale on WorldClim BIO1 so values are in deg C (now ~10.6–11.4 for JC).
   - Rebuilt JC/TAS analysis layers, previews, and site attribute tables with the corrected BIO1 scale.
   - Checked WorldClim grid alignment: closest camera to a cell intersection is ~0.00157 deg lon and ~0.00021 deg lat away (~130 m x 23 m), so the near-center intersection is coincidence, not a misalignment.
+
+- 2026-01-19: CHM extraction + attributes.
+  - Fixed CHM extract pattern (`\\.tif$`) so cached TAS_CHM_2m.tif is detected.
+  - Added 7z fallback for deflate64 ZIP extraction to avoid base unzip failures.
+  - Rebuilt JC/TAS CHM outputs with `LOCALMAP_ALLOW_LARGE_DOWNLOADS=1`; CHM rasters now contain values (0–45 m) and site attributes populate `canopy_height_m`.

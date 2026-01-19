@@ -33,6 +33,7 @@ build_site_attributes_long <- function(sites,
     "raster_file",
     "raster_arcgis",
     "raster_wcs",
+    "raster_remote",
     "raster_geodata",
     "derived_slope",
     "derived_ndvi",
@@ -276,8 +277,9 @@ extract_raster_attributes <- function(sites, raster_layers) {
     band_names <- band_names_raw
     if (terra::nlyr(rast) == 1L && length(band_names_raw) == 1L) {
       raw_name <- band_names_raw[[1]]
+      raw_name_lower <- tolower(raw_name)
       generic_name <- is.na(raw_name) || !nzchar(raw_name) ||
-        grepl("^(lyr\\.|file)", raw_name) || raw_name == "band_1"
+        grepl("^(lyr\\.|file)", raw_name_lower) || raw_name_lower == "band_1"
       if (isTRUE(generic_name)) {
         band_names <- "value"
         names(values_mat) <- band_names

@@ -1081,7 +1081,46 @@ analysis_download_file <- function(url, dest_path, expected_size_mb = NULL) {
 
 analysis_unzip_archive <- function(archive_path, extract_dir) {
   dir.create(extract_dir, recursive = TRUE, showWarnings = FALSE)
-  utils::unzip(archive_path, exdir = extract_dir)
+  unzip_ok <- tryCatch(
+    {
+      utils::unzip(archive_path, exdir = extract_dir)
+      TRUE
+    },
+    warning = function(w) {
+      FALSE
+    },
+    error = function(e) {
+      FALSE
+    }
+  )
+  if (!isTRUE(unzip_ok)) {
+    seven_zip <- Sys.which("7z")
+    if (!nzchar(seven_zip)) {
+      rlang::abort(
+        c(
+          sprintf("Failed to unzip %s with base unzip.", basename(archive_path)),
+          i = "Install '7z' (p7zip) or extract manually, then re-run."
+        ),
+        class = "analysis_unzip_missing_7z"
+      )
+    }
+    res <- system2(
+      seven_zip,
+      c("x", archive_path, paste0("-o", extract_dir)),
+      stdout = TRUE,
+      stderr = TRUE
+    )
+    status <- attr(res, "status")
+    if (!is.null(status) && status != 0) {
+      rlang::abort(
+        c(
+          sprintf("7z extraction failed for %s.", basename(archive_path)),
+          i = paste(res, collapse = "\n")
+        ),
+        class = "analysis_unzip_failed"
+      )
+    }
+  }
   extract_dir
 }
 
