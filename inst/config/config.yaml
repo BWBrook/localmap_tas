@@ -43,7 +43,7 @@ default:
         point_colour: "#2171b5"
         point_size: 1.6
         additional_points:
-          path: "data/raw/lyr_pt.csv"
+          path: "data/raw/lyr/lyr_pt.csv"
           colour: "#d73027"
           size: null
         tile_provider: "Esri.WorldImagery"
@@ -531,8 +531,9 @@ jc:
     camera_sites:
       source: "jc"
       jc:
-        site_path: "data/jc_camera_study/jc_site.csv"
-        obs_path: "data/jc_camera_study/jc_obs.csv"
+        site_path: "data/raw/jc_camera_study/site.csv"
+        obs_path: "data/raw/jc_camera_study/obs.csv"
+        op_path: "data/raw/jc_camera_study/op.csv"
         output_path: "data/interim/jc_camera_sites.csv"
       path: "data/interim/jc_camera_sites.csv"
       central_site: "jc_cen"
@@ -876,8 +877,9 @@ tas_canonical:
     camera_sites:
       source: "jc"
       jc:
-        site_path: "data/jc_camera_study/jc_site.csv"
-        obs_path: "data/jc_camera_study/jc_obs.csv"
+        site_path: "data/raw/jc_camera_study/site.csv"
+        obs_path: "data/raw/jc_camera_study/obs.csv"
+        op_path: "data/raw/jc_camera_study/op.csv"
         output_path: "data/interim/jc_camera_sites.csv"
       path: "data/interim/jc_camera_sites.csv"
       central_site: "jc_cen"

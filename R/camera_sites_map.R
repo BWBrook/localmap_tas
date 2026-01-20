@@ -594,7 +594,9 @@ render_camera_sites_map <- function(context,
   }
 
   if (nrow(within) > 0L) {
-    within$colour <- ifelse(within$obs > 0, map_cfg$positive_obs_colour, map_cfg$zero_obs_colour)
+    obs_values <- within$obs
+    obs_values[!is.finite(obs_values)] <- 0
+    within$colour <- ifelse(obs_values > 0, map_cfg$positive_obs_colour, map_cfg$zero_obs_colour)
     within$size <- point_sizes
     plot_obj <- plot_obj +
       ggplot2::geom_sf(

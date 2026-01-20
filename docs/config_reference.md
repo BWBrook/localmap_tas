@@ -21,7 +21,7 @@ Required:
 - `aoi` (list, required): area of interest definition.
 - `manifest` (string): CSV manifest path (e.g., `metadata/data_manifest.csv`).
 - `species_requests` (string): species query CSV path (e.g., `metadata/species_requests.csv`).
-  - JC profile uses `metadata/species_requests_jc.csv` (species codes from `jc_obs.csv`).
+- JC profile uses `metadata/species_requests_jc.csv` (species codes from `obs.csv`).
 - `occurrence` (list): occurrence settings.
 - `camera_sites` (list): camera-site settings.
 - `coverage` (list, optional): coverage polygon settings.
@@ -121,13 +121,15 @@ Each entry supports:
 
 For `source: jc`, derive a compatible camera-site table from the Judbury camera study:
 
-- `site_path` (string, required): path to `jc_site.csv` (lat/lon).
-- `obs_path` (string, required): path to `jc_obs.csv` (datetime + site).
+- `site_path` (string, required): path to `site.csv` (lat/lon).
+- `obs_path` (string, optional): path to `obs.csv` (site + datetime + optional `count`).
+- `op_path` (string, optional): path to `op.csv` (operational days by site, wide format).
 - `output_path` (string, optional): derived output CSV (defaults to `data/interim/jc_camera_sites.csv`).
 
 Derived fields:
-- `rd`: number of unique observation dates per site (from `jc_obs.csv`).
-- `obs`: total observed individuals per site (sum of `count` if present; otherwise row count).
+- `obs`: total observed individuals per site (from `site.csv` `count`/`obs`, else sum of
+  `obs.csv$count` if present; otherwise row count).
+- `rd`: number of operational days per site (from `site.csv` `rd`, else summed `op.csv` values).
 
 ### `data.camera_sites.basemap`
 

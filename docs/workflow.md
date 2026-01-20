@@ -73,11 +73,11 @@ Fix and repeat until coherent.
 ### Container builds
 - Use `scripts/bootstrap_container.R` for Docker/Apptainer images (renv restore only).
 - The container bootstrap prefers r2u binaries to keep build times reasonable.
-- The container run should mount `data/` from the host when using local datasets (e.g., `data/jc_camera_study/`).
+- The container run should mount `data/` from the host when using local datasets (e.g., `data/raw/jc_camera_study/`).
 
 ### Local datasets
 - Real-world datasets belong under `data/` (gitignored).
-- The Judbury camera study example lives at `data/jc_camera_study/`.
+- The Judbury camera study example lives at `data/raw/jc_camera_study/`.
 - Use profile `jc` to derive a compatible camera-site table at `data/interim/jc_camera_sites.csv`.
 - Minimal JC run:
   - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\",\"species_map\"))'`

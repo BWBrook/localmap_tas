@@ -345,3 +345,16 @@
   - Added lookup CSVs for TASVEG groups, geology, land tenure, and reserve estate classes.
   - Site attributes now use compact codes for `tasveg_category`, `land_tenure_class`, and `reserve_estate_class`; geology uses `map_symb`.
   - Full labels are preserved in the new lookup tables alongside the analysis vectors.
+
+- 2026-01-19: JC inputs moved to data/raw + rd/obs derivation update.
+  - Updated JC config + fixtures to read `data/raw/jc_camera_study/{site,obs,op}.csv` instead of `data/jc_camera_study`.
+  - `derive_camera_sites_from_jc()` now uses `site.csv` `count`/`rd` when present, otherwise computes `obs` from `obs.csv` and `rd` from `op.csv` with NA fallbacks + warnings.
+  - `site_attributes_wide.csv` now carries extra columns from the site input (non-conflicting names preserved, conflicts prefixed `site_`).
+
+- 2026-01-19: Rebuild with JC inputs under data/raw.
+  - Ran `R_CONFIG_ACTIVE=jc LOCALMAP_ALLOW_NETWORK=1 LOCALMAP_ALLOW_LARGE_DOWNLOADS=1 Rscript -e 'targets::tar_make()'`.
+  - Pipeline completed (54 targets) with warnings about missing `data/raw/lyr_pt.csv` and spatially-constant attribute assumptions.
+  - Outputs refreshed under `outputs/` including updated `camera_sites` and `site_attributes` tables using the new `site/obs/op` inputs.
+
+- 2026-01-19: Updated config to look for `data/raw/lyr/lyr_pt.csv` after raw-data reorg.
+- 2026-01-19: Re-ran JC pipeline after lyr_pt path update; missing points warning resolved (remaining warnings are spatially-constant attributes + row names).

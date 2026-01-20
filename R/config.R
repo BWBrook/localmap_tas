@@ -329,7 +329,12 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
       )
     }
     cfg_require_string(jc_cfg$site_path, "data$camera_sites$jc$site_path")
-    cfg_require_string(jc_cfg$obs_path, "data$camera_sites$jc$obs_path")
+    if (!is.null(jc_cfg$obs_path)) {
+      cfg_require_string(jc_cfg$obs_path, "data$camera_sites$jc$obs_path")
+    }
+    if (!is.null(jc_cfg$op_path)) {
+      cfg_require_string(jc_cfg$op_path, "data$camera_sites$jc$op_path")
+    }
   } else {
     cfg_require_string(camera_cfg$path, "data$camera_sites$path")
   }

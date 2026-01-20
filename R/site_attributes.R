@@ -122,15 +122,48 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
   }
   checkmate::assert_string(output_path, min.chars = 1L)
 
+  desired_cols <- c(
+    "site_id",
+    "lat",
+    "lon",
+    "dem",
+    "slope",
+    "ndvi",
+    "nbr",
+    "tasveg_category",
+    "tasveg_class",
+    "canopy_height_m",
+    "soil_ph",
+    "bio1_mean_temp_c",
+    "bio12_annual_precip_mm",
+    "fire_sensitivity",
+    "fire_flammability",
+    "geology_description",
+    "land_tenure_class",
+    "reserve_estate_class",
+    "distance_to_road",
+    "distance_to_locality"
+  )
+
   if (!is.null(sites) &&
         is.data.frame(sites) &&
         all(c("site", "lat", "lon") %in% names(sites))) {
-    site_tbl <- sites |>
-      dplyr::transmute(
-        site_id = as.character(.data$site),
-        lat = as.numeric(.data$lat),
-        lon = as.numeric(.data$lon)
+    site_tbl <- tibble::as_tibble(sites)
+    site_tbl$site_id <- as.character(site_tbl$site)
+    site_tbl$site <- NULL
+    site_tbl$lat <- suppressWarnings(as.numeric(site_tbl$lat))
+    site_tbl$lon <- suppressWarnings(as.numeric(site_tbl$lon))
+    conflict_cols <- setdiff(
+      intersect(names(site_tbl), desired_cols),
+      c("site_id", "lat", "lon")
+    )
+    if (length(conflict_cols) > 0L) {
+      site_tbl <- dplyr::rename_with(
+        site_tbl,
+        ~ paste0("site_", .x),
+        tidyselect::all_of(conflict_cols)
       )
+    }
   } else {
     site_tbl <- tibble::tibble(
       site_id = as.character(unique(attributes$site_id)),
@@ -202,35 +235,14 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
     }
   }
 
-  desired_cols <- c(
-    "site_id",
-    "lat",
-    "lon",
-    "dem",
-    "slope",
-    "ndvi",
-    "nbr",
-    "tasveg_category",
-    "tasveg_class",
-    "canopy_height_m",
-    "soil_ph",
-    "bio1_mean_temp_c",
-    "bio12_annual_precip_mm",
-    "fire_sensitivity",
-    "fire_flammability",
-    "geology_description",
-    "land_tenure_class",
-    "reserve_estate_class",
-    "distance_to_road",
-    "distance_to_locality"
-  )
   missing_cols <- setdiff(desired_cols, names(wide))
   if (length(missing_cols) > 0L) {
     for (col in missing_cols) {
       wide[[col]] <- NA_character_
     }
   }
-  wide <- wide[, desired_cols, drop = FALSE]
+  extra_cols <- setdiff(names(wide), desired_cols)
+  wide <- wide[, c(desired_cols, extra_cols), drop = FALSE]
   numeric_cols <- c(
     "lat",
     "lon",

@@ -9,7 +9,7 @@ suppressPackageStartupMessages({
 
 set.seed(123)
 
-jc_sites <- read_csv("data/jc_camera_study/jc_site.csv", show_col_types = FALSE)
+jc_sites <- read_csv("data/raw/jc_camera_study/site.csv", show_col_types = FALSE)
 
 # Build a simple bounding box around sites in EPSG:4326
 bbox <- st_bbox(c(
