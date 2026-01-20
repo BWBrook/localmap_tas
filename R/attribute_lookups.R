@@ -148,6 +148,9 @@ render_attribute_lookups <- function(analysis_layers) {
                          lookup_suffix = "_lookup.csv",
                          max_len = 4L,
                          stopwords = NULL) {
+    if (is.null(layer_id) || !nzchar(layer_id)) {
+      return(NA_character_)
+    }
     vector_path <- path_lookup[[layer_id]]
     lookup_path <- if (!is.null(vector_path) && nzchar(vector_path)) {
       sub("\\.gpkg$", lookup_suffix, vector_path)

@@ -364,3 +364,6 @@
   - `_targets.R` now respects `LOCALMAP_CONFIG_PATH` so runs can use a generated config file.
   - Ran `devtools::test(filter = "settings_runner")` to validate the settings overlay logic.
   - Sanity check: `pkgload::load_all("."); run_settings("settings.example.yaml", targets = "cfg")` created `outputs/judbury_cameras/run_config.yaml`.
+- 2026-01-19: Fixed attribute lookup handling for missing layers and re-ran user settings.
+  - `render_attribute_lookups()` now returns NA for missing layer IDs instead of erroring.
+  - Ran `Rscript scripts/run_project.R settings.yaml`; pipeline completed (20 targets) with a TASVEG class placeholder warning.
