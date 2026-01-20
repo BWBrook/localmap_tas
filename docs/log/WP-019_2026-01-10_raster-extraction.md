@@ -8,7 +8,7 @@ Date: 2026-01-10
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-019_2026-01-10_raster-extraction/`
-  - `outputs/tables/jc/site_attributes_long.parquet`
+  - `outputs/jc/tables/site_attributes_long.parquet`
 
 ## Sanity checks
 - Long table has 117 rows (13 sites × 9 attributes per site).

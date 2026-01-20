@@ -1,82 +1,82 @@
 output_id,type,description,path,format,crs,profile,producer
-species_map,map,Species occurrence overview map,outputs/maps/jc/species_occurrences.png,png,EPSG:4326,jc,map_species_occurrences
-camera_sites_map,map,Camera sites basemap map,outputs/maps/jc/camera_sites.png,png,EPSG:3857,jc,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of JC maps,outputs/maps/jc/camera_sites_panel.png,png,EPSG:3857,jc,camera_sites_stack_maps
-camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/jc_camera_sites_tile.png,png,EPSG:3857,jc,fetch_camera_wms_tile
-aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/jc/coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary
-site_attributes_long,table,Site attributes long table,outputs/tables/jc/site_attributes_long.parquet,parquet,NA,jc,write_site_attributes_long
-site_attributes_wide,table,Site attributes wide table,outputs/tables/jc/site_attributes_wide.csv,csv,NA,jc,write_site_attributes_wide
-wms_layer,basemap,WMS layer imagery,outputs/layers/jc/tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
-wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/jc/tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
-tasveg_class_wms_layer,basemap,TASVEG 4.0 Classes WMS layer,outputs/layers/jc/tasveg_class_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
-tasveg_class_wms_layer_provenance,provenance,TASVEG 4.0 Classes WMS provenance,outputs/layers/jc/tasveg_class_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
-tasveg_class_wms_legend,figure,TASVEG 4.0 Classes WMS legend,outputs/layers/jc/tasveg_class_wms_legend.png,png,EPSG:3857,jc,render_tasveg_class_legend
-arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/jc/topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
-arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/jc/topography_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
-orthophoto_arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/layers/jc/orthophoto_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
-orthophoto_arcgis_layer_provenance,provenance,Orthophoto ArcGIS export provenance,outputs/layers/jc/orthophoto_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
-roads_wms_layer,basemap,State Growth Roads WMS layer,outputs/layers/jc/roads_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
-roads_wms_layer_provenance,provenance,State Growth Roads WMS provenance,outputs/layers/jc/roads_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
-localities_wms_layer,basemap,Localities WMS layer,outputs/layers/jc/localities_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
-localities_wms_layer_provenance,provenance,Localities WMS provenance,outputs/layers/jc/localities_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
-overview_map,map,Overview map panel,outputs/maps/jc/overview_map.png,png,EPSG:3857,jc,render_overview_map
-panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/jc/panel_figure.png,png,EPSG:3857,jc,assemble_panel_figure
-panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/jc/panel_figure.pdf,pdf,EPSG:3857,jc,assemble_panel_figure
-vector_tasveg,vector,JC TASVEG polygons (clipped),outputs/analysis/jc/vector/jc_tasveg.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
-vector_tasveg_provenance,provenance,JC TASVEG provenance,outputs/analysis/jc/vector/jc_tasveg.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-vector_tasveg_preview,figure,JC TASVEG preview PNG,outputs/analysis/jc/vector/jc_tasveg.png,png,EPSG:28355,jc,render_analysis_layer_previews
-vector_tasveg_class,vector,JC TASVEG classes polygons (clipped),outputs/analysis/jc/vector/jc_tasveg_class.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
-vector_tasveg_class_provenance,provenance,JC TASVEG classes provenance,outputs/analysis/jc/vector/jc_tasveg_class.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-vector_tasveg_class_preview,figure,JC TASVEG classes preview PNG,outputs/analysis/jc/vector/jc_tasveg_class.png,png,EPSG:28355,jc,render_analysis_layer_previews
-tasveg_class_lookup,table,TASVEG class code lookup (AOI),outputs/analysis/jc/vector/jc_tasveg_class_lookup.csv,csv,EPSG:28355,jc,render_tasveg_class_legend
-tasveg_group_lookup,table,TASVEG group code lookup (AOI),outputs/analysis/jc/vector/jc_tasveg_group_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
-geology_lookup,table,Geology code lookup (AOI),outputs/analysis/jc/vector/jc_geology_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
-land_tenure_lookup,table,Land tenure code lookup (AOI),outputs/analysis/jc/vector/jc_land_tenure_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
-reserve_estate_lookup,table,Reserve estate code lookup (AOI),outputs/analysis/jc/vector/jc_reserve_estate_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
-raster_dem,raster,JC DEM (GA DEM 1 Second; clipped),outputs/analysis/jc/raster/jc_dem.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_dem_provenance,provenance,JC DEM provenance (GA DEM 1 Second),outputs/analysis/jc/raster/jc_dem.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_dem_preview,figure,JC DEM preview PNG,outputs/analysis/jc/raster/jc_dem.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_multiband,raster,JC multiband raster (clipped),outputs/analysis/jc/raster/jc_multiband.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_multiband_provenance,provenance,JC multiband provenance,outputs/analysis/jc/raster/jc_multiband.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_multiband_preview,figure,JC multiband preview PNG,outputs/analysis/jc/raster/jc_multiband.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_slope,raster,JC slope derived raster,outputs/analysis/jc/raster/jc_slope.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_slope_provenance,provenance,JC slope provenance,outputs/analysis/jc/raster/jc_slope.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_slope_preview,figure,JC slope preview PNG,outputs/analysis/jc/raster/jc_slope.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_ndvi,raster,JC NDVI derived raster,outputs/analysis/jc/raster/jc_ndvi.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_ndvi_provenance,provenance,JC NDVI provenance,outputs/analysis/jc/raster/jc_ndvi.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_ndvi_preview,figure,JC NDVI preview PNG,outputs/analysis/jc/raster/jc_ndvi.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_nbr,raster,JC NBR derived raster,outputs/analysis/jc/raster/jc_nbr.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_nbr_provenance,provenance,JC NBR provenance,outputs/analysis/jc/raster/jc_nbr.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_nbr_preview,figure,JC NBR preview PNG,outputs/analysis/jc/raster/jc_nbr.png,png,EPSG:28355,jc,render_analysis_layer_previews
-fire_attributes_arcgis_layer,basemap,Fire attributes ArcGIS export layer,outputs/layers/jc/fire_attributes_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
-fire_attributes_arcgis_layer_provenance,provenance,Fire attributes ArcGIS export provenance,outputs/layers/jc/fire_attributes_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
-soil_ph_wms_layer,basemap,Soil pH WMS layer,outputs/layers/jc/soil_ph_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
-soil_ph_wms_layer_provenance,provenance,Soil pH WMS provenance,outputs/layers/jc/soil_ph_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
-vector_fire_attributes,vector,JC fire attributes polygons (clipped),outputs/analysis/jc/vector/jc_fire_attributes.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
-vector_fire_attributes_provenance,provenance,JC fire attributes provenance,outputs/analysis/jc/vector/jc_fire_attributes.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-vector_fire_attributes_preview,figure,JC fire attributes preview PNG,outputs/analysis/jc/vector/jc_fire_attributes.png,png,EPSG:28355,jc,render_analysis_layer_previews
-vector_geology,vector,JC geology units (clipped),outputs/analysis/jc/vector/jc_geology.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
-vector_geology_provenance,provenance,JC geology provenance,outputs/analysis/jc/vector/jc_geology.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-vector_geology_preview,figure,JC geology preview PNG,outputs/analysis/jc/vector/jc_geology.png,png,EPSG:28355,jc,render_analysis_layer_previews
-vector_land_tenure,vector,JC land tenure polygons (clipped),outputs/analysis/jc/vector/jc_land_tenure.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
-vector_land_tenure_provenance,provenance,JC land tenure provenance,outputs/analysis/jc/vector/jc_land_tenure.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-vector_land_tenure_preview,figure,JC land tenure preview PNG,outputs/analysis/jc/vector/jc_land_tenure.png,png,EPSG:28355,jc,render_analysis_layer_previews
-vector_reserve_estate,vector,JC reserve estate polygons (clipped),outputs/analysis/jc/vector/jc_reserve_estate.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
-vector_reserve_estate_provenance,provenance,JC reserve estate provenance,outputs/analysis/jc/vector/jc_reserve_estate.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-vector_reserve_estate_preview,figure,JC reserve estate preview PNG,outputs/analysis/jc/vector/jc_reserve_estate.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_chm,raster,JC canopy height model (clipped),outputs/analysis/jc/raster/jc_chm.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_chm_provenance,provenance,JC canopy height provenance,outputs/analysis/jc/raster/jc_chm.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_chm_preview,figure,JC canopy height preview PNG,outputs/analysis/jc/raster/jc_chm.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_soil_ph,raster,JC soil pH raster (0-15 cm),outputs/analysis/jc/raster/jc_soil_ph.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_soil_ph_provenance,provenance,JC soil pH provenance,outputs/analysis/jc/raster/jc_soil_ph.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_soil_ph_preview,figure,JC soil pH preview PNG,outputs/analysis/jc/raster/jc_soil_ph.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_bio1,raster,JC WorldClim BIO1 raster,outputs/analysis/jc/raster/jc_bio1.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_bio1_provenance,provenance,JC WorldClim BIO1 provenance,outputs/analysis/jc/raster/jc_bio1.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_bio1_preview,figure,JC WorldClim BIO1 preview PNG,outputs/analysis/jc/raster/jc_bio1.png,png,EPSG:28355,jc,render_analysis_layer_previews
-raster_bio12,raster,JC WorldClim BIO12 raster,outputs/analysis/jc/raster/jc_bio12.tif,tif,EPSG:28355,jc,fetch_analysis_layers
-raster_bio12_provenance,provenance,JC WorldClim BIO12 provenance,outputs/analysis/jc/raster/jc_bio12.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
-raster_bio12_preview,figure,JC WorldClim BIO12 preview PNG,outputs/analysis/jc/raster/jc_bio12.png,png,EPSG:28355,jc,render_analysis_layer_previews
-analysis_provenance,provenance,Combined layer provenance table,outputs/provenance/analysis_layers.csv,csv,NA,jc,build_layer_provenance
-attribution_report,provenance,Layer attribution report,outputs/provenance/attribution.md,md,NA,jc,write_attribution_report
-run_manifest,provenance,Run manifest metadata,outputs/provenance/run_manifest.yml,yml,NA,jc,write_run_manifest
+species_map,map,Species occurrence overview map,outputs/jc/maps/species_occurrences.png,png,EPSG:4326,jc,map_species_occurrences
+camera_sites_map,map,Camera sites basemap map,outputs/jc/maps/camera_sites.png,png,EPSG:3857,jc,render_camera_sites_map
+camera_sites_panel,figure,Stacked panel of JC maps,outputs/jc/maps/camera_sites_panel.png,png,EPSG:3857,jc,camera_sites_stack_maps
+camera_sites_tile,basemap,Camera basemap tile,outputs/jc/tiles/camera_sites_tile.png,png,EPSG:3857,jc,fetch_camera_wms_tile
+aoi_debug_plot,figure,AOI debug plot with sites,outputs/jc/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
+coverage_summary,table,Coverage zone summary table,outputs/jc/tables/coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/jc/tables/site_attributes_long.parquet,parquet,NA,jc,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/jc/tables/site_attributes_wide.csv,csv,NA,jc,write_site_attributes_wide
+wms_layer,basemap,WMS layer imagery,outputs/jc/layers/tasveg_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+wms_layer_provenance,provenance,WMS layer provenance,outputs/jc/layers/tasveg_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+tasveg_class_wms_layer,basemap,TASVEG 4.0 Classes WMS layer,outputs/jc/layers/tasveg_class_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+tasveg_class_wms_layer_provenance,provenance,TASVEG 4.0 Classes WMS provenance,outputs/jc/layers/tasveg_class_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+tasveg_class_wms_legend,figure,TASVEG 4.0 Classes WMS legend,outputs/jc/layers/tasveg_class_wms_legend.png,png,EPSG:3857,jc,render_tasveg_class_legend
+arcgis_layer,basemap,ArcGIS export imagery,outputs/jc/layers/topography_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/jc/layers/topography_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+orthophoto_arcgis_layer,basemap,Orthophoto ArcGIS export imagery,outputs/jc/layers/orthophoto_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+orthophoto_arcgis_layer_provenance,provenance,Orthophoto ArcGIS export provenance,outputs/jc/layers/orthophoto_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+roads_wms_layer,basemap,State Growth Roads WMS layer,outputs/jc/layers/roads_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+roads_wms_layer_provenance,provenance,State Growth Roads WMS provenance,outputs/jc/layers/roads_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+localities_wms_layer,basemap,Localities WMS layer,outputs/jc/layers/localities_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+localities_wms_layer_provenance,provenance,Localities WMS provenance,outputs/jc/layers/localities_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+overview_map,map,Overview map panel,outputs/jc/maps/overview_map.png,png,EPSG:3857,jc,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/jc/maps/panel_figure.png,png,EPSG:3857,jc,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/jc/maps/panel_figure.pdf,pdf,EPSG:3857,jc,assemble_panel_figure
+vector_tasveg,vector,JC TASVEG polygons (clipped),outputs/jc/analysis/vector/jc_tasveg.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_tasveg_provenance,provenance,JC TASVEG provenance,outputs/jc/analysis/vector/jc_tasveg.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_tasveg_preview,figure,JC TASVEG preview PNG,outputs/jc/analysis/vector/jc_tasveg.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_tasveg_class,vector,JC TASVEG classes polygons (clipped),outputs/jc/analysis/vector/jc_tasveg_class.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_tasveg_class_provenance,provenance,JC TASVEG classes provenance,outputs/jc/analysis/vector/jc_tasveg_class.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_tasveg_class_preview,figure,JC TASVEG classes preview PNG,outputs/jc/analysis/vector/jc_tasveg_class.png,png,EPSG:28355,jc,render_analysis_layer_previews
+tasveg_class_lookup,table,TASVEG class code lookup (AOI),outputs/jc/analysis/vector/jc_tasveg_class_lookup.csv,csv,EPSG:28355,jc,render_tasveg_class_legend
+tasveg_group_lookup,table,TASVEG group code lookup (AOI),outputs/jc/analysis/vector/jc_tasveg_group_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+geology_lookup,table,Geology code lookup (AOI),outputs/jc/analysis/vector/jc_geology_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+land_tenure_lookup,table,Land tenure code lookup (AOI),outputs/jc/analysis/vector/jc_land_tenure_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+reserve_estate_lookup,table,Reserve estate code lookup (AOI),outputs/jc/analysis/vector/jc_reserve_estate_lookup.csv,csv,EPSG:28355,jc,render_attribute_lookups
+raster_dem,raster,JC DEM (GA DEM 1 Second; clipped),outputs/jc/analysis/raster/jc_dem.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_dem_provenance,provenance,JC DEM provenance (GA DEM 1 Second),outputs/jc/analysis/raster/jc_dem.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_dem_preview,figure,JC DEM preview PNG,outputs/jc/analysis/raster/jc_dem.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_multiband,raster,JC multiband raster (clipped),outputs/jc/analysis/raster/jc_multiband.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_multiband_provenance,provenance,JC multiband provenance,outputs/jc/analysis/raster/jc_multiband.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_multiband_preview,figure,JC multiband preview PNG,outputs/jc/analysis/raster/jc_multiband.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_slope,raster,JC slope derived raster,outputs/jc/analysis/raster/jc_slope.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_slope_provenance,provenance,JC slope provenance,outputs/jc/analysis/raster/jc_slope.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_slope_preview,figure,JC slope preview PNG,outputs/jc/analysis/raster/jc_slope.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_ndvi,raster,JC NDVI derived raster,outputs/jc/analysis/raster/jc_ndvi.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_ndvi_provenance,provenance,JC NDVI provenance,outputs/jc/analysis/raster/jc_ndvi.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_ndvi_preview,figure,JC NDVI preview PNG,outputs/jc/analysis/raster/jc_ndvi.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_nbr,raster,JC NBR derived raster,outputs/jc/analysis/raster/jc_nbr.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_nbr_provenance,provenance,JC NBR provenance,outputs/jc/analysis/raster/jc_nbr.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_nbr_preview,figure,JC NBR preview PNG,outputs/jc/analysis/raster/jc_nbr.png,png,EPSG:28355,jc,render_analysis_layer_previews
+fire_attributes_arcgis_layer,basemap,Fire attributes ArcGIS export layer,outputs/jc/layers/fire_attributes_arcgis.png,png,EPSG:3857,jc,fetch_arcgis_imagery
+fire_attributes_arcgis_layer_provenance,provenance,Fire attributes ArcGIS export provenance,outputs/jc/layers/fire_attributes_arcgis.png.yml,yml,EPSG:3857,jc,fetch_arcgis_imagery
+soil_ph_wms_layer,basemap,Soil pH WMS layer,outputs/jc/layers/soil_ph_wms.png,png,EPSG:3857,jc,fetch_wms_imagery
+soil_ph_wms_layer_provenance,provenance,Soil pH WMS provenance,outputs/jc/layers/soil_ph_wms.png.yml,yml,EPSG:3857,jc,fetch_wms_imagery
+vector_fire_attributes,vector,JC fire attributes polygons (clipped),outputs/jc/analysis/vector/jc_fire_attributes.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_fire_attributes_provenance,provenance,JC fire attributes provenance,outputs/jc/analysis/vector/jc_fire_attributes.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_fire_attributes_preview,figure,JC fire attributes preview PNG,outputs/jc/analysis/vector/jc_fire_attributes.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_geology,vector,JC geology units (clipped),outputs/jc/analysis/vector/jc_geology.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_geology_provenance,provenance,JC geology provenance,outputs/jc/analysis/vector/jc_geology.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_geology_preview,figure,JC geology preview PNG,outputs/jc/analysis/vector/jc_geology.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_land_tenure,vector,JC land tenure polygons (clipped),outputs/jc/analysis/vector/jc_land_tenure.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_land_tenure_provenance,provenance,JC land tenure provenance,outputs/jc/analysis/vector/jc_land_tenure.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_land_tenure_preview,figure,JC land tenure preview PNG,outputs/jc/analysis/vector/jc_land_tenure.png,png,EPSG:28355,jc,render_analysis_layer_previews
+vector_reserve_estate,vector,JC reserve estate polygons (clipped),outputs/jc/analysis/vector/jc_reserve_estate.gpkg,gpkg,EPSG:28355,jc,fetch_analysis_layers
+vector_reserve_estate_provenance,provenance,JC reserve estate provenance,outputs/jc/analysis/vector/jc_reserve_estate.gpkg.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+vector_reserve_estate_preview,figure,JC reserve estate preview PNG,outputs/jc/analysis/vector/jc_reserve_estate.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_chm,raster,JC canopy height model (clipped),outputs/jc/analysis/raster/jc_chm.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_chm_provenance,provenance,JC canopy height provenance,outputs/jc/analysis/raster/jc_chm.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_chm_preview,figure,JC canopy height preview PNG,outputs/jc/analysis/raster/jc_chm.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_soil_ph,raster,JC soil pH raster (0-15 cm),outputs/jc/analysis/raster/jc_soil_ph.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_soil_ph_provenance,provenance,JC soil pH provenance,outputs/jc/analysis/raster/jc_soil_ph.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_soil_ph_preview,figure,JC soil pH preview PNG,outputs/jc/analysis/raster/jc_soil_ph.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_bio1,raster,JC WorldClim BIO1 raster,outputs/jc/analysis/raster/jc_bio1.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_bio1_provenance,provenance,JC WorldClim BIO1 provenance,outputs/jc/analysis/raster/jc_bio1.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_bio1_preview,figure,JC WorldClim BIO1 preview PNG,outputs/jc/analysis/raster/jc_bio1.png,png,EPSG:28355,jc,render_analysis_layer_previews
+raster_bio12,raster,JC WorldClim BIO12 raster,outputs/jc/analysis/raster/jc_bio12.tif,tif,EPSG:28355,jc,fetch_analysis_layers
+raster_bio12_provenance,provenance,JC WorldClim BIO12 provenance,outputs/jc/analysis/raster/jc_bio12.tif.yml,yml,EPSG:28355,jc,fetch_analysis_layers
+raster_bio12_preview,figure,JC WorldClim BIO12 preview PNG,outputs/jc/analysis/raster/jc_bio12.png,png,EPSG:28355,jc,render_analysis_layer_previews
+analysis_provenance,provenance,Combined layer provenance table,outputs/jc/provenance/analysis_layers.csv,csv,NA,jc,build_layer_provenance
+attribution_report,provenance,Layer attribution report,outputs/jc/provenance/attribution.md,md,NA,jc,write_attribution_report
+run_manifest,provenance,Run manifest metadata,outputs/jc/provenance/run_manifest.yml,yml,NA,jc,write_run_manifest

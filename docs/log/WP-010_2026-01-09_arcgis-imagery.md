@@ -8,8 +8,8 @@ Date: 2026-01-09
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-010_2026-01-09_arcgis-imagery/`
-  - `outputs/layers/jc/topography_arcgis.png`
-  - `outputs/layers/jc/topography_arcgis.png.yml`
+  - `outputs/jc/layers/topography_arcgis.png`
+  - `outputs/jc/layers/topography_arcgis.png.yml`
 
 ## Sanity checks
 - Live ArcGIS imagery downloaded for the JC AOI using `layers=show:65` (Elevation Bands).

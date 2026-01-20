@@ -128,7 +128,7 @@ render_attribute_lookups <- function(analysis_layers) {
   base_dir <- if (length(path_lookup) > 0L) {
     dirname(path_lookup[[1]])
   } else {
-    "outputs/analysis"
+    file.path("outputs", "analysis")
   }
 
   find_layer <- function(pattern, exclude = NULL) {

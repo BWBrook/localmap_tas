@@ -2,8 +2,8 @@ testthat::test_that("provenance outputs capture layer metadata", {
   layers <- tibble::tibble(
     id = "imagery1",
     type = "wms",
-    path = "outputs/layers/imagery1.png",
-    provenance_path = "outputs/layers/imagery1.png.yml",
+    path = "outputs/jc/layers/imagery1.png",
+    provenance_path = "outputs/jc/layers/imagery1.png.yml",
     cache_path = "data/cache/imagery1.png",
     attribution_source = "Imagery Source",
     attribution_license = "CC BY",
@@ -12,8 +12,8 @@ testthat::test_that("provenance outputs capture layer metadata", {
   analysis_layers <- tibble::tibble(
     id = "analysis1",
     type = "raster_file",
-    path = "outputs/analysis/analysis1.tif",
-    provenance_path = "outputs/analysis/analysis1.tif.yml",
+    path = "outputs/jc/analysis/raster/analysis1.tif",
+    provenance_path = "outputs/jc/analysis/raster/analysis1.tif.yml",
     cache_path = "data/cache/analysis1.tif",
     source_id = NA_character_,
     attribution_source = "Analysis Source",

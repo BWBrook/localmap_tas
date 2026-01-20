@@ -11,11 +11,16 @@
 cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
                      config_path = NULL) {
   if (is.null(config_path)) {
-    installed <- system.file("config", "config.yaml", package = "localmap")
-    if (nzchar(installed) && file.exists(installed)) {
-      config_path <- installed
+    local_path <- here::here("config", "config.yaml")
+    if (file.exists(local_path)) {
+      config_path <- local_path
     } else {
-      config_path <- here::here("config", "config.yaml")
+      installed <- system.file("config", "config.yaml", package = "localmap")
+      if (nzchar(installed) && file.exists(installed)) {
+        config_path <- installed
+      } else {
+        config_path <- local_path
+      }
     }
   }
   path <- config_path
@@ -36,6 +41,7 @@ cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
   cfg <- cfg_migrate(cfg, config_path = path)
   cfg_validate(cfg, config_path = path)
   cfg <- cfg_apply_dem_variant(cfg)
+  cfg <- cfg_apply_output_dir(cfg)
   cfg
 }
 
@@ -483,6 +489,40 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     checkmate::assert_integerish(ala_cfg$download_reason_id, lower = 1L, len = 1L)
   }
 
+  cfg
+}
+
+cfg_apply_output_dir <- function(cfg) {
+  output_dir <- cfg$data$outputs$output_dir
+  if (is.null(output_dir) || !nzchar(output_dir)) {
+    return(cfg)
+  }
+  if (identical(output_dir, "outputs/default")) {
+    return(cfg)
+  }
+
+  rewrite_value <- function(value) {
+    if (is.list(value)) {
+      return(lapply(value, rewrite_value))
+    }
+    if (!is.character(value)) {
+      return(value)
+    }
+    unname(vapply(value, function(path) {
+      if (!nzchar(path)) {
+        return(path)
+      }
+      if (startsWith(path, "outputs/default/")) {
+        return(file.path(output_dir, sub("^outputs/default/", "", path)))
+      }
+      if (identical(path, "outputs/default")) {
+        return(output_dir)
+      }
+      path
+    }, character(1)))
+  }
+
+  cfg[] <- rewrite_value(cfg)
   cfg
 }
 

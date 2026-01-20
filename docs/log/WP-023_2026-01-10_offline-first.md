@@ -10,8 +10,8 @@ Date: 2026-01-10
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-023_2026-01-10_offline-first/`
-  - `outputs/layers/jc/tasveg_wms.png` + `.yml`
-  - `outputs/layers/jc/topography_arcgis.png` + `.yml`
+  - `outputs/jc/layers/tasveg_wms.png` + `.yml`
+  - `outputs/jc/layers/topography_arcgis.png` + `.yml`
   - `jc_overview_map.png`
   - `jc_panel_figure.png` + `.pdf`
   - `jc_camera_sites.png`

@@ -84,9 +84,9 @@
     - `devtools::test()` OK (80 passing).
     - `rcmdcheck::rcmdcheck(args = \"--no-manual\")` OK with 2 NOTEs (import usage + `import::from` checks).
     - Demo pipeline: `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` completed; outputs inspected:
-      - `outputs/maps/demo/species_occurrences.png` shows Tasmania outline with fixture points within the configured bounding box.
-      - `outputs/maps/demo/camera_sites.png` shows camera sites on placeholder basemap; extent and symbol scaling appear coherent.
-      - `outputs/maps/demo/camera_sites_panel.png` renders as expected for a 1×1 panel.
+      - `outputs/demo/maps/species_occurrences.png` shows Tasmania outline with fixture points within the configured bounding box.
+      - `outputs/demo/maps/camera_sites.png` shows camera sites on placeholder basemap; extent and symbol scaling appear coherent.
+      - `outputs/demo/maps/camera_sites_panel.png` renders as expected for a 1×1 panel.
     - Remaining: demo camera basemap intentionally uses a placeholder tile (warnings expected when provider URL is empty).
 
 - 2025-12-17: Refactor away from `{import}`/`import::from()` toward explicit `pkg::fun()` usage.
@@ -101,9 +101,9 @@
     - `rcmdcheck::rcmdcheck(args = \"--no-manual\")` OK (0 errors, 0 warnings, 0 notes).
     - Demo pipeline: `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` completed with expected warning (placeholder WMS tile when URL is empty).
   - Artefact review (demo outputs, 2025-12-17):
-    - `outputs/maps/demo/species_occurrences.png`: Tasmania outline and occurrence points appear spatially plausible (points clustered in NW TAS; graticule labels plausible).
-    - `outputs/maps/demo/camera_sites.png`: camera site points render within the expected coastal extent; scale bar + north arrow present; placeholder basemap expected in demo.
-    - `outputs/maps/demo/camera_sites_panel.png`: panel renders but contains substantial whitespace (likely config/layout choice); consider tightening demo panel layout in a follow-up.
+    - `outputs/demo/maps/species_occurrences.png`: Tasmania outline and occurrence points appear spatially plausible (points clustered in NW TAS; graticule labels plausible).
+    - `outputs/demo/maps/camera_sites.png`: camera site points render within the expected coastal extent; scale bar + north arrow present; placeholder basemap expected in demo.
+    - `outputs/demo/maps/camera_sites_panel.png`: panel renders but contains substantial whitespace (likely config/layout choice); consider tightening demo panel layout in a follow-up.
 
 - 2026-01-09: WP-001 logging + evidence conventions.
   - Added `docs/log/README.md` and documented naming conventions in `docs/workflow.md`.
@@ -140,7 +140,7 @@
   - Added `data/` to `.gitignore` per runtime-data policy; recorded decision to keep real datasets out of package defaults.
   - Documented AOI conventions (analysis CRS, units, rotation) in `docs/config_reference.md`.
   - Added `render_aoi_debug_plot()` and `aoi_debug_plot` target for AOI sanity previews (bounding box + sites).
-  - Ran `devtools::test()` (88 pass) and regenerated `outputs/maps/aoi/aoi_debug.png` for inspection.
+  - Ran `devtools::test()` (88 pass) and regenerated `outputs/jc/maps/aoi_debug.png` for inspection.
 
 - 2026-01-09: WP-007 AOI builder + JC dataset integration.
   - Implemented `build_aoi_from_config()` with centroid/size/rotation and schema v2 migration from v1 bounding boxes.
@@ -251,7 +251,7 @@
   - Re-ran `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 targets::tar_make()`; `tas_dem.tif` regenerated from LIST export with offline=false provenance.
 
 - 2026-01-11: Analysis outputs split by profile + JC DEM source aligned.
-  - Moved analysis outputs under `outputs/analysis/jc/` and `outputs/analysis/tas/` to avoid mixed files.
+  - Moved analysis outputs under `outputs/jc/analysis/` and `outputs/tas/analysis/` to avoid mixed files.
   - Switched JC DEM to geodata SRTM (same as TAS) so DEM/slope previews align; fixtures remain for offline CI.
   - Added `config_profile` target cue `mode=always` so profile changes invalidate pipeline.
   - Regenerated analysis layers/previews for `jc` and `tas_canonical` profiles.
@@ -276,21 +276,21 @@
   - Refreshed JC analysis previews and derived indices with the new multiband source.
 
 - 2026-01-12: Layer output tidy-up.
-  - Moved imagery outputs under `outputs/layers/{jc|tas|demo}/` to match the analysis output hierarchy.
+  - Moved imagery outputs under `outputs/{jc|tas|demo}/layers/` to match the analysis output hierarchy.
   - Updated manifests and schema docs to point to the new layer output paths.
 
 - 2026-01-12: Map output tidy-up + layer parity.
-  - Moved map outputs under `outputs/maps/{jc|tas|demo}/` and placed AOI debug output under `outputs/maps/aoi/`.
+  - Moved map outputs under `outputs/{jc|tas|demo}/maps/` and placed AOI debug output under `outputs/<profile>/maps/aoi_debug.png`.
   - Regenerated JC/TAS map artefacts at the new paths; removed legacy top-level map files.
   - Added JC orthophoto/roads/localities layers and TAS topography layer to keep layer outputs consistent across profiles.
 
 - 2026-01-12: Tables output hierarchy cleanup.
-  - Moved table artefacts into `outputs/tables/{jc|tas|demo|default}/` and updated config + manifests.
+  - Moved table artefacts into `outputs/{jc|tas|demo|default}/tables/` and updated config + manifests.
   - Fixed demo layer registry duplicates (roads/localities) and aligned demo layer output paths.
   - Regenerated demo coverage + site attribute tables at the new paths.
 
 - 2026-01-12: Tables output consolidation.
-  - Removed default/demo table directories; tables now only under `outputs/tables/jc/` and `outputs/tables/tas/`.
+  - Removed default/demo table directories; tables now only under `outputs/jc/tables/` and `outputs/tas/tables/`.
   - Updated config + manifests + fallback paths to align with JC/TAS-only table layout.
 
 - 2026-01-12: Table schema + distance metrics.
@@ -327,7 +327,7 @@
   - Added `raster_remote` support (CHM) with large-download gating + placeholder handling; switched WorldClim to tile downloads; optimized raster clipping (crop before reprojection).
   - Added soil pH + WorldClim BIO1/BIO12 rasters, fire/geology/tenure/reserve vectors, and TAS fire/soil WMS overlays; updated site-attributes mapping + ordering.
   - Ran `R_CONFIG_ACTIVE=jc LOCALMAP_ALLOW_NETWORK=1 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript -e 'targets::tar_make()'` and `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript -e 'targets::tar_make()'`.
-  - Artefacts inspected: `outputs/analysis/jc/raster/jc_soil_ph.png`, `outputs/analysis/jc/raster/jc_bio1.png`, `outputs/analysis/jc/raster/jc_bio12.png`, `outputs/analysis/jc/raster/jc_chm.png`, `outputs/analysis/jc/vector/jc_fire_attributes.png`, `outputs/analysis/jc/vector/jc_geology.png`, `outputs/layers/jc/fire_attributes_arcgis.png`, `outputs/layers/jc/soil_ph_wms.png`, `outputs/tables/jc/site_attributes_wide.csv` (and TAS equivalents in `outputs/analysis/tas/`).
+  - Artefacts inspected: `outputs/jc/analysis/raster/jc_soil_ph.png`, `outputs/jc/analysis/raster/jc_bio1.png`, `outputs/jc/analysis/raster/jc_bio12.png`, `outputs/jc/analysis/raster/jc_chm.png`, `outputs/jc/analysis/vector/jc_fire_attributes.png`, `outputs/jc/analysis/vector/jc_geology.png`, `outputs/jc/layers/fire_attributes_arcgis.png`, `outputs/jc/layers/soil_ph_wms.png`, `outputs/jc/tables/site_attributes_wide.csv` (and TAS equivalents in `outputs/tas/analysis/`).
   - Sanity notes: soil pH values ~5.4–5.7; BIO1 ~10–11 °C after scaling; BIO12 ~900–1078 mm; NDVI/NBR within expected ranges. CHM preview is placeholder due to large-download gating. Fire/geology/tenure/reserve vectors return multiple classes; distance-to-road/locality remain NA at current AOI.
   - Next steps: run once with `LOCALMAP_ALLOW_LARGE_DOWNLOADS=1` to fetch CHM when bandwidth permits; review CHM alignment and consider finer climate resolution if needed.
 
@@ -368,3 +368,17 @@
   - `render_attribute_lookups()` now returns NA for missing layer IDs instead of erroring.
   - Ran `Rscript scripts/run_project.R settings.yaml`; pipeline completed (20 targets) with a TASVEG class placeholder warning.
 - 2026-01-19: Settings overlay now auto-includes TASVEG class when TASVEG is requested (avoids class-legend warnings).
+
+- 2026-01-20: Outputs hierarchy refactor + settings run fixes.
+  - Reworked outputs to `outputs/<profile>/<type>/` across config, manifests, docs, and targets; settings runs now drop artefacts directly under the project root (no nested `jc/` subfolders).
+  - `cfg_read()` now prefers the repo `config/config.yaml` when present and rewrites `outputs/default/*` to the active `data.outputs.output_dir` for profile-specific paths.
+  - Settings overlay now strips the base profile output prefix and `_targets.R` re-evaluates `cfg_file` on every run so `LOCALMAP_CONFIG_PATH` changes are respected.
+  - Added JC/TAS camera-site overlay output paths and regenerated JC/TAS/`judbury_cameras` runs to refresh outputs.
+  - Artefacts inspected: `outputs/jc/maps/overview_map.png`, `outputs/jc/maps/camera_sites.png`, `outputs/jc/analysis/raster/jc_dem.png`, `outputs/judbury_cameras/maps/overview_map.png`.
+  - Sanity notes: AOI polygons align with camera sites; orthophoto basemap and TASVEG overlays align; DEM gradients look plausible at the AOI scale.
+  - Remaining: address recurring “spatially constant attributes” and row-name warnings in a later cleanup pass.
+
+- 2026-01-20: renv snapshot preflight fix.
+  - Added `.renvignore` to exclude `dependencies.R` from renv scanning.
+  - Updated renv settings to drop `Suggests` from dependency fields so snapshotting does not require the full devtool dependency tree.
+  - `renv::snapshot()` now completes without missing-package errors.

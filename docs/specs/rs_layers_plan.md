@@ -33,7 +33,7 @@ Add ecologically relevant remote-sensing (RS) layers and derived site attributes
 - Add CHM layer to `analysis_layers` (JC + TAS) as `raster_arcgis` (if service exists) or `raster_file` backed by a cached download.
 - Implement a **download-once cache** if using a full-file source; crop to AOI for analysis.
 - Add `canopy_height_m` attribute to `site_attributes` (mean/median at site point).
-- Add preview PNGs to `outputs/analysis/*/raster/` and (optionally) map overlay in `outputs/maps`.
+- Add preview PNGs to `outputs/<profile>/analysis/raster/` and (optionally) map overlay in `outputs/<profile>/maps/`.
 
 **Verification**
 - Run `targets::tar_make()` for CHM targets only.

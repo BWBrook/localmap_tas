@@ -1,47 +1,47 @@
 output_id,type,description,path,format,crs,profile,producer
-species_map,map,Species occurrence overview map,outputs/maps/demo/species_occurrences.png,png,EPSG:4326,demo,map_species_occurrences
-camera_sites_map,map,Camera sites basemap map,outputs/maps/demo/camera_sites.png,png,EPSG:3857,demo,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of demo maps,outputs/maps/demo/camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
-camera_sites_tile,basemap,Camera basemap tile,outputs/tiles/demo_camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
-aoi_debug_plot,figure,AOI debug plot with sites,outputs/maps/aoi/aoi_debug.png,png,EPSG:4326,demo,render_aoi_debug_plot
-coverage_summary,table,Coverage zone summary table,outputs/tables/jc/coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
-site_attributes_long,table,Site attributes long table,outputs/tables/jc/site_attributes_long.parquet,parquet,NA,demo,write_site_attributes_long
-site_attributes_wide,table,Site attributes wide table,outputs/tables/jc/site_attributes_wide.csv,csv,NA,demo,write_site_attributes_wide
-wms_layer,basemap,WMS layer imagery,outputs/layers/demo/tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
-wms_layer_provenance,provenance,WMS layer provenance,outputs/layers/demo/tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
-arcgis_layer,basemap,ArcGIS export imagery,outputs/layers/demo/topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
-arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/layers/demo/topography_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
-overview_map,map,Overview map panel,outputs/maps/demo/overview_map.png,png,EPSG:3857,demo,render_overview_map
-panel_figure_png,figure,Multi-panel figure PNG,outputs/maps/demo/panel_figure.png,png,EPSG:3857,demo,assemble_panel_figure
-panel_figure_pdf,figure,Multi-panel figure PDF,outputs/maps/demo/panel_figure.pdf,pdf,EPSG:3857,demo,assemble_panel_figure
-fire_attributes_arcgis_layer,basemap,Fire attributes ArcGIS export layer,outputs/layers/demo/fire_attributes_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
-fire_attributes_arcgis_layer_provenance,provenance,Fire attributes ArcGIS export provenance,outputs/layers/demo/fire_attributes_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
-soil_ph_wms_layer,basemap,Soil pH WMS layer,outputs/layers/demo/soil_ph_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
-soil_ph_wms_layer_provenance,provenance,Soil pH WMS provenance,outputs/layers/demo/soil_ph_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
-vector_fire_attributes,vector,DEMO fire attributes polygons (clipped),outputs/analysis/demo/vector/demo_fire_attributes.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
-vector_fire_attributes_provenance,provenance,DEMO fire attributes provenance,outputs/analysis/demo/vector/demo_fire_attributes.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-vector_fire_attributes_preview,figure,DEMO fire attributes preview PNG,outputs/analysis/demo/vector/demo_fire_attributes.png,png,EPSG:28355,demo,render_analysis_layer_previews
-vector_geology,vector,DEMO geology units (clipped),outputs/analysis/demo/vector/demo_geology.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
-vector_geology_provenance,provenance,DEMO geology provenance,outputs/analysis/demo/vector/demo_geology.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-vector_geology_preview,figure,DEMO geology preview PNG,outputs/analysis/demo/vector/demo_geology.png,png,EPSG:28355,demo,render_analysis_layer_previews
-vector_land_tenure,vector,DEMO land tenure polygons (clipped),outputs/analysis/demo/vector/demo_land_tenure.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
-vector_land_tenure_provenance,provenance,DEMO land tenure provenance,outputs/analysis/demo/vector/demo_land_tenure.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-vector_land_tenure_preview,figure,DEMO land tenure preview PNG,outputs/analysis/demo/vector/demo_land_tenure.png,png,EPSG:28355,demo,render_analysis_layer_previews
-vector_reserve_estate,vector,DEMO reserve estate polygons (clipped),outputs/analysis/demo/vector/demo_reserve_estate.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
-vector_reserve_estate_provenance,provenance,DEMO reserve estate provenance,outputs/analysis/demo/vector/demo_reserve_estate.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-vector_reserve_estate_preview,figure,DEMO reserve estate preview PNG,outputs/analysis/demo/vector/demo_reserve_estate.png,png,EPSG:28355,demo,render_analysis_layer_previews
-raster_chm,raster,DEMO canopy height model (clipped),outputs/analysis/demo/raster/demo_chm.tif,tif,EPSG:28355,demo,fetch_analysis_layers
-raster_chm_provenance,provenance,DEMO canopy height provenance,outputs/analysis/demo/raster/demo_chm.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-raster_chm_preview,figure,DEMO canopy height preview PNG,outputs/analysis/demo/raster/demo_chm.png,png,EPSG:28355,demo,render_analysis_layer_previews
-raster_soil_ph,raster,DEMO soil pH raster (0-15 cm),outputs/analysis/demo/raster/demo_soil_ph.tif,tif,EPSG:28355,demo,fetch_analysis_layers
-raster_soil_ph_provenance,provenance,DEMO soil pH provenance,outputs/analysis/demo/raster/demo_soil_ph.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-raster_soil_ph_preview,figure,DEMO soil pH preview PNG,outputs/analysis/demo/raster/demo_soil_ph.png,png,EPSG:28355,demo,render_analysis_layer_previews
-raster_bio1,raster,DEMO WorldClim BIO1 raster,outputs/analysis/demo/raster/demo_bio1.tif,tif,EPSG:28355,demo,fetch_analysis_layers
-raster_bio1_provenance,provenance,DEMO WorldClim BIO1 provenance,outputs/analysis/demo/raster/demo_bio1.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-raster_bio1_preview,figure,DEMO WorldClim BIO1 preview PNG,outputs/analysis/demo/raster/demo_bio1.png,png,EPSG:28355,demo,render_analysis_layer_previews
-raster_bio12,raster,DEMO WorldClim BIO12 raster,outputs/analysis/demo/raster/demo_bio12.tif,tif,EPSG:28355,demo,fetch_analysis_layers
-raster_bio12_provenance,provenance,DEMO WorldClim BIO12 provenance,outputs/analysis/demo/raster/demo_bio12.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
-raster_bio12_preview,figure,DEMO WorldClim BIO12 preview PNG,outputs/analysis/demo/raster/demo_bio12.png,png,EPSG:28355,demo,render_analysis_layer_previews
-analysis_provenance,provenance,Combined layer provenance table,outputs/provenance/analysis_layers.csv,csv,NA,demo,build_layer_provenance
-attribution_report,provenance,Layer attribution report,outputs/provenance/attribution.md,md,NA,demo,write_attribution_report
-run_manifest,provenance,Run manifest metadata,outputs/provenance/run_manifest.yml,yml,NA,demo,write_run_manifest
+species_map,map,Species occurrence overview map,outputs/demo/maps/species_occurrences.png,png,EPSG:4326,demo,map_species_occurrences
+camera_sites_map,map,Camera sites basemap map,outputs/demo/maps/camera_sites.png,png,EPSG:3857,demo,render_camera_sites_map
+camera_sites_panel,figure,Stacked panel of demo maps,outputs/demo/maps/camera_sites_panel.png,png,EPSG:3857,demo,camera_sites_stack_maps
+camera_sites_tile,basemap,Camera basemap tile,outputs/demo/tiles/camera_sites_tile.png,png,EPSG:3857,demo,fetch_camera_wms_tile
+aoi_debug_plot,figure,AOI debug plot with sites,outputs/demo/maps/aoi_debug.png,png,EPSG:4326,demo,render_aoi_debug_plot
+coverage_summary,table,Coverage zone summary table,outputs/demo/tables/coverage_summary.csv,csv,EPSG:28355,demo,write_coverage_summary
+site_attributes_long,table,Site attributes long table,outputs/demo/tables/site_attributes_long.parquet,parquet,NA,demo,write_site_attributes_long
+site_attributes_wide,table,Site attributes wide table,outputs/demo/tables/site_attributes_wide.csv,csv,NA,demo,write_site_attributes_wide
+wms_layer,basemap,WMS layer imagery,outputs/demo/layers/tasveg_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
+wms_layer_provenance,provenance,WMS layer provenance,outputs/demo/layers/tasveg_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
+arcgis_layer,basemap,ArcGIS export imagery,outputs/demo/layers/topography_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
+arcgis_layer_provenance,provenance,ArcGIS export provenance,outputs/demo/layers/topography_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
+overview_map,map,Overview map panel,outputs/demo/maps/overview_map.png,png,EPSG:3857,demo,render_overview_map
+panel_figure_png,figure,Multi-panel figure PNG,outputs/demo/maps/panel_figure.png,png,EPSG:3857,demo,assemble_panel_figure
+panel_figure_pdf,figure,Multi-panel figure PDF,outputs/demo/maps/panel_figure.pdf,pdf,EPSG:3857,demo,assemble_panel_figure
+fire_attributes_arcgis_layer,basemap,Fire attributes ArcGIS export layer,outputs/demo/layers/fire_attributes_arcgis.png,png,EPSG:3857,demo,fetch_arcgis_imagery
+fire_attributes_arcgis_layer_provenance,provenance,Fire attributes ArcGIS export provenance,outputs/demo/layers/fire_attributes_arcgis.png.yml,yml,EPSG:3857,demo,fetch_arcgis_imagery
+soil_ph_wms_layer,basemap,Soil pH WMS layer,outputs/demo/layers/soil_ph_wms.png,png,EPSG:3857,demo,fetch_wms_imagery
+soil_ph_wms_layer_provenance,provenance,Soil pH WMS provenance,outputs/demo/layers/soil_ph_wms.png.yml,yml,EPSG:3857,demo,fetch_wms_imagery
+vector_fire_attributes,vector,DEMO fire attributes polygons (clipped),outputs/demo/analysis/vector/demo_fire_attributes.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
+vector_fire_attributes_provenance,provenance,DEMO fire attributes provenance,outputs/demo/analysis/vector/demo_fire_attributes.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+vector_fire_attributes_preview,figure,DEMO fire attributes preview PNG,outputs/demo/analysis/vector/demo_fire_attributes.png,png,EPSG:28355,demo,render_analysis_layer_previews
+vector_geology,vector,DEMO geology units (clipped),outputs/demo/analysis/vector/demo_geology.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
+vector_geology_provenance,provenance,DEMO geology provenance,outputs/demo/analysis/vector/demo_geology.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+vector_geology_preview,figure,DEMO geology preview PNG,outputs/demo/analysis/vector/demo_geology.png,png,EPSG:28355,demo,render_analysis_layer_previews
+vector_land_tenure,vector,DEMO land tenure polygons (clipped),outputs/demo/analysis/vector/demo_land_tenure.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
+vector_land_tenure_provenance,provenance,DEMO land tenure provenance,outputs/demo/analysis/vector/demo_land_tenure.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+vector_land_tenure_preview,figure,DEMO land tenure preview PNG,outputs/demo/analysis/vector/demo_land_tenure.png,png,EPSG:28355,demo,render_analysis_layer_previews
+vector_reserve_estate,vector,DEMO reserve estate polygons (clipped),outputs/demo/analysis/vector/demo_reserve_estate.gpkg,gpkg,EPSG:28355,demo,fetch_analysis_layers
+vector_reserve_estate_provenance,provenance,DEMO reserve estate provenance,outputs/demo/analysis/vector/demo_reserve_estate.gpkg.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+vector_reserve_estate_preview,figure,DEMO reserve estate preview PNG,outputs/demo/analysis/vector/demo_reserve_estate.png,png,EPSG:28355,demo,render_analysis_layer_previews
+raster_chm,raster,DEMO canopy height model (clipped),outputs/demo/analysis/raster/demo_chm.tif,tif,EPSG:28355,demo,fetch_analysis_layers
+raster_chm_provenance,provenance,DEMO canopy height provenance,outputs/demo/analysis/raster/demo_chm.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+raster_chm_preview,figure,DEMO canopy height preview PNG,outputs/demo/analysis/raster/demo_chm.png,png,EPSG:28355,demo,render_analysis_layer_previews
+raster_soil_ph,raster,DEMO soil pH raster (0-15 cm),outputs/demo/analysis/raster/demo_soil_ph.tif,tif,EPSG:28355,demo,fetch_analysis_layers
+raster_soil_ph_provenance,provenance,DEMO soil pH provenance,outputs/demo/analysis/raster/demo_soil_ph.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+raster_soil_ph_preview,figure,DEMO soil pH preview PNG,outputs/demo/analysis/raster/demo_soil_ph.png,png,EPSG:28355,demo,render_analysis_layer_previews
+raster_bio1,raster,DEMO WorldClim BIO1 raster,outputs/demo/analysis/raster/demo_bio1.tif,tif,EPSG:28355,demo,fetch_analysis_layers
+raster_bio1_provenance,provenance,DEMO WorldClim BIO1 provenance,outputs/demo/analysis/raster/demo_bio1.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+raster_bio1_preview,figure,DEMO WorldClim BIO1 preview PNG,outputs/demo/analysis/raster/demo_bio1.png,png,EPSG:28355,demo,render_analysis_layer_previews
+raster_bio12,raster,DEMO WorldClim BIO12 raster,outputs/demo/analysis/raster/demo_bio12.tif,tif,EPSG:28355,demo,fetch_analysis_layers
+raster_bio12_provenance,provenance,DEMO WorldClim BIO12 provenance,outputs/demo/analysis/raster/demo_bio12.tif.yml,yml,EPSG:28355,demo,fetch_analysis_layers
+raster_bio12_preview,figure,DEMO WorldClim BIO12 preview PNG,outputs/demo/analysis/raster/demo_bio12.png,png,EPSG:28355,demo,render_analysis_layer_previews
+analysis_provenance,provenance,Combined layer provenance table,outputs/demo/provenance/analysis_layers.csv,csv,NA,demo,build_layer_provenance
+attribution_report,provenance,Layer attribution report,outputs/demo/provenance/attribution.md,md,NA,demo,write_attribution_report
+run_manifest,provenance,Run manifest metadata,outputs/demo/provenance/run_manifest.yml,yml,NA,demo,write_run_manifest

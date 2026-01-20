@@ -38,9 +38,9 @@ This roadmap is authoritative for priorities and scope. It is organised by miles
 - Derived layers (e.g., slope from DEM) using `terra`
 - Attribute extraction:
   - extract values/classes at sites
-  - write `outputs/tables/<profile>/site_attributes.csv` (or parquet)
+  - write `outputs/<profile>/tables/site_attributes.csv` (or parquet)
 - Provenance outputs:
-  - `outputs/provenance/` with per-layer metadata and run summary
+  - `outputs/<profile>/provenance/` with per-layer metadata and run summary
 
 ### Acceptance criteria
 - Configured run produces maps + attribute table + provenance summary

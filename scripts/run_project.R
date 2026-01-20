@@ -7,12 +7,10 @@ if (length(args) < 1L) {
 
 settings_path <- args[[1]]
 
-if (!requireNamespace("localmap", quietly = TRUE)) {
-  if (requireNamespace("pkgload", quietly = TRUE)) {
-    pkgload::load_all(".")
-  } else {
-    stop("Package 'localmap' is not installed. Install it or add pkgload.", call. = FALSE)
-  }
+if (requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".")
+} else if (!requireNamespace("localmap", quietly = TRUE)) {
+  stop("Package 'localmap' is not installed. Install it or add pkgload.", call. = FALSE)
 }
 
 localmap::run_settings(settings_path)

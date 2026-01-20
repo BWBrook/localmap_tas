@@ -20,6 +20,7 @@ list(
         here::here("config", "config.yaml")
       }
     },
+    cue = targets::tar_cue(mode = "always"),
     format = "file",
     description = "Path to the YAML configuration file (tracked for changes)."
   ),
@@ -33,6 +34,19 @@ list(
     cfg,
     cfg_read(profile = config_profile, config_path = cfg_file),
     description = "Project configuration (paths, compute flags)."
+  ),
+
+  targets::tar_target(
+    output_dir,
+    {
+      output_cfg <- cfg$data$outputs
+      if (!is.null(output_cfg$output_dir) && nzchar(output_cfg$output_dir)) {
+        output_cfg$output_dir
+      } else {
+        "outputs"
+      }
+    },
+    description = "Base output directory for this run."
   ),
 
   targets::tar_target(
@@ -180,7 +194,14 @@ list(
   ),
   targets::tar_target(
     layer_legend_files,
-    layer_outputs$legend_path[!is.na(layer_outputs$legend_path)],
+    {
+      legend_paths <- layer_outputs$legend_path
+      legend_paths <- legend_paths[!is.na(legend_paths) & nzchar(legend_paths)]
+      if (exists("tasveg_class_legend", inherits = FALSE)) {
+        legend_paths <- unique(c(legend_paths, tasveg_class_legend))
+      }
+      legend_paths[!is.na(legend_paths) & nzchar(legend_paths)]
+    },
     format = "file",
     description = "Layer legend files from the registry."
   ),
@@ -247,12 +268,22 @@ list(
       if (is.null(profile) || !nzchar(profile)) {
         profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
       }
-      class_id <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
-        "tasveg_class_vector"
-      } else if (profile %in% c("demo")) {
-        "demo_tasveg_class"
-      } else {
-        "jc_tasveg_class"
+      class_id <- NULL
+      layer_ids <- names(analysis_layer_paths)
+      if (!is.null(layer_ids)) {
+        matches <- layer_ids[grepl("tasveg_class", layer_ids)]
+        if (length(matches) > 0L) {
+          class_id <- matches[[1]]
+        }
+      }
+      if (is.null(class_id) || !nzchar(class_id)) {
+        class_id <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
+          "tasveg_class_vector"
+        } else if (profile %in% c("demo")) {
+          "demo_tasveg_class"
+        } else {
+          "jc_tasveg_class"
+        }
       }
       safe_lookup <- function(values, key) {
         if (is.null(values) || is.null(key) || !nzchar(key)) {
@@ -277,31 +308,25 @@ list(
       layer_cfg <- find_cfg_layer(cfg$data$analysis_layers, class_id)
       vector_path <- safe_lookup(analysis_layer_paths, class_id)
       legend_path <- safe_lookup(layer_legend_paths, "tasveg_class_wms")
-      profile_dir <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
-        "tas"
-      } else if (profile %in% c("demo")) {
-        "demo"
-      } else {
-        "jc"
-      }
       if (is.null(legend_path) || !nzchar(legend_path)) {
-        legend_path <- file.path("outputs", "layers", profile_dir, "tasveg_class_wms_legend.png")
+        legend_path <- file.path(output_dir, "layers", "tasveg_class_wms_legend.png")
       }
       lookup_path <- NULL
       if (!is.null(vector_path) && nzchar(vector_path)) {
         lookup_path <- sub("\\.gpkg$", "_lookup.csv", vector_path)
       } else {
-        prefix <- if (identical(profile_dir, "tas")) {
-          "tas"
-        } else if (identical(profile_dir, "demo")) {
+        prefix <- if (grepl("^demo", class_id)) {
           "demo"
-        } else {
+        } else if (grepl("^jc", class_id)) {
           "jc"
+        } else if (grepl("^tas", class_id)) {
+          "tas"
+        } else {
+          "site"
         }
         lookup_path <- file.path(
-          "outputs",
+          output_dir,
           "analysis",
-          profile_dir,
           "vector",
           paste0(prefix, "_tasveg_class_lookup.csv")
         )
@@ -402,7 +427,7 @@ list(
     build_layer_provenance(
       layers = layer_outputs,
       analysis_layers = analysis_layers,
-      output_path = "outputs/provenance/analysis_layers.csv"
+      output_path = file.path(output_dir, "provenance", "analysis_layers.csv")
     ),
     format = "file",
     description = "Combined provenance table for imagery and analysis layers."
@@ -412,7 +437,7 @@ list(
     write_attribution_report(
       layers = layer_outputs,
       analysis_layers = analysis_layers,
-      output_path = "outputs/provenance/attribution.md"
+      output_path = file.path(output_dir, "provenance", "attribution.md")
     ),
     format = "file",
     description = "Human-readable layer attribution report."
@@ -427,7 +452,7 @@ list(
       analysis_layers_cfg = cfg$data$analysis_layers,
       analysis_layers = analysis_layers,
       output_manifest_file = output_manifest_file,
-      output_path = "outputs/provenance/run_manifest.yml"
+      output_path = file.path(output_dir, "provenance", "run_manifest.yml")
     ),
     format = "file",
     description = "Machine-readable run manifest with layer metadata."
@@ -447,7 +472,7 @@ list(
     render_aoi_debug_plot(
       aoi = aoi,
       sites = camera_sites_data,
-      output_path = NULL
+      output_path = file.path(output_dir, "maps", "aoi_debug.png")
     ),
     format = "file",
     description = "Debug plot showing the configured AOI bounding box and camera sites."

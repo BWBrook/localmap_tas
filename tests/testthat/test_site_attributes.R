@@ -14,8 +14,8 @@ testthat::test_that("raster extraction returns sites × bands rows", {
       system.file("extdata", "jc_multiband.tif", package = "localmap")
     ),
     provenance_path = c(
-      "outputs/analysis/jc/raster/jc_dem.tif.yml",
-      "outputs/analysis/jc/raster/jc_multiband.tif.yml"
+      "outputs/jc/analysis/raster/jc_dem.tif.yml",
+      "outputs/jc/analysis/raster/jc_multiband.tif.yml"
     ),
     units = c("m", "index")
   )
@@ -49,7 +49,7 @@ testthat::test_that("vector extraction returns attributes with NA for no-hit", {
     id = "habitats",
     type = "vector_file",
     path = vec_path,
-    provenance_path = "outputs/analysis/jc/vector/jc_tasveg.gpkg.yml"
+    provenance_path = "outputs/jc/analysis/vector/jc_tasveg.gpkg.yml"
   )
 
   out <- localmap::build_site_attributes_long(sites = sites, analysis_layers = layers)
@@ -67,7 +67,7 @@ testthat::test_that("site attributes outputs write long + wide products", {
     id = "habitats",
     type = "vector_file",
     path = system.file("extdata", "jc_habitats.gpkg", package = "localmap"),
-    provenance_path = "outputs/analysis/jc/vector/jc_tasveg.gpkg.yml"
+    provenance_path = "outputs/jc/analysis/vector/jc_tasveg.gpkg.yml"
   )
 
   long_tbl <- localmap::build_site_attributes_long(sites = sites, analysis_layers = layers)

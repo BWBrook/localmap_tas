@@ -119,7 +119,7 @@ testthat::test_that("cfg_read applies dem_variant overrides", {
       "\""
     ),
     "        coverage: \"1\"",
-    "        output_path: \"outputs/analysis/jc/raster/jc_dem.tif\"",
+    "        output_path: \"outputs/jc/analysis/raster/jc_dem.tif\"",
     "        attribution:",
     "          source: \"stub\"",
     "  ala:",

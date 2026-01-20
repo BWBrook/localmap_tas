@@ -25,17 +25,21 @@ testthat::test_that("apply_settings_to_config updates paths and filters layers",
     analysis_layers = list(include = c("dem"))
   )
 
-  cfg2 <- localmap:::apply_settings_to_config(cfg, settings)
+  cfg2 <- localmap:::apply_settings_to_config(
+    cfg,
+    settings,
+    base_profile = "jc"
+  )
 
   testthat::expect_equal(
     cfg2$data$camera_sites$jc$site_path,
     file.path(input_dir, "site.csv")
   )
   testthat::expect_equal(cfg2$data$camera_sites$central_site, "s1")
-  testthat::expect_true(startsWith(
+  testthat::expect_equal(
     cfg2$data$overview_map$output_path,
-    file.path(tmp_dir, "outputs")
-  ))
+    file.path(tmp_dir, "outputs", "maps", "overview_map.png")
+  )
   layer_ids <- vapply(cfg2$data$layers, function(layer) layer$id, character(1))
   testthat::expect_true(all(layer_ids %in% c("orthophoto_arcgis")))
   analysis_suffixes <- vapply(cfg2$data$analysis_layers, function(layer) {

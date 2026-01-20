@@ -8,8 +8,8 @@ Date: 2026-01-09
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-011_2026-01-09_layer-registry/`
-  - `outputs/layers/jc/tasveg_wms.png`
-  - `outputs/layers/jc/topography_arcgis.png`
+  - `outputs/jc/layers/tasveg_wms.png`
+  - `outputs/jc/layers/topography_arcgis.png`
 
 ## Sanity checks
 - Layer registry validated on config load; missing fields produce actionable errors.

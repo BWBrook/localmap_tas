@@ -21,4 +21,4 @@ Date: 2026-01-09
 ## Addendum (2026-01-11)
 - Slope derivation now uses the GA 1 Second DEM (WCS) where available; SRTM 3s remains the fallback.
 - Derived raster cache keys now include the source cache key so slope/indices regenerate when DEM sources change.
-- Re-ran JC/TAS slope outputs and inspected updated previews (`outputs/analysis/jc/raster/jc_slope.png`, `outputs/analysis/tas/raster/tas_slope.png`).
+- Re-ran JC/TAS slope outputs and inspected updated previews (`outputs/jc/analysis/raster/jc_slope.png`, `outputs/tas/analysis/raster/tas_slope.png`).

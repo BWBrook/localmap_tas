@@ -8,7 +8,7 @@ Date: 2026-01-10
 
 ## Artefacts
 - Canonical run folder: `outputs/canonical_runs/WP-020_2026-01-10_vector-extraction/`
-  - `outputs/tables/jc/site_attributes_long.parquet`
+  - `outputs/jc/tables/site_attributes_long.parquet`
 
 ## Sanity checks
 - Habitat values are `forest` / `grassland`; zone values `west` / `east`.

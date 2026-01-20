@@ -102,18 +102,38 @@ filter_analysis_layers <- function(layers, include_keys) {
   layers[keep]
 }
 
-rewrite_output_paths <- function(value, output_dir) {
+rewrite_output_paths <- function(value, output_dir, strip_prefixes = NULL) {
   if (is.list(value)) {
-    return(lapply(value, rewrite_output_paths, output_dir = output_dir))
+    return(lapply(
+      value,
+      rewrite_output_paths,
+      output_dir = output_dir,
+      strip_prefixes = strip_prefixes
+    ))
   }
   if (!is.character(value)) {
     return(value)
+  }
+  if (!is.null(strip_prefixes)) {
+    strip_prefixes <- strip_prefixes[nzchar(strip_prefixes)]
+    strip_prefixes <- sub("/+$", "", strip_prefixes)
+    strip_prefixes <- unique(strip_prefixes)
   }
   unname(vapply(value, function(path) {
     if (!nzchar(path)) {
       return(path)
     }
     if (startsWith(path, "outputs/")) {
+      if (!is.null(strip_prefixes) && length(strip_prefixes) > 0L) {
+        for (prefix in strip_prefixes) {
+          if (identical(path, prefix)) {
+            return(output_dir)
+          }
+          if (startsWith(path, paste0(prefix, "/"))) {
+            return(file.path(output_dir, sub(paste0("^", prefix, "/"), "", path)))
+          }
+        }
+      }
       return(file.path(output_dir, sub("^outputs/", "", path)))
     }
     path
@@ -131,7 +151,10 @@ resolve_first_site <- function(site_path) {
   as.character(sites$site[[1]])
 }
 
-apply_settings_to_config <- function(cfg, settings, settings_path = NULL) {
+apply_settings_to_config <- function(cfg,
+                                     settings,
+                                     settings_path = NULL,
+                                     base_profile = NULL) {
   checkmate::assert_list(cfg, any.missing = FALSE)
   checkmate::assert_list(settings, any.missing = FALSE)
 
@@ -228,7 +251,18 @@ apply_settings_to_config <- function(cfg, settings, settings_path = NULL) {
     cfg$data$analysis_layers <- filter_analysis_layers(cfg$data$analysis_layers, analysis_include)
   }
 
-  cfg <- rewrite_output_paths(cfg, output_dir = output_dir)
+  base_output_dir <- cfg$data$outputs$output_dir
+  if ((is.null(base_output_dir) || !nzchar(base_output_dir)) &&
+      !is.null(base_profile) && nzchar(base_profile)) {
+    base_output_dir <- file.path("outputs", base_profile)
+  }
+  strip_prefixes <- c()
+  if (!is.null(base_output_dir) && nzchar(base_output_dir)) {
+    strip_prefixes <- c(strip_prefixes, base_output_dir)
+  }
+  strip_prefixes <- unique(c(strip_prefixes, "outputs/default"))
+
+  cfg <- rewrite_output_paths(cfg, output_dir = output_dir, strip_prefixes = strip_prefixes)
   cfg$data$outputs <- list(
     project = project,
     output_dir = output_dir,
@@ -258,7 +292,12 @@ run_settings <- function(settings_path,
     base_profile <- "jc"
   }
   base_cfg <- cfg_read(profile = base_profile, config_path = config_path)
-  run_cfg <- apply_settings_to_config(base_cfg, settings, settings_path = settings_path)
+  run_cfg <- apply_settings_to_config(
+    base_cfg,
+    settings,
+    settings_path = settings_path,
+    base_profile = base_profile
+  )
 
   project <- run_cfg$data$outputs$project
   output_dir <- run_cfg$data$outputs$output_dir

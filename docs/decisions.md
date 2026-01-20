@@ -108,7 +108,7 @@ Format:
 **Status:** Active.
 
 ## 2026-01-09 — Run-level provenance + attribution outputs
-**Decision:** Each canonical run writes a machine-readable run manifest (`outputs/provenance/run_manifest.yml`) and a human-readable attribution report (`outputs/provenance/attribution.md`), alongside a combined layer provenance table.
+**Decision:** Each canonical run writes a machine-readable run manifest (`outputs/<profile>/provenance/run_manifest.yml`) and a human-readable attribution report (`outputs/<profile>/provenance/attribution.md`), alongside a combined layer provenance table.
 **Rationale:** Provides traceable, publication-ready metadata for reproducibility and attribution requirements.
 **Status:** Active.
 
@@ -178,4 +178,14 @@ Format:
 ## 2026-01-19 — Simplified settings overlay for end-user runs
 **Decision:** Introduce a lightweight `settings.yaml` + runner script (`scripts/run_project.R`) that overlays a small set of user inputs onto a known-good base config profile, generating a run-specific config and invoking the targets pipeline.
 **Rationale:** Most end users should not edit the full `config/config.yaml`. A small settings overlay preserves reproducibility while providing a “just edit this and run” workflow.
+**Status:** Active.
+
+## 2026-01-20 — Output hierarchy is profile-first (`outputs/<profile>/<type>/`)
+**Decision:** Standardise outputs under `outputs/<profile>/<type>/` (maps/layers/analysis/tables/tiles/provenance) and rewrite `outputs/default/*` paths to the active `data.outputs.output_dir` during config read/overlay.
+**Rationale:** Profile-first layout matches user expectations and avoids nested `jc/` folders for settings-driven runs; it also keeps artefacts grouped by project.
+**Status:** Active.
+
+## 2026-01-20 — renv snapshot uses runtime-only dependency fields
+**Decision:** Update renv settings to use only `Imports`, `Depends`, and `LinkingTo` when resolving package dependencies and ignore `dependencies.R` during renv scans.
+**Rationale:** Prevents `renv::snapshot()` from requiring the full dev/test suggestion tree (e.g., devtools/pak dependencies), while keeping runtime reproducibility intact.
 **Status:** Active.

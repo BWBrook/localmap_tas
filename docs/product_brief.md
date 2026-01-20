@@ -32,9 +32,9 @@ localmap_tas is a reproducible workflow for generating **publication-quality loc
 2. Run a single command:
    - `targets::tar_make()` (or `make pipeline`)
 3. Collect outputs from `outputs/`:
-   - `outputs/maps/` (single maps + panels)
-   - `outputs/tables/` (optional extracted attributes)
-   - `outputs/provenance/` (metadata)
+   - `outputs/<profile>/maps/` (single maps + panels)
+   - `outputs/<profile>/tables/` (optional extracted attributes)
+   - `outputs/<profile>/provenance/` (metadata)
 
 ## Non-goals
 

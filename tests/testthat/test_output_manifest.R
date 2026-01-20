@@ -26,7 +26,7 @@ testthat::test_that("validate_output_manifest errors on missing output id", {
 testthat::test_that("validate_output_manifest errors when declared path missing", {
   tmp <- tempfile(fileext = ".csv")
   utils::write.csv(
-    data.frame(output_id = "species_map", type = "map", path = "outputs/maps/nope.png"),
+    data.frame(output_id = "species_map", type = "map", path = "outputs/jc/maps/nope.png"),
     tmp,
     row.names = FALSE
   )
