@@ -90,6 +90,9 @@ filter_analysis_layers <- function(layers, include_keys) {
   if ("slope" %in% include_suffixes) {
     include_suffixes <- unique(c(include_suffixes, "dem"))
   }
+  if ("tasveg" %in% include_suffixes) {
+    include_suffixes <- unique(c(include_suffixes, "tasveg_class"))
+  }
 
   keep <- vapply(layers, function(layer) {
     if (is.null(layer$id)) return(FALSE)

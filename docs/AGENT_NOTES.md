@@ -367,3 +367,4 @@
 - 2026-01-19: Fixed attribute lookup handling for missing layers and re-ran user settings.
   - `render_attribute_lookups()` now returns NA for missing layer IDs instead of erroring.
   - Ran `Rscript scripts/run_project.R settings.yaml`; pipeline completed (20 targets) with a TASVEG class placeholder warning.
+- 2026-01-19: Settings overlay now auto-includes TASVEG class when TASVEG is requested (avoids class-legend warnings).
