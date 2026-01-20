@@ -18,6 +18,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - AOI builder (`build_aoi_from_config`) with centroid/size/rotation and AOI debug plots (`aoi_debug_plot` target).
 - AOI auto mode to derive extents from site bounds with a buffered heuristic (median nearest-neighbour distance).
 - `jc` camera-sites source to derive effort (`rd`) and observations (`obs`) from Judbury camera study inputs.
+- Simplified `settings.yaml` overlay + runner (`scripts/run_project.R`) for end users, with run-specific config generation and `LOCALMAP_CONFIG_PATH` support.
 - JC fixture occurrences (`inst/extdata/occurrences_jc.csv`) and species list (`metadata/species_requests_jc.csv`) for local camera-scale demo maps.
 - Coverage zone polygons (convex hull + buffer) with summary tables.
 - WMS imagery fetch with caching, provenance, and offline placeholders.

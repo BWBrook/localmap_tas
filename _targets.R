@@ -12,7 +12,14 @@ list(
   # Configuration
   targets::tar_target(
     cfg_file,
-    here::here("config", "config.yaml"),
+    {
+      override <- Sys.getenv("LOCALMAP_CONFIG_PATH", "")
+      if (nzchar(override)) {
+        override
+      } else {
+        here::here("config", "config.yaml")
+      }
+    },
     format = "file",
     description = "Path to the YAML configuration file (tracked for changes)."
   ),

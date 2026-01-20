@@ -358,3 +358,9 @@
 
 - 2026-01-19: Updated config to look for `data/raw/lyr/lyr_pt.csv` after raw-data reorg.
 - 2026-01-19: Re-ran JC pipeline after lyr_pt path update; missing points warning resolved (remaining warnings are spatially-constant attributes + row names).
+- 2026-01-19: Added settings overlay + runner.
+  - Added `settings.example.yaml` and `scripts/run_project.R` to support a simplified user workflow.
+  - Added `run_settings()` and helpers to merge settings into a base config and run the pipeline.
+  - `_targets.R` now respects `LOCALMAP_CONFIG_PATH` so runs can use a generated config file.
+  - Ran `devtools::test(filter = "settings_runner")` to validate the settings overlay logic.
+  - Sanity check: `pkgload::load_all("."); run_settings("settings.example.yaml", targets = "cfg")` created `outputs/judbury_cameras/run_config.yaml`.

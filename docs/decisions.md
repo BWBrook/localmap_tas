@@ -174,3 +174,8 @@ Format:
 - **Geology:** Use `map_symb` as the code and store `description` in the lookup.
 - **Land tenure / reserve estate:** Derived codes from `TEN_CLASS` / `RES_CLASS` when no official code is present.
 **Status:** Active.
+
+## 2026-01-19 — Simplified settings overlay for end-user runs
+**Decision:** Introduce a lightweight `settings.yaml` + runner script (`scripts/run_project.R`) that overlays a small set of user inputs onto a known-good base config profile, generating a run-specific config and invoking the targets pipeline.
+**Rationale:** Most end users should not edit the full `config/config.yaml`. A small settings overlay preserves reproducibility while providing a “just edit this and run” workflow.
+**Status:** Active.

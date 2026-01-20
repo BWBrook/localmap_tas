@@ -35,6 +35,9 @@ outputs/
 /*.tar.gz
 /*.zip
 
+# user settings
+settings.yaml
+
 # vignette/build artefacts
 vignettes/*.html
 vignettes/*.pdf

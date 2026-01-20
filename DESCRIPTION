@@ -36,7 +36,8 @@ Imports:
     terra,
     geodata,
     arrow,
-    base64enc
+    base64enc,
+    yaml
 Suggests:
     targets,
     tarchetypes,

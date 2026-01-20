@@ -79,6 +79,9 @@ Fix and repeat until coherent.
 - Real-world datasets belong under `data/` (gitignored).
 - The Judbury camera study example lives at `data/raw/jc_camera_study/`.
 - Use profile `jc` to derive a compatible camera-site table at `data/interim/jc_camera_sites.csv`.
+- Simplified run (recommended for new users):
+  - Copy `settings.example.yaml` to `settings.yaml` and edit the paths/toggles.
+  - Run `Rscript scripts/run_project.R settings.yaml` (writes a run-specific config in `outputs/<project>/run_config.yaml`).
 - Minimal JC run:
   - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\",\"species_map\"))'`
   - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
