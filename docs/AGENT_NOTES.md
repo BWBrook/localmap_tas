@@ -382,3 +382,9 @@
   - Added `.renvignore` to exclude `dependencies.R` from renv scanning.
   - Updated renv settings to drop `Suggests` from dependency fields so snapshotting does not require the full devtool dependency tree.
   - `renv::snapshot()` now completes without missing-package errors.
+
+- 2026-01-20: Flexible panel assembly updates.
+  - `panel_figure` now supports explicit `panels` entries (path + optional label/legend) with size normalization and zero-gap layouts for abutting panels.
+  - Added panel legend overlay support with per-panel defaults (alpha/position/size) and kept legacy `paths` support.
+  - Camera-site legend overlay now supports transparency via `legend.alpha`.
+  - Ran `R_CONFIG_ACTIVE=jc Rscript -e 'targets::tar_make(names = c(\"panel_figure\"))'`; panel figure regenerated (PNG size 4200×3818 px) with zero gap; warnings persisted from earlier runs.

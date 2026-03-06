@@ -310,26 +310,22 @@ demo:
       scale_bar_location: "bl"
       north_arrow_location: "tr"
     panel_figure:
-      paths:
-        - "outputs/demo/maps/overview_map.png"
-        - "outputs/demo/maps/species_occurrences.png"
-        - "outputs/demo/maps/camera_sites.png"
-        - "outputs/demo/maps/species_topo.png"
-      order:
-        - "demo_overview_map"
-        - "demo_species_occurrences"
-        - "demo_camera_sites"
-        - "demo_species_topo"
+      panels:
+        - path: "outputs/demo/maps/overview_map.png"
+          label: "a)"
+        - path: "outputs/demo/maps/species_occurrences.png"
+          label: "b)"
+        - path: "outputs/demo/maps/camera_sites.png"
+          label: "c)"
+        - path: "outputs/demo/maps/species_topo.png"
+          label: "d)"
       columns: 2
       rows: 2
       output_path: "outputs/demo/maps/panel_figure.png"
       output_pdf: "outputs/demo/maps/panel_figure.pdf"
-      gap_px: 8
-      labels:
-        values: ["a)", "b)", "c)", "d)"]
-        padding_px: 16
-        colour: "#050505"
-        font_size: 28
+      gap_px: 0
+      normalize_sizes: true
+      size_mode: "min"
 
 jc:
   inherits: default
@@ -514,26 +510,22 @@ jc:
       scale_bar_location: "bl"
       north_arrow_location: "tr"
     panel_figure:
-      paths:
-        - "outputs/jc/maps/overview_map.png"
-        - "outputs/jc/maps/species_occurrences.png"
-        - "outputs/jc/maps/camera_sites.png"
-        - "outputs/jc/maps/species_topo.png"
-      order:
-        - "jc_overview_map"
-        - "jc_species_occurrences"
-        - "jc_camera_sites"
-        - "jc_species_topo"
+      panels:
+        - path: "outputs/jc/maps/overview_map.png"
+          label: "a)"
+        - path: "outputs/jc/maps/species_occurrences.png"
+          label: "b)"
+        - path: "outputs/jc/maps/camera_sites.png"
+          label: "c)"
+        - path: "outputs/jc/maps/species_topo.png"
+          label: "d)"
       columns: 2
       rows: 2
       output_path: "outputs/jc/maps/panel_figure.png"
       output_pdf: "outputs/jc/maps/panel_figure.pdf"
-      gap_px: 8
-      labels:
-        values: ["a)", "b)", "c)", "d)"]
-        padding_px: 16
-        colour: "#050505"
-        font_size: 28
+      gap_px: 0
+      normalize_sizes: true
+      size_mode: "min"
     camera_sites:
       source: "jc"
       jc:
@@ -1107,26 +1099,22 @@ tas_canonical:
       scale_bar_location: "bl"
       north_arrow_location: "tr"
     panel_figure:
-      paths:
-        - "outputs/tas/maps/overview_map.png"
-        - "outputs/tas/maps/species_occurrences.png"
-        - "outputs/tas/maps/camera_sites.png"
-        - "outputs/tas/maps/species_topo.png"
-      order:
-        - "tas_overview_map"
-        - "tas_species_occurrences"
-        - "tas_camera_sites"
-        - "tas_species_topo"
+      panels:
+        - path: "outputs/tas/maps/overview_map.png"
+          label: "a)"
+        - path: "outputs/tas/maps/species_occurrences.png"
+          label: "b)"
+        - path: "outputs/tas/maps/camera_sites.png"
+          label: "c)"
+        - path: "outputs/tas/maps/species_topo.png"
+          label: "d)"
       columns: 2
       rows: 2
       output_path: "outputs/tas/maps/panel_figure.png"
       output_pdf: "outputs/tas/maps/panel_figure.pdf"
-      gap_px: 8
-      labels:
-        values: ["a)", "b)", "c)", "d)"]
-        padding_px: 16
-        colour: "#050505"
-        font_size: 28
+      gap_px: 0
+      normalize_sizes: true
+      size_mode: "min"
     analysis_layers:
       - id: "tasveg_vector"
         type: "vector_arcgis"

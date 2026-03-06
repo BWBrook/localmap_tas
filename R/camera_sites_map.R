@@ -472,6 +472,7 @@ render_camera_sites_map <- function(context,
       layout = "overlay",
       width_fraction = 0.2,
       margin_fraction = 0.05,
+      alpha = 0.75,
       format = "image/png",
       graphic_width = NULL,
       graphic_height = NULL
@@ -484,6 +485,7 @@ render_camera_sites_map <- function(context,
   legend_cfg$position <- camera_sites_default(legend_cfg$position, "right")
   legend_cfg$width_fraction <- as.numeric(camera_sites_default(legend_cfg$width_fraction, 0.2))
   legend_cfg$margin_fraction <- as.numeric(camera_sites_default(legend_cfg$margin_fraction, 0.05))
+  legend_cfg$alpha <- as.numeric(camera_sites_default(legend_cfg$alpha, 0.75))
 
   bbox <- sf::st_bbox(context$bbox_3857)
   within <- context$within
@@ -511,6 +513,23 @@ render_camera_sites_map <- function(context,
     if (!is.null(legend_path) && file.exists(legend_path)) {
       legend_img <- try(png::readPNG(legend_path), silent = TRUE)
       if (!inherits(legend_img, "try-error")) {
+        if (length(dim(legend_img)) == 2L) {
+          arr <- array(1, dim = c(dim(legend_img)[1], dim(legend_img)[2], 4))
+          arr[, , 1] <- legend_img
+          arr[, , 2] <- legend_img
+          arr[, , 3] <- legend_img
+          arr[, , 4] <- 1
+          legend_img <- arr
+        }
+        if (length(dim(legend_img)) == 3L && dim(legend_img)[3] == 3L) {
+          arr <- array(1, dim = c(dim(legend_img)[1], dim(legend_img)[2], 4))
+          arr[, , 1:3] <- legend_img
+          arr[, , 4] <- 1
+          legend_img <- arr
+        }
+        if (is.finite(legend_cfg$alpha) && legend_cfg$alpha < 1) {
+          legend_img[, , 4] <- legend_img[, , 4] * max(0, min(legend_cfg$alpha, 1))
+        }
         legend_grob <- grid::rasterGrob(legend_img, interpolate = TRUE)
         legend_dims <- dim(legend_img)
       } else {
@@ -913,6 +932,50 @@ camera_sites_stack_maps <- function(stack_cfg,
     resolved
   }
 
+  resolve_panel_entries <- function(panels, path_lookup = NULL) {
+    if (is.null(panels)) {
+      return(list())
+    }
+    lookup <- if (is.list(path_lookup)) path_lookup else list()
+    entries <- list()
+    if (is.character(panels)) {
+      panels <- as.list(panels)
+    }
+    for (item in panels) {
+      entry <- list()
+      if (is.list(item)) {
+        entry$path <- as.character(item$path %||% item$file %||% "")
+        entry$label <- as.character(item$label %||% "")
+        entry$legend_path <- as.character(item$legend_path %||% "")
+        entry$alpha <- item$legend_alpha %||% item$alpha
+        entry$position <- item$legend_position %||% item$position
+        entry$width_fraction <- item$legend_width_fraction %||% item$width_fraction
+        entry$margin_fraction <- item$legend_margin_fraction %||% item$margin_fraction
+        if (!nzchar(entry$path)) {
+          entry$id <- as.character(item$id %||% "")
+          if (nzchar(entry$id) && !is.null(lookup[[entry$id]])) {
+            entry$path <- as.character(lookup[[entry$id]])
+          } else if (nzchar(entry$id)) {
+            rlang::warn(sprintf("Panel entry id not found in path_lookup: %s", entry$id))
+          }
+        }
+      } else if (is.character(item) && length(item) > 0L) {
+        entry$path <- as.character(item[[1L]])
+      } else {
+        next
+      }
+      if (is.null(entry$path) || !nzchar(entry$path)) {
+        next
+      }
+      entries[[length(entries) + 1L]] <- entry
+    }
+    entries
+  }
+
+  panel_entries <- resolve_panel_entries(stack_cfg$panels, stack_cfg$path_lookup)
+  panel_paths <- vapply(panel_entries, function(entry) entry$path %||% "", character(1))
+  panel_paths <- panel_paths[nzchar(panel_paths)]
+
   direct_paths <- stack_cfg$paths
   if (is.null(direct_paths)) {
     direct_paths <- character()
@@ -935,13 +998,17 @@ camera_sites_stack_maps <- function(stack_cfg,
   input_dirs <- input_dirs[nzchar(input_dirs)]
   dir_pattern <- camera_sites_default(stack_cfg$pattern, "\\.png$")
 
-  collected_paths <- c(
-    collect_from_paths(direct_paths),
-    collect_from_glob(glob_patterns),
-    collect_from_directory(input_dirs, dir_pattern)
-  )
-  collected_paths <- collected_paths[nzchar(collected_paths)]
-  collected_paths <- unique(collected_paths)
+  if (length(panel_paths) > 0L) {
+    collected_paths <- panel_paths
+  } else {
+    collected_paths <- c(
+      collect_from_paths(direct_paths),
+      collect_from_glob(glob_patterns),
+      collect_from_directory(input_dirs, dir_pattern)
+    )
+    collected_paths <- collected_paths[nzchar(collected_paths)]
+    collected_paths <- unique(collected_paths)
+  }
 
   if (length(collected_paths) == 0L) {
     rlang::abort(
@@ -951,10 +1018,12 @@ camera_sites_stack_maps <- function(stack_cfg,
   }
 
   collected_paths <- normalizePath(collected_paths, winslash = "/", mustWork = TRUE)
-  collected_paths <- sort(unique(collected_paths))
+  if (length(panel_paths) == 0L) {
+    collected_paths <- sort(unique(collected_paths))
+  }
 
   preferred_order <- stack_cfg$order
-  if (!is.null(preferred_order)) {
+  if (!is.null(preferred_order) && length(panel_paths) == 0L) {
     preferred_order <- as.character(unlist(preferred_order, use.names = FALSE))
     preferred_order <- trimws(preferred_order)
     preferred_order <- preferred_order[nzchar(preferred_order)]
@@ -1027,6 +1096,11 @@ camera_sites_stack_maps <- function(stack_cfg,
   label_values <- as.character(unlist(label_values, use.names = FALSE))
   label_values <- trimws(label_values)
   label_values <- label_values[nzchar(label_values)]
+  panel_label_values <- vapply(panel_entries, function(entry) entry$label %||% "", character(1))
+  use_panel_labels <- length(panel_label_values) > 0L && any(nzchar(panel_label_values))
+  if (isTRUE(use_panel_labels)) {
+    label_values <- panel_label_values
+  }
   if (length(label_values) > 0L) {
     label_values <- rep(label_values, length.out = length(collected_paths))
   }
@@ -1081,6 +1155,32 @@ camera_sites_stack_maps <- function(stack_cfg,
     normalize_rgba(img, path = path)
   }
 
+  resize_rgba <- function(img, width_px, height_px) {
+    if (is.null(width_px) || is.null(height_px)) {
+      return(img)
+    }
+    width_px <- as.integer(round(width_px))
+    height_px <- as.integer(round(height_px))
+    if (width_px <= 0 || height_px <= 0) {
+      return(img)
+    }
+    if (dim(img)[2] == width_px && dim(img)[1] == height_px) {
+      return(img)
+    }
+    tmp <- tempfile(fileext = ".png")
+    grDevices::png(filename = tmp, width = width_px, height = height_px, bg = "transparent")
+    grid::grid.newpage()
+    grid::grid.raster(
+      img,
+      width = grid::unit(1, "npc"),
+      height = grid::unit(1, "npc"),
+      interpolate = TRUE
+    )
+    grDevices::dev.off()
+    on.exit(unlink(tmp), add = TRUE)
+    normalize_rgba(png::readPNG(tmp), path = tmp)
+  }
+
   annotate_label <- function(img, label_text) {
     if (is.null(label_text) || !nzchar(label_text)) {
       return(img)
@@ -1117,8 +1217,123 @@ camera_sites_stack_maps <- function(stack_cfg,
     normalize_rgba(png::readPNG(tmp), path = tmp)
   }
 
-  images <- lapply(seq_along(collected_paths), function(idx) {
-    img <- read_rgba(collected_paths[[idx]])
+  overlay_panel_legend <- function(img, legend_path, legend_cfg = list()) {
+    if (is.null(legend_path) || !nzchar(legend_path) || !file.exists(legend_path)) {
+      return(img)
+    }
+    legend_img <- try(png::readPNG(legend_path), silent = TRUE)
+    if (inherits(legend_img, "try-error")) {
+      rlang::warn(sprintf("Failed to read panel legend image: %s", legend_path))
+      return(img)
+    }
+    legend_img <- normalize_rgba(legend_img, path = legend_path)
+    alpha <- as.numeric(legend_cfg$alpha %||% 0.75)
+    if (is.finite(alpha) && alpha < 1) {
+      legend_img[, , 4] <- legend_img[, , 4] * max(0, min(alpha, 1))
+    }
+    width_frac <- as.numeric(legend_cfg$width_fraction %||% 0.2)
+    margin_frac <- as.numeric(legend_cfg$margin_fraction %||% 0.04)
+    if (!is.finite(width_frac) || width_frac <= 0) width_frac <- 0.2
+    if (!is.finite(margin_frac) || margin_frac < 0) margin_frac <- 0.04
+    position <- as.character(legend_cfg$position %||% "tr")
+    panel_width <- dim(img)[2]
+    panel_height <- dim(img)[1]
+    legend_width_px <- max(1, round(panel_width * width_frac))
+    aspect <- dim(legend_img)[1] / dim(legend_img)[2]
+    legend_height_px <- max(1, round(legend_width_px * aspect))
+    legend_width_npc <- legend_width_px / panel_width
+    legend_height_npc <- legend_height_px / panel_height
+    margin_x <- margin_frac
+    margin_y <- margin_frac
+    x_pos <- 1 - margin_x
+    y_pos <- 1 - margin_y
+    just <- c("right", "top")
+    if (identical(position, "br")) {
+      y_pos <- margin_y
+      just <- c("right", "bottom")
+    } else if (identical(position, "bl")) {
+      x_pos <- margin_x
+      y_pos <- margin_y
+      just <- c("left", "bottom")
+    } else if (identical(position, "tl")) {
+      x_pos <- margin_x
+      just <- c("left", "top")
+    }
+    tmp <- tempfile(fileext = ".png")
+    grDevices::png(filename = tmp, width = panel_width, height = panel_height, bg = "transparent")
+    grid::grid.newpage()
+    grid::grid.raster(
+      img,
+      width = grid::unit(1, "npc"),
+      height = grid::unit(1, "npc"),
+      interpolate = TRUE
+    )
+    grid::grid.raster(
+      legend_img,
+      x = grid::unit(x_pos, "npc"),
+      y = grid::unit(y_pos, "npc"),
+      width = grid::unit(legend_width_npc, "npc"),
+      height = grid::unit(legend_height_npc, "npc"),
+      just = just,
+      interpolate = TRUE
+    )
+    grDevices::dev.off()
+    on.exit(unlink(tmp), add = TRUE)
+    normalize_rgba(png::readPNG(tmp), path = tmp)
+  }
+
+  raw_images <- lapply(seq_along(collected_paths), function(idx) {
+    read_rgba(collected_paths[[idx]])
+  })
+
+  widths <- vapply(raw_images, function(img) dim(img)[2], numeric(1))
+  heights <- vapply(raw_images, function(img) dim(img)[1], numeric(1))
+
+  target_width <- stack_cfg$target_width_px
+  target_height <- stack_cfg$target_height_px
+  normalize_sizes <- isTRUE(stack_cfg$normalize_sizes) || !is.null(target_width) || !is.null(target_height)
+  size_mode <- as.character(stack_cfg$size_mode %||% "min")
+  if (normalize_sizes) {
+    if (is.null(target_width) && is.null(target_height)) {
+      if (identical(size_mode, "max")) {
+        target_width <- max(widths)
+        target_height <- max(heights)
+      } else {
+        target_width <- min(widths)
+        target_height <- min(heights)
+      }
+    } else {
+      if (is.null(target_width) && is.finite(target_height)) {
+        target_width <- round(target_height * (widths[[1]] / heights[[1]]))
+      }
+      if (is.null(target_height) && is.finite(target_width)) {
+        target_height <- round(target_width * (heights[[1]] / widths[[1]]))
+      }
+    }
+    raw_images <- lapply(raw_images, resize_rgba, width_px = target_width, height_px = target_height)
+    widths <- vapply(raw_images, function(img) dim(img)[2], numeric(1))
+    heights <- vapply(raw_images, function(img) dim(img)[1], numeric(1))
+  } else if (length(unique(widths)) > 1L || length(unique(heights)) > 1L) {
+    rlang::warn(
+      "Panel images differ in size; bounding boxes may not match. Consider normalize_sizes = TRUE."
+    )
+  }
+
+  if (length(panel_entries) == 0L) {
+    panel_entries <- rep(list(list()), length(raw_images))
+  } else if (length(panel_entries) < length(raw_images)) {
+    panel_entries <- c(panel_entries, rep(list(list()), length(raw_images) - length(panel_entries)))
+  }
+
+  legend_defaults <- stack_cfg$legend_defaults %||% list()
+
+  images <- lapply(seq_along(raw_images), function(idx) {
+    img <- raw_images[[idx]]
+    entry <- panel_entries[[idx]]
+    legend_cfg <- utils::modifyList(legend_defaults, entry)
+    if (!is.null(legend_cfg$legend_path) && nzchar(legend_cfg$legend_path)) {
+      img <- overlay_panel_legend(img, legend_cfg$legend_path, legend_cfg)
+    }
     if (length(label_values) >= idx && nzchar(label_values[[idx]])) {
       img <- annotate_label(img, label_values[[idx]])
     }

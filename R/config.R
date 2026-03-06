@@ -433,6 +433,9 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
         class = "cfg_panel_figure_invalid"
       )
     }
+    if (!is.null(panel_cfg$panels)) {
+      checkmate::assert_list(panel_cfg$panels, any.missing = FALSE)
+    }
     if (!is.null(panel_cfg$paths)) {
       checkmate::assert_character(
         as.character(unlist(panel_cfg$paths, use.names = FALSE)),

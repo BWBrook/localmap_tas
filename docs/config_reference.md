@@ -158,10 +158,11 @@ Derived fields:
 - `graticule_colour` (string hex).
 - `graticule_alpha` (numeric 0–1).
 - `graticule_label_size` (numeric).
-- `legend` (list, optional): legend display settings.
+- `legend` (list, optional): legend display settings (including `alpha` for transparency).
 
 ### `data.camera_sites.stack`
 
+- `panels` (list, optional): explicit panel entries (same format as `data.panel_figure`).
 - `paths` (character vector): explicit input PNGs.
 - `glob` (character vector): glob patterns.
 - `input_dir` (character vector): directories to scan.
@@ -169,6 +170,10 @@ Derived fields:
 - `order` (character vector): preferred ordering patterns.
 - `columns`/`rows` (integer): panel layout.
 - `gap_px` (numeric): gap between panels.
+- `normalize_sizes` (logical, optional): resize panels to a common size before stacking.
+- `size_mode` (string, optional): `"min"` or `"max"` target dimensions when normalizing.
+- `target_width_px`/`target_height_px` (integer, optional): explicit panel size for resizing.
+- `legend_defaults` (list, optional): default legend overlay settings for panels.
 - `background` (string hex): background colour.
 - `labels` (list): panel labels.
 - `output_path` (string): panel output path.
@@ -405,10 +410,21 @@ Controls site attribute extraction outputs.
 
 ### `data.panel_figure`
 
-- `paths` (list): panel image paths.
+- `panels` (list, optional): explicit panel entries. Each entry can include:
+  - `path` (string): PNG path to include.
+  - `label` (string, optional): panel label (e.g., `a)`).
+  - `legend_path` (string, optional): legend PNG to overlay inside the panel.
+  - `legend_alpha`/`legend_position`/`legend_width_fraction`/`legend_margin_fraction`
+    (optional): legend overlay controls (defaults from `legend_defaults`).
+- `paths` (list): panel image paths (legacy fallback when `panels` not provided).
 - `order` (list, optional): ordering patterns for panel filenames.
 - `columns`/`rows` (integer): panel grid layout.
 - `output_path` (string): PNG output path.
 - `output_pdf` (string, optional): PDF output path.
 - `gap_px` (integer, optional): padding between panels.
+- `normalize_sizes` (logical, optional): resize panels to a common size before stacking.
+- `size_mode` (string, optional): `"min"` or `"max"` target dimensions when normalizing.
+- `target_width_px`/`target_height_px` (integer, optional): explicit panel size for resizing.
+- `legend_defaults` (list, optional): default overlay settings (`alpha`, `position`,
+  `width_fraction`, `margin_fraction`) for panel legends.
 - `labels` (list, optional): label values + style (see camera-sites stack config).
