@@ -73,3 +73,25 @@ testthat::test_that("provenance outputs capture layer metadata", {
   testthat::expect_true(any(grepl("layers.imagery.imagery1", run_lines)))
   testthat::expect_true(any(grepl("layers.analysis.analysis1", run_lines)))
 })
+
+testthat::test_that("imagery provenance includes required machine-readable keys", {
+  prov_path <- tempfile(fileext = ".yml")
+  localmap:::imagery_write_provenance(
+    prov_path,
+    list(
+      status = "offline_placeholder",
+      output_path = "outputs/demo/maps/species_occurrences.png",
+      params = list(width = 64, height = 64)
+    )
+  )
+
+  lines <- readLines(prov_path)
+  testthat::expect_true(any(grepl("^status: offline_placeholder$", lines)))
+  testthat::expect_true(any(grepl(
+    "^output_path: outputs/demo/maps/species_occurrences.png$",
+    lines
+  )))
+  testthat::expect_true(any(grepl("^params.width: 64$", lines)))
+  testthat::expect_true(any(grepl("^params.height: 64$", lines)))
+  testthat::expect_true(any(grepl("^timestamp:", lines)))
+})

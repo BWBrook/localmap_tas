@@ -15,6 +15,7 @@ This workflow is mandatory for the Codex CLI engineer and is also recommended fo
 3. Verify technically:
    - Run unit tests and lint.
    - Ensure the demo profile runs end-to-end.
+   - Use the QA bootstrap before lint/package checks.
 
 4. Verify scientifically (Artefact Review Cycle):
    - Generate maps/panels/tables.
@@ -113,3 +114,13 @@ Write succinct questions into `docs/questions_for_human.md` only when:
 - repeated attempts fail and you need guidance.
 
 Default is to decide and proceed.
+
+## 6) QA command set
+
+Recommended command sequence for QA-enabled environments:
+
+- `make bootstrap-qa`
+- `make lint`
+- `make test`
+- `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
+- `make check`

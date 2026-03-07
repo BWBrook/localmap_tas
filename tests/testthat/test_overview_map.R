@@ -20,3 +20,27 @@ testthat::test_that("render_overview_map writes output", {
 
   testthat::expect_true(file.exists(out))
 })
+
+testthat::test_that("render_overview_map matches AOI aspect ratio by default", {
+  aoi_cfg <- list(
+    centroid = list(lat = -42.0, lon = 146.0),
+    width_km = 20,
+    height_km = 10,
+    rotation_deg = 0
+  )
+  aoi <- localmap::build_aoi_from_config(aoi_cfg)
+  sites <- data.frame(site = "a", lat = -42.0, lon = 146.0)
+  tmp <- tempfile(fileext = ".png")
+  on.exit(unlink(tmp), add = TRUE)
+
+  out <- localmap::render_overview_map(
+    aoi = aoi,
+    sites = sites,
+    layers = tibble::tibble(),
+    map_cfg = list(output_path = tmp, width = 6, dpi = 100, show_labels = FALSE)
+  )
+
+  img <- png::readPNG(out)
+  pixel_ratio <- dim(img)[2] / dim(img)[1]
+  testthat::expect_equal(pixel_ratio, 2, tolerance = 0.2)
+})

@@ -10,38 +10,11 @@
 #' @export
 cfg_read <- function(profile = Sys.getenv("R_CONFIG_ACTIVE", "default"),
                      config_path = NULL) {
-  if (is.null(config_path)) {
-    local_path <- here::here("config", "config.yaml")
-    if (file.exists(local_path)) {
-      config_path <- local_path
-    } else {
-      installed <- system.file("config", "config.yaml", package = "localmap")
-      if (nzchar(installed) && file.exists(installed)) {
-        config_path <- installed
-      } else {
-        config_path <- local_path
-      }
-    }
-  }
-  path <- config_path
-  if (!file.exists(path)) {
-    rlang::abort(
-      c(
-        "Configuration file not found.",
-        i = sprintf("Expected at: %s", path)
-      ),
-      class = "cfg_read_missing_config"
-    )
-  }
-
-  cfg <- config::get(file = path, config = profile)
-  if (!is.list(cfg)) {
-    rlang::abort("Config must resolve to a list.", class = "cfg_read_invalid_config")
-  }
-  cfg <- cfg_migrate(cfg, config_path = path)
+  loaded <- cfg_load_profile(profile = profile, config_path = config_path)
+  path <- loaded$path
+  cfg <- cfg_migrate(loaded$cfg, config_path = path)
   cfg_validate(cfg, config_path = path)
-  cfg <- cfg_apply_dem_variant(cfg)
-  cfg <- cfg_apply_output_dir(cfg)
+  cfg <- cfg_resolve(cfg)
   cfg
 }
 

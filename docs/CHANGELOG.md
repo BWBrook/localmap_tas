@@ -68,6 +68,10 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   on satellite imagery.
 
 ### Changed
+- `_targets.R` now delegates profile-specific expected-output assembly, report fallback rendering, TASVEG class lookup resolution, and manifest selection to internal helper functions to keep the pipeline declarative without changing target names or outputs.
+- Config handling is now split into load, migrate, validate, and resolve phases behind the existing `cfg_read()` entrypoint, preserving the schema and output layout while reducing coupling in `R/config.R`.
+- Camera-site internals are now separated by responsibility: defaults, graticule generation, and panel assembly live in dedicated helper modules instead of one oversized renderer file.
+- Analysis-layer internals are now separated by responsibility: validation and remote download/WCS fallback helpers live outside the main acquisition module, reducing the size and coupling of `R/analysis_layers.R`.
 - Config schema bumped to v2 with AOI as the authoritative extent definition; v1 configs are migrated.
 - Species mapping now accepts AOI input and only falls back to bounding-box config when needed.
 - JC profile now uses AOI auto mode for a camera-scale extent.
@@ -91,3 +95,6 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - `make test` and `R CMD check` now use package-aware test entrypoints, so the canonical checks exercise `localmap` instead of skipping most tests.
 - Demo output-schema validation now handles profiles without analysis layers and validates against a demo-specific expected-output map.
 - Removed the no-longer-required `pak` suggestion from the project metadata and refreshed `renv.lock`, restoring a clean `renv::status()`.
+- Added a separate QA bootstrap path and active CI workflow so lint, offline pipelines, and package checks match the documented release gates.
+- `tests/run-tests.R` is now `R CMD check` compatible, and `.renvignore` is excluded from package builds.
+- Added positive contract tests for demo output manifests, provenance keys, overview-map aspect ratio, site-attribute wide-table mapping, and `run_settings()` environment restoration.

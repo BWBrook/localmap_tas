@@ -13,10 +13,11 @@ This checklist must be satisfied before tagging a release.
 - [ ] Layer provenance includes attribution fields where configured
 
 ## 3) Quality gates
-- [ ] `R CMD check` passes (no ERRORs)
-- [ ] Unit tests pass
-- [ ] Lint gate passes (or exceptions documented)
-- [ ] `targets::tar_make()` runs successfully on the demo profile
+- [ ] `make bootstrap-qa` completed
+- [ ] `make lint` passes (or exceptions documented)
+- [ ] `make test` passes
+- [ ] `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'` passes
+- [ ] `make check` passes (no ERRORs)
 
 ## 4) Artefact verification
 - [ ] Overview map(s) generated and visually inspected

@@ -112,3 +112,76 @@ testthat::test_that("attribute lookups stay empty-but-named without analysis lay
   )
   testthat::expect_true(all(vapply(lookups, function(x) identical(x, ""), logical(1))))
 })
+
+testthat::test_that("site attributes wide maps representative fields into stable columns", {
+  attributes <- tibble::tibble(
+    site_id = rep("site_a", 8),
+    layer_id = c(
+      "jc_dem",
+      "jc_slope",
+      "jc_ndvi",
+      "jc_tasveg",
+      "jc_fire_attributes",
+      "jc_geology",
+      "jc_land_tenure",
+      "distance_to_road"
+    ),
+    attribute_name = c(
+      "value",
+      "slope",
+      "ndvi",
+      "VEG_GROUP",
+      "FIRESENS",
+      "map_symb",
+      "TEN_CLASS",
+      "distance_m"
+    ),
+    value = c(
+      "101.5",
+      "12.1",
+      "0.34",
+      "Dry eucalypt forest and woodland",
+      "Moderate",
+      "Qm",
+      "Public Reserve",
+      "42"
+    ),
+    units = c("m", "degrees", NA, NA, NA, NA, NA, "m"),
+    layer_type = c(
+      "raster_file",
+      "derived_slope",
+      "derived_ndvi",
+      "vector_file",
+      "vector_arcgis",
+      "vector_arcgis",
+      "vector_arcgis",
+      "vector_arcgis"
+    ),
+    source_id = NA_character_,
+    provenance_path = rep("outputs/jc/provenance/example.yml", 8)
+  )
+  sites <- tibble::tibble(site = "site_a", lat = -42, lon = 146)
+  out_path <- tempfile(fileext = ".csv")
+
+  wide_out <- localmap::write_site_attributes_wide(
+    attributes,
+    sites = sites,
+    output_path = out_path
+  )
+  wide_tbl <- utils::read.csv(wide_out, stringsAsFactors = FALSE)
+
+  testthat::expect_equal(wide_tbl$dem[[1]], 101.5)
+  testthat::expect_equal(wide_tbl$slope[[1]], 12.1)
+  testthat::expect_equal(wide_tbl$ndvi[[1]], 0.34)
+  testthat::expect_equal(wide_tbl$fire_sensitivity[[1]], "Moderate")
+  testthat::expect_equal(wide_tbl$geology_description[[1]], "Qm")
+  testthat::expect_equal(wide_tbl$distance_to_road[[1]], 42)
+  testthat::expect_equal(
+    wide_tbl$tasveg_category[[1]],
+    unname(localmap:::attribute_code_from_label("Dry eucalypt forest and woodland"))
+  )
+  testthat::expect_equal(
+    wide_tbl$land_tenure_class[[1]],
+    unname(localmap:::attribute_code_from_label("Public Reserve"))
+  )
+})

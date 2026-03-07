@@ -264,79 +264,11 @@ list(
     tasveg_class_outputs,
     {
       analysis_layer_files
-      profile <- attr(cfg, "config")
-      if (is.null(profile) || !nzchar(profile)) {
-        profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
-      }
-      class_id <- NULL
-      layer_ids <- names(analysis_layer_paths)
-      if (!is.null(layer_ids)) {
-        matches <- layer_ids[grepl("tasveg_class", layer_ids)]
-        if (length(matches) > 0L) {
-          class_id <- matches[[1]]
-        }
-      }
-      if (is.null(class_id) || !nzchar(class_id)) {
-        class_id <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
-          "tasveg_class_vector"
-        } else if (profile %in% c("demo")) {
-          "demo_tasveg_class"
-        } else {
-          "jc_tasveg_class"
-        }
-      }
-      safe_lookup <- function(values, key) {
-        if (is.null(values) || is.null(key) || !nzchar(key)) {
-          return("")
-        }
-        if (!key %in% names(values)) {
-          return("")
-        }
-        values[[key]]
-      }
-      find_cfg_layer <- function(layers_cfg, id) {
-        if (is.null(layers_cfg)) {
-          return(NULL)
-        }
-        for (layer in layers_cfg) {
-          if (!is.null(layer$id) && identical(layer$id, id)) {
-            return(layer)
-          }
-        }
-        NULL
-      }
-      layer_cfg <- find_cfg_layer(cfg$data$analysis_layers, class_id)
-      vector_path <- safe_lookup(analysis_layer_paths, class_id)
-      legend_path <- safe_lookup(layer_legend_paths, "tasveg_class_wms")
-      if (is.null(legend_path) || !nzchar(legend_path)) {
-        legend_path <- file.path(output_dir, "layers", "tasveg_class_wms_legend.png")
-      }
-      lookup_path <- NULL
-      if (!is.null(vector_path) && nzchar(vector_path)) {
-        lookup_path <- sub("\\.gpkg$", "_lookup.csv", vector_path)
-      } else {
-        prefix <- if (grepl("^demo", class_id)) {
-          "demo"
-        } else if (grepl("^jc", class_id)) {
-          "jc"
-        } else if (grepl("^tas", class_id)) {
-          "tas"
-        } else {
-          "site"
-        }
-        lookup_path <- file.path(
-          output_dir,
-          "analysis",
-          "vector",
-          paste0(prefix, "_tasveg_class_lookup.csv")
-        )
-      }
-      render_tasveg_class_legend(
-        vector_path = vector_path,
-        legend_path = legend_path,
-        lookup_path = lookup_path,
-        layer_url = layer_cfg$url %||% "",
-        offline = isTRUE(layer_cfg$offline)
+      render_tasveg_class_outputs(
+        cfg = cfg,
+        analysis_layer_paths = analysis_layer_paths,
+        layer_legend_paths = layer_legend_paths,
+        output_dir = output_dir
       )
     },
     description = "Custom TASVEG class legend + lookup for AOI classes."
@@ -360,16 +292,7 @@ list(
   ),
   targets::tar_target(
     analysis_attribute_lookup_files,
-    {
-      lookup_paths <- analysis_attribute_lookups
-      if (is.null(lookup_paths)) {
-        lookup_paths <- character()
-      } else {
-        lookup_paths <- unname(unlist(lookup_paths, use.names = FALSE))
-      }
-      lookup_paths <- lookup_paths[!is.na(lookup_paths) & nzchar(lookup_paths)]
-      lookup_paths
-    },
+    flatten_lookup_paths(analysis_attribute_lookups),
     format = "file",
     description = "Attribute lookup CSVs (vector code to label)."
   ),
@@ -540,19 +463,7 @@ list(
 
   targets::tar_target(
     output_manifest_file,
-    {
-      profile <- attr(cfg, "config")
-      if (is.null(profile) || !nzchar(profile)) {
-        profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
-      }
-      if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
-        "inst/extdata/output_manifest_tas_canonical.csv"
-      } else if (profile %in% c("demo")) {
-        "inst/extdata/output_manifest_demo.csv"
-      } else {
-        "inst/extdata/output_manifest_v1.csv"
-      }
-    },
+    output_manifest_file_for_profile(localmap_active_profile(cfg)),
     format = "file",
     description = "Output schema manifest (v1) file."
   ),
@@ -566,20 +477,9 @@ list(
   targets::tar_target(
     output_schema_v1,
     {
-      profile <- attr(cfg, "config")
-      if (is.null(profile) || !nzchar(profile)) {
-        profile <- Sys.getenv("R_CONFIG_ACTIVE", "default")
-      }
-      safe_lookup <- function(values, key) {
-        if (is.null(values) || is.null(key) || !nzchar(key)) {
-          return("")
-        }
-        if (!key %in% names(values)) {
-          return("")
-        }
-        values[[key]]
-      }
-      expected_outputs <- if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
+      profile <- localmap_active_profile(cfg)
+      expected_outputs <- build_output_schema_expected_outputs(
+        profile,
         list(
           species_map = species_map,
           camera_sites_map = camera_sites_map,
@@ -587,302 +487,24 @@ list(
           camera_sites_tile = camera_sites_tile,
           aoi_debug_plot = aoi_debug_plot,
           coverage_summary = coverage_summary,
-          wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
-          wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
-          tasveg_class_wms_layer = safe_lookup(layer_output_paths, "tasveg_class_wms"),
-          tasveg_class_wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_class_wms"),
-          tasveg_class_wms_legend = tasveg_class_legend,
-          arcgis_layer = safe_lookup(layer_output_paths, "orthophoto_arcgis"),
-          arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "orthophoto_arcgis"),
-          topography_arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
-          topography_arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "topography_arcgis"),
-          fire_attributes_arcgis_layer = safe_lookup(layer_output_paths, "fire_attributes_arcgis"),
-          fire_attributes_arcgis_layer_provenance = safe_lookup(
-            layer_provenance_paths,
-            "fire_attributes_arcgis"
-          ),
-          soil_ph_wms_layer = safe_lookup(layer_output_paths, "soil_ph_wms"),
-          soil_ph_wms_layer_provenance = safe_lookup(layer_provenance_paths, "soil_ph_wms"),
+          layer_output_paths = layer_output_paths,
+          layer_provenance_paths = layer_provenance_paths,
+          analysis_layer_paths = analysis_layer_paths,
+          analysis_layer_provenance_paths = analysis_layer_provenance_paths,
+          analysis_layer_preview_paths = analysis_layer_preview_paths,
           overview_map = overview_map,
           panel_figure_png = panel_figure_png,
           panel_figure_pdf = panel_figure_pdf,
-          vector_tasveg = safe_lookup(analysis_layer_paths, "tasveg_vector"),
-          vector_tasveg_provenance = safe_lookup(analysis_layer_provenance_paths, "tasveg_vector"),
-          vector_tasveg_class = safe_lookup(analysis_layer_paths, "tasveg_class_vector"),
-          vector_tasveg_class_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "tasveg_class_vector"
-          ),
-          vector_fire_attributes = safe_lookup(analysis_layer_paths, "tas_fire_attributes"),
-          vector_fire_attributes_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "tas_fire_attributes"
-          ),
-          vector_geology = safe_lookup(analysis_layer_paths, "tas_geology"),
-          vector_geology_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_geology"),
-          vector_land_tenure = safe_lookup(analysis_layer_paths, "tas_land_tenure"),
-          vector_land_tenure_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "tas_land_tenure"
-          ),
-          vector_reserve_estate = safe_lookup(analysis_layer_paths, "tas_reserve_estate"),
-          vector_reserve_estate_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "tas_reserve_estate"
-          ),
-          raster_dem = safe_lookup(analysis_layer_paths, "tas_dem"),
-          raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_dem"),
-          raster_slope = safe_lookup(analysis_layer_paths, "tas_slope"),
-          raster_slope_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_slope"),
-          raster_chm = safe_lookup(analysis_layer_paths, "tas_chm"),
-          raster_chm_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_chm"),
-          raster_soil_ph = safe_lookup(analysis_layer_paths, "tas_soil_ph"),
-          raster_soil_ph_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "tas_soil_ph"
-          ),
-          raster_bio1 = safe_lookup(analysis_layer_paths, "tas_bio1"),
-          raster_bio1_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_bio1"),
-          raster_bio12 = safe_lookup(analysis_layer_paths, "tas_bio12"),
-          raster_bio12_provenance = safe_lookup(analysis_layer_provenance_paths, "tas_bio12"),
-          vector_tasveg_preview = safe_lookup(analysis_layer_preview_paths, "tasveg_vector"),
-          vector_tasveg_class_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "tasveg_class_vector"
-          ),
+          tasveg_class_legend = tasveg_class_legend,
           tasveg_class_lookup = tasveg_class_lookup,
-          tasveg_group_lookup = analysis_attribute_lookups$tasveg_group_lookup,
-          geology_lookup = analysis_attribute_lookups$geology_lookup,
-          land_tenure_lookup = analysis_attribute_lookups$land_tenure_lookup,
-          reserve_estate_lookup = analysis_attribute_lookups$reserve_estate_lookup,
-          vector_fire_attributes_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "tas_fire_attributes"
-          ),
-          vector_geology_preview = safe_lookup(analysis_layer_preview_paths, "tas_geology"),
-          vector_land_tenure_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "tas_land_tenure"
-          ),
-          vector_reserve_estate_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "tas_reserve_estate"
-          ),
-          raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "tas_dem"),
-          raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "tas_slope"),
-          raster_chm_preview = safe_lookup(analysis_layer_preview_paths, "tas_chm"),
-          raster_soil_ph_preview = safe_lookup(analysis_layer_preview_paths, "tas_soil_ph"),
-          raster_bio1_preview = safe_lookup(analysis_layer_preview_paths, "tas_bio1"),
-          raster_bio12_preview = safe_lookup(analysis_layer_preview_paths, "tas_bio12"),
-          site_attributes_long = site_attributes_long_file,
-          site_attributes_wide = site_attributes_wide_file,
+          analysis_attribute_lookups = analysis_attribute_lookups,
+          site_attributes_long_file = site_attributes_long_file,
+          site_attributes_wide_file = site_attributes_wide_file,
           analysis_provenance = analysis_provenance,
           attribution_report = attribution_report,
           run_manifest = run_manifest
         )
-      } else if (profile %in% c("demo")) {
-        list(
-          species_map = species_map,
-          camera_sites_map = camera_sites_map,
-          camera_sites_panel = camera_sites_panel,
-          camera_sites_tile = camera_sites_tile,
-          aoi_debug_plot = aoi_debug_plot,
-          coverage_summary = coverage_summary,
-          site_attributes_long = site_attributes_long_file,
-          site_attributes_wide = site_attributes_wide_file,
-          wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
-          wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
-          arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
-          arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "topography_arcgis"),
-          overview_map = overview_map,
-          panel_figure_png = panel_figure_png,
-          panel_figure_pdf = panel_figure_pdf,
-          fire_attributes_arcgis_layer = safe_lookup(layer_output_paths, "fire_attributes_arcgis"),
-          fire_attributes_arcgis_layer_provenance = safe_lookup(
-            layer_provenance_paths,
-            "fire_attributes_arcgis"
-          ),
-          soil_ph_wms_layer = safe_lookup(layer_output_paths, "soil_ph_wms"),
-          soil_ph_wms_layer_provenance = safe_lookup(layer_provenance_paths, "soil_ph_wms"),
-          vector_fire_attributes = safe_lookup(analysis_layer_paths, "demo_fire_attributes"),
-          vector_fire_attributes_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_fire_attributes"
-          ),
-          vector_fire_attributes_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "demo_fire_attributes"
-          ),
-          vector_geology = safe_lookup(analysis_layer_paths, "demo_geology"),
-          vector_geology_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_geology"
-          ),
-          vector_geology_preview = safe_lookup(analysis_layer_preview_paths, "demo_geology"),
-          vector_land_tenure = safe_lookup(analysis_layer_paths, "demo_land_tenure"),
-          vector_land_tenure_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_land_tenure"
-          ),
-          vector_land_tenure_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "demo_land_tenure"
-          ),
-          vector_reserve_estate = safe_lookup(analysis_layer_paths, "demo_reserve_estate"),
-          vector_reserve_estate_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_reserve_estate"
-          ),
-          vector_reserve_estate_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "demo_reserve_estate"
-          ),
-          raster_chm = safe_lookup(analysis_layer_paths, "demo_chm"),
-          raster_chm_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_chm"
-          ),
-          raster_chm_preview = safe_lookup(analysis_layer_preview_paths, "demo_chm"),
-          raster_soil_ph = safe_lookup(analysis_layer_paths, "demo_soil_ph"),
-          raster_soil_ph_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_soil_ph"
-          ),
-          raster_soil_ph_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "demo_soil_ph"
-          ),
-          raster_bio1 = safe_lookup(analysis_layer_paths, "demo_bio1"),
-          raster_bio1_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_bio1"
-          ),
-          raster_bio1_preview = safe_lookup(analysis_layer_preview_paths, "demo_bio1"),
-          raster_bio12 = safe_lookup(analysis_layer_paths, "demo_bio12"),
-          raster_bio12_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "demo_bio12"
-          ),
-          raster_bio12_preview = safe_lookup(analysis_layer_preview_paths, "demo_bio12"),
-          analysis_provenance = analysis_provenance,
-          attribution_report = attribution_report,
-          run_manifest = run_manifest
-        )
-      } else {
-        list(
-          species_map = species_map,
-          camera_sites_map = camera_sites_map,
-          camera_sites_panel = camera_sites_panel,
-          camera_sites_tile = camera_sites_tile,
-          aoi_debug_plot = aoi_debug_plot,
-          coverage_summary = coverage_summary,
-          wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
-          wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
-          tasveg_class_wms_layer = safe_lookup(layer_output_paths, "tasveg_class_wms"),
-          tasveg_class_wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_class_wms"),
-          tasveg_class_wms_legend = tasveg_class_legend,
-          arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
-          arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "topography_arcgis"),
-          orthophoto_arcgis_layer = safe_lookup(layer_output_paths, "orthophoto_arcgis"),
-          orthophoto_arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "orthophoto_arcgis"),
-          roads_wms_layer = safe_lookup(layer_output_paths, "roads_wms"),
-          roads_wms_layer_provenance = safe_lookup(layer_provenance_paths, "roads_wms"),
-          localities_wms_layer = safe_lookup(layer_output_paths, "localities_wms"),
-          localities_wms_layer_provenance = safe_lookup(layer_provenance_paths, "localities_wms"),
-          fire_attributes_arcgis_layer = safe_lookup(layer_output_paths, "fire_attributes_arcgis"),
-          fire_attributes_arcgis_layer_provenance = safe_lookup(
-            layer_provenance_paths,
-            "fire_attributes_arcgis"
-          ),
-          soil_ph_wms_layer = safe_lookup(layer_output_paths, "soil_ph_wms"),
-          soil_ph_wms_layer_provenance = safe_lookup(layer_provenance_paths, "soil_ph_wms"),
-          overview_map = overview_map,
-          panel_figure_png = panel_figure_png,
-          panel_figure_pdf = panel_figure_pdf,
-          vector_tasveg = safe_lookup(analysis_layer_paths, "jc_tasveg"),
-          vector_tasveg_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_tasveg"),
-          vector_tasveg_class = safe_lookup(analysis_layer_paths, "jc_tasveg_class"),
-          vector_tasveg_class_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "jc_tasveg_class"
-          ),
-          vector_fire_attributes = safe_lookup(analysis_layer_paths, "jc_fire_attributes"),
-          vector_fire_attributes_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "jc_fire_attributes"
-          ),
-          vector_geology = safe_lookup(analysis_layer_paths, "jc_geology"),
-          vector_geology_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_geology"),
-          vector_land_tenure = safe_lookup(analysis_layer_paths, "jc_land_tenure"),
-          vector_land_tenure_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "jc_land_tenure"
-          ),
-          vector_reserve_estate = safe_lookup(analysis_layer_paths, "jc_reserve_estate"),
-          vector_reserve_estate_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "jc_reserve_estate"
-          ),
-          raster_dem = safe_lookup(analysis_layer_paths, "jc_dem"),
-          raster_dem_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_dem"),
-          raster_multiband = safe_lookup(analysis_layer_paths, "jc_multiband"),
-          raster_multiband_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_multiband"),
-          raster_slope = safe_lookup(analysis_layer_paths, "jc_slope"),
-          raster_slope_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_slope"),
-          raster_ndvi = safe_lookup(analysis_layer_paths, "jc_ndvi"),
-          raster_ndvi_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_ndvi"),
-          raster_nbr = safe_lookup(analysis_layer_paths, "jc_nbr"),
-          raster_nbr_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_nbr"),
-          raster_chm = safe_lookup(analysis_layer_paths, "jc_chm"),
-          raster_chm_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_chm"),
-          raster_soil_ph = safe_lookup(analysis_layer_paths, "jc_soil_ph"),
-          raster_soil_ph_provenance = safe_lookup(
-            analysis_layer_provenance_paths,
-            "jc_soil_ph"
-          ),
-          raster_bio1 = safe_lookup(analysis_layer_paths, "jc_bio1"),
-          raster_bio1_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_bio1"),
-          raster_bio12 = safe_lookup(analysis_layer_paths, "jc_bio12"),
-          raster_bio12_provenance = safe_lookup(analysis_layer_provenance_paths, "jc_bio12"),
-          vector_tasveg_preview = safe_lookup(analysis_layer_preview_paths, "jc_tasveg"),
-          vector_tasveg_class_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "jc_tasveg_class"
-          ),
-          tasveg_class_lookup = tasveg_class_lookup,
-          tasveg_group_lookup = analysis_attribute_lookups$tasveg_group_lookup,
-          geology_lookup = analysis_attribute_lookups$geology_lookup,
-          land_tenure_lookup = analysis_attribute_lookups$land_tenure_lookup,
-          reserve_estate_lookup = analysis_attribute_lookups$reserve_estate_lookup,
-          vector_fire_attributes_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "jc_fire_attributes"
-          ),
-          vector_geology_preview = safe_lookup(analysis_layer_preview_paths, "jc_geology"),
-          vector_land_tenure_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "jc_land_tenure"
-          ),
-          vector_reserve_estate_preview = safe_lookup(
-            analysis_layer_preview_paths,
-            "jc_reserve_estate"
-          ),
-          raster_dem_preview = safe_lookup(analysis_layer_preview_paths, "jc_dem"),
-          raster_multiband_preview = safe_lookup(analysis_layer_preview_paths, "jc_multiband"),
-          raster_slope_preview = safe_lookup(analysis_layer_preview_paths, "jc_slope"),
-          raster_ndvi_preview = safe_lookup(analysis_layer_preview_paths, "jc_ndvi"),
-          raster_nbr_preview = safe_lookup(analysis_layer_preview_paths, "jc_nbr"),
-          raster_chm_preview = safe_lookup(analysis_layer_preview_paths, "jc_chm"),
-          raster_soil_ph_preview = safe_lookup(analysis_layer_preview_paths, "jc_soil_ph"),
-          raster_bio1_preview = safe_lookup(analysis_layer_preview_paths, "jc_bio1"),
-          raster_bio12_preview = safe_lookup(analysis_layer_preview_paths, "jc_bio12"),
-          site_attributes_long = site_attributes_long_file,
-          site_attributes_wide = site_attributes_wide_file,
-          analysis_provenance = analysis_provenance,
-          attribution_report = attribution_report,
-          run_manifest = run_manifest
-        )
-      }
+      )
       validate_output_manifest(manifest = output_manifest, expected_outputs = expected_outputs)
     },
     description = "Validated output schema manifest (v1) for produced artefacts."
@@ -934,28 +556,7 @@ list(
   # Report rendering: render to same directory as source file
   targets::tar_target(
     report,
-    {
-      qmd <- "reports/paper.qmd"
-      out_dir <- dirname(qmd)
-      # Render with Quarto if available; otherwise write a simple placeholder HTML
-      quarto_path <- tryCatch(quarto::quarto_path(), error = function(e) "")
-      has_quarto <- isTRUE(requireNamespace("quarto", quietly = TRUE)) &&
-        is.character(quarto_path) && length(quarto_path) == 1L &&
-        nzchar(quarto_path) && !is.na(quarto_path)
-      base <- tools::file_path_sans_ext(basename(qmd))
-      html <- file.path(out_dir, paste0(base, ".html"))
-      ok <- FALSE
-      if (has_quarto) {
-        ok <- isTRUE(tryCatch({
-          quarto::quarto_render(input = qmd, quiet = TRUE)
-          file.exists(html)
-        }, error = function(e) FALSE))
-      }
-      if (!ok) {
-        writeLines("<html><body><p>Report placeholder (Quarto not available or render failed).</p></body></html>", html)
-      }
-      html
-    },
+    render_report_artifact("reports/paper.qmd"),
     format = "file",
     description = "Rendered Quarto report artifact."
   )

@@ -1,4 +1,4 @@
-# Dependency helper for contributors who are not relying on renv::restore().
+# Dependency helpers for contributors and QA workflows.
 
 read_description_dependencies <- function(
   fields = c("Depends", "Imports", "Suggests")
@@ -18,28 +18,73 @@ read_description_dependencies <- function(
   unique(pkgs[nzchar(pkgs) & pkgs != "R"])
 }
 
-# Returns the package names declared in DESCRIPTION.
-project_dependencies <- function() {
-  read_description_dependencies()
+# Returns package names declared in DESCRIPTION.
+project_dependencies <- function(fields = c("Depends", "Imports", "Suggests")) {
+  read_description_dependencies(fields)
 }
 
-# Optional helper: install any DESCRIPTION packages that are still missing from
-# the active library. Use this only when you are intentionally not restoring the
+project_runtime_dependencies <- function() {
+  project_dependencies(fields = c("Depends", "Imports", "LinkingTo"))
+}
+
+project_qa_dependencies <- function() {
+  project_dependencies(fields = "Suggests")
+}
+
+qa_library_path <- function() {
+  minor <- strsplit(R.version$minor, ".", fixed = TRUE)[[1]][1]
+  file.path(
+    tools::R_user_dir("localmap", which = "cache"),
+    "qa-library",
+    paste0("R-", R.version$major, ".", minor)
+  )
+}
+
+with_qa_library <- function(expr, lib = qa_library_path()) {
+  dir.create(lib, recursive = TRUE, showWarnings = FALSE)
+  old_paths <- .libPaths()
+  on.exit(.libPaths(old_paths), add = TRUE)
+  .libPaths(c(normalizePath(lib, winslash = "/", mustWork = FALSE), old_paths))
+  eval.parent(substitute(expr))
+}
+
+install_missing_packages <- function(pkgs, lib = NULL) {
+  pkgs <- unique(pkgs[nzchar(pkgs)])
+
+  installer <- function() {
+    missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+
+    if (!length(missing)) {
+      message("All requested packages are already installed.")
+      return(invisible(TRUE))
+    }
+
+    if (requireNamespace("pak", quietly = TRUE)) {
+      pak::pkg_install(missing)
+    } else {
+      install.packages(missing, dependencies = TRUE)
+    }
+
+    invisible(TRUE)
+  }
+
+  if (is.null(lib)) {
+    return(installer())
+  }
+
+  with_qa_library(installer(), lib = lib)
+}
+
+# Optional helper: install any DESCRIPTION packages still missing from the
+# active library. Use this only when you are intentionally not restoring the
 # project via renv.
 install_project_dependencies <- function(pkgs = project_dependencies()) {
-  pkgs <- unique(pkgs[nzchar(pkgs)])
-  missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+  install_missing_packages(pkgs)
+}
 
-  if (!length(missing)) {
-    message("All DESCRIPTION packages are already installed.")
-    return(invisible(TRUE))
-  }
-
-  if (requireNamespace("pak", quietly = TRUE)) {
-    pak::pkg_install(missing)
-  } else {
-    install.packages(missing, dependencies = TRUE)
-  }
-
-  invisible(TRUE)
+# Optional helper: install Suggests-based QA packages into a separate cache
+# library so runtime `renv` state stays focused on execution dependencies.
+install_project_qa_dependencies <- function(pkgs = project_qa_dependencies(),
+                                            lib = qa_library_path()) {
+  install_missing_packages(pkgs, lib = lib)
 }

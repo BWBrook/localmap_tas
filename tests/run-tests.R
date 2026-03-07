@@ -1,7 +1,5 @@
-# Run tests for the localmap package from the repository root.
+# Run package tests in a way that is compatible with `R CMD check`.
 
-if (requireNamespace("devtools", quietly = TRUE)) {
-  devtools::test(reporter = "summary")
-} else if (requireNamespace("testthat", quietly = TRUE)) {
-  testthat::test_local(".", reporter = "summary")
+if (requireNamespace("testthat", quietly = TRUE)) {
+  testthat::test_check("localmap")
 }

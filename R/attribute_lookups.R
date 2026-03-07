@@ -127,7 +127,7 @@ render_attribute_lookups <- function(analysis_layers) {
   )
 
   if (is.null(analysis_layers) || !is.data.frame(analysis_layers) ||
-      nrow(analysis_layers) == 0L) {
+        nrow(analysis_layers) == 0L) {
     return(empty_result)
   }
   layer_ids <- as.character(analysis_layers$id)

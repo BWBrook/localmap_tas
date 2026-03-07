@@ -253,7 +253,7 @@ apply_settings_to_config <- function(cfg,
 
   base_output_dir <- cfg$data$outputs$output_dir
   if ((is.null(base_output_dir) || !nzchar(base_output_dir)) &&
-      !is.null(base_profile) && nzchar(base_profile)) {
+        !is.null(base_profile) && nzchar(base_profile)) {
     base_output_dir <- file.path("outputs", base_profile)
   }
   strip_prefixes <- c()
@@ -322,10 +322,27 @@ run_settings <- function(settings_path,
     )
   }
 
+  script_path <- here::here("_targets.R")
+  if (!file.exists(script_path)) {
+    script_path <- "_targets.R"
+  }
+  script_dir <- dirname(script_path)
+  script_file <- basename(script_path)
+  callr_args <- list(wd = script_dir)
+  old_wd <- setwd(script_dir)
+  on.exit(setwd(old_wd), add = TRUE)
+
   if (is.null(targets) || length(targets) == 0L) {
-    targets::tar_make()
+    targets::tar_make(
+      script = script_file,
+      callr_arguments = callr_args
+    )
   } else {
-    targets::tar_make(names = targets)
+    targets::tar_make(
+      names = tidyselect::any_of(targets),
+      script = script_file,
+      callr_arguments = callr_args
+    )
   }
 
   run_config_path

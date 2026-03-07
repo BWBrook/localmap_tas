@@ -1,5 +1,18 @@
 # AGENT NOTES
 
+- 2026-03-07: Whole-repo QA repairs + characterization tests + conservative internal refactors.
+  - Repaired the documented quality gates so runtime bootstrap, QA bootstrap, lint, tests, demo pipeline, and `R CMD check` now agree on the same repo entrypoints; reactivated GitHub Actions CI under `.github/workflows/ci.yaml`.
+  - Added contract tests for demo output manifests, provenance sidecars, output-path resolution, site-attribute wide-table mapping, `_targets.R` helper behavior, overview-map aspect ratio, and `run_settings()` environment restoration.
+  - Thinned `_targets.R` and config loading by extracting internal helpers for profile-aware output schemas, TASVEG lookup/legend handling, report rendering fallback, and config load/resolve phases while preserving target names, output paths, and schema semantics.
+  - Split large internal modules into narrower files without changing public entrypoints: analysis-layer remote/validation helpers now live outside `R/analysis_layers.R`, and camera-site defaults, graticules, and panel assembly now live outside `R/camera_sites_map.R`.
+  - Verification (2026-03-07): `make bootstrap`, `make bootstrap-qa`, `make lint`, `make test`, `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`, and `make check` all completed successfully (`0 errors | 0 warnings | 0 notes` for package check).
+  - Artefact review (demo outputs, 2026-03-07):
+    - `outputs/demo/maps/camera_sites.png` still shows the expected coastal camera cluster with plausible point scaling; dark basemap styling and graticule placement remain coherent after the refactor.
+    - `outputs/demo/maps/panel_figure.png` still assembles as a 2x2 figure with the expected map mix and stable aspect ratios; no new panel spacing or legend regressions were evident.
+    - `outputs/demo/maps/overview_map.png` remains intentionally sparse in the demo profile, with the AOI border and scale bar preserved; this is still a presentation limitation of the demo fixtures rather than a regression from the refactor.
+    - Demo provenance remained coherent; `run_manifest.yml` records the demo profile, schema hash, and imagery provenance keys expected by the characterization tests.
+  - Remaining deferred work: structured provenance/output-schema redesigns and any schema/API/numerical changes still require explicit PI approval before implementation.
+
 - 2025-09-19: Extended camera site panel stacking.
   - Enhanced `camera_sites_stack_maps()` to deduplicate glob/directories, accept
     explicit grid sizing via `columns`/`rows`, honour regex-based `order`, and

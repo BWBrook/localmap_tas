@@ -37,3 +37,11 @@ use the optional helper:
 source("dependencies.R")
 install_project_dependencies()
 ```
+
+QA tasks from the shell:
+
+```sh
+make bootstrap-qa
+make lint
+make check
+```

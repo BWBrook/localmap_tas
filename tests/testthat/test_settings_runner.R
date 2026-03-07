@@ -47,3 +47,52 @@ testthat::test_that("apply_settings_to_config updates paths and filters layers",
   }, character(1))
   testthat::expect_true(all(analysis_suffixes %in% c("dem")))
 })
+
+testthat::test_that("run_settings restores env vars after running cfg target", {
+  testthat::skip_if_not_installed("targets")
+  script_path <- normalizePath(file.path("..", "..", "_targets.R"), mustWork = FALSE)
+  if (!file.exists(script_path)) {
+    testthat::skip("Project target script is not available in installed-package checks.")
+  }
+
+  old_env <- Sys.getenv(c("LOCALMAP_CONFIG_PATH", "R_CONFIG_ACTIVE"), unset = "")
+
+  tmp_dir <- tempfile("settings_run")
+  dir.create(tmp_dir)
+  on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
+
+  input_dir <- file.path(tmp_dir, "input")
+  dir.create(input_dir)
+  utils::write.csv(
+    data.frame(site = c("s1"), lat = c(-42.0), lon = c(146.0)),
+    file.path(input_dir, "site.csv"),
+    row.names = FALSE
+  )
+
+  output_dir <- file.path(tmp_dir, "outputs")
+  settings_path <- file.path(tmp_dir, "settings.yaml")
+  yaml::write_yaml(
+    list(
+      project = "testrun",
+      input_dir = input_dir,
+      site_file = "site.csv",
+      central_site = "s1",
+      outputs = list(dir = output_dir)
+    ),
+    settings_path
+  )
+
+  run_cfg <- localmap::run_settings(
+    settings_path = settings_path,
+    targets = "cfg",
+    base_profile = "jc"
+  )
+
+  testthat::expect_true(file.exists(run_cfg))
+  testthat::expect_equal(Sys.getenv("LOCALMAP_CONFIG_PATH", unset = ""), old_env[[1]])
+  testthat::expect_equal(Sys.getenv("R_CONFIG_ACTIVE", unset = ""), old_env[[2]])
+
+  run_yaml <- yaml::read_yaml(run_cfg)
+  testthat::expect_equal(run_yaml$run$data$outputs$output_dir, output_dir)
+  testthat::expect_equal(run_yaml$run$data$camera_sites$central_site, "s1")
+})

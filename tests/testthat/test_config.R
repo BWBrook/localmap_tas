@@ -189,3 +189,30 @@ testthat::test_that("cfg_read fails on unsupported schema_version", {
     class = "cfg_schema_unsupported"
   )
 })
+
+testthat::test_that("cfg_read resolves demo outputs under outputs/demo", {
+  cfg <- localmap::cfg_read(profile = "demo")
+
+  testthat::expect_equal(cfg$data$outputs$output_dir, "outputs/demo")
+  testthat::expect_true(startsWith(cfg$data$overview_map$output_path, "outputs/demo/"))
+  testthat::expect_true(startsWith(cfg$data$panel_figure$output_path, "outputs/demo/"))
+})
+
+testthat::test_that("cfg_read resolves jc outputs under outputs/jc", {
+  cfg <- localmap::cfg_read(profile = "jc")
+
+  testthat::expect_equal(cfg$data$outputs$output_dir, "outputs/jc")
+  testthat::expect_true(startsWith(cfg$data$overview_map$output_path, "outputs/jc/"))
+  testthat::expect_true(startsWith(cfg$data$panel_figure$output_path, "outputs/jc/"))
+})
+
+testthat::test_that("cfg_read resolves tas canonical outputs and DEM override", {
+  cfg <- localmap::cfg_read(profile = "tas_canonical")
+  dem_layer <- purrr::detect(cfg$data$analysis_layers, ~ grepl("_dem$", .x$id))
+
+  testthat::expect_equal(cfg$data$outputs$output_dir, "outputs/tas")
+  testthat::expect_true(startsWith(cfg$data$overview_map$output_path, "outputs/tas/"))
+  testthat::expect_true(startsWith(cfg$data$panel_figure$output_path, "outputs/tas/"))
+  testthat::expect_false(is.null(dem_layer))
+  testthat::expect_true(dem_layer$type %in% c("raster_wcs", "raster_geodata", "raster_file"))
+})

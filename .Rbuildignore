@@ -16,5 +16,6 @@
 ^_pkgdown\.yml$
 ^docs/pkgdown$
 ^\.Rproj\.user$
+^\.renvignore$
 ^CITATION\.cff$
 ^reports/CITATION\.cff$

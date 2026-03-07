@@ -39,6 +39,14 @@ source("dependencies.R")
 install_project_dependencies()
 ```
 
+QA/bootstrap for contributors who want lint and package checks:
+
+```sh
+make bootstrap-qa
+make lint
+make check
+```
+
 Optional local dataset (Judbury camera study):
 
 ```r
@@ -73,6 +81,8 @@ You are responsible for ensuring appropriate attribution and usage compliance fo
 
 Common tasks:
 
+* Bootstrap QA tools: `make bootstrap-qa`
+* Run lint: `make lint`
 * Run tests: `make test`
 * Run pipeline: `make pipeline`
 * Run R CMD check: `make check`
