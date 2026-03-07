@@ -1,16 +1,13 @@
 # Bootstrap script for local setup (run in RStudio Console)
 
-message("Restoring renv and installing project dependencies...")
+message("Restoring renv and preparing the project library...")
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore(prompt = FALSE)
-source("dependencies.R")
-if (exists("project_dependencies")) {
-  if (requireNamespace("pak", quietly = TRUE)) {
-    pak::pkg_install(project_dependencies())
-  } else {
-    install.packages(project_dependencies())
-  }
-}
 if (requireNamespace("devtools", quietly = TRUE)) devtools::document()
-message("Done. You can now run tests and the pipeline.")
-
+message(
+  paste(
+    "Done. The renv library is ready.",
+    "If you are intentionally working outside renv, run",
+    "source('dependencies.R'); install_project_dependencies()."
+  )
+)

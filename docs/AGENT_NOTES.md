@@ -388,3 +388,12 @@
   - Added panel legend overlay support with per-panel defaults (alpha/position/size) and kept legacy `paths` support.
   - Camera-site legend overlay now supports transparency via `legend.alpha`.
   - Ran `R_CONFIG_ACTIVE=jc Rscript -e 'targets::tar_make(names = c(\"panel_figure\"))'`; panel figure regenerated (PNG size 4200×3818 px) with zero gap; warnings persisted from earlier runs.
+
+- 2026-03-06: Bootstrap workflow aligned with renv.
+  - Cloned `BWBrook/localmap_tas` into `/home/bwbrook/git/localmap_tas` and ran `make bootstrap`; `renv::restore()` completed, but the follow-on `pak::pkg_install(project_dependencies())` step failed because `dependencies.R` no longer matched the repo.
+  - Simplified `make bootstrap` and `scripts/bootstrap.R` to rely on `renv::restore()` plus `devtools::document()`, avoiding the stale secondary install path.
+  - Reworked `dependencies.R` to derive its optional helper installs from `DESCRIPTION`, and updated README/development docs to stop recommending a redundant post-restore package install.
+  - Fixed the canonical test entrypoints by switching `make test` / `tests/run-tests.R` to package-aware runners and adding `tests/testthat.R` for `R CMD check`.
+  - Fixed demo output-schema validation by giving `demo` its own expected-output map in `_targets.R` and normalizing empty attribute lookup paths in `render_attribute_lookups()`.
+  - Removed `pak` from `DESCRIPTION` Suggests and refreshed `renv.lock`; `renv::status()` now reports a consistent state.
+  - Verification (2026-03-06): `make bootstrap` OK; `make test` OK (1 expected skip, 7 expected offline warnings); `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci targets::tar_make()` OK.

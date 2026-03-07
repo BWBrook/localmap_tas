@@ -55,8 +55,7 @@ To run locally (in RStudio Console):
 
 ```r
 renv::restore(prompt = FALSE)
-source("dependencies.R")
-pak::pkg_install(project_dependencies())
+devtools::document()
 # Set profile via R_CONFIG_ACTIVE if desired (default is "default")
 # Sys.setenv(R_CONFIG_ACTIVE = "local")
 
@@ -65,4 +64,12 @@ targets::tar_make()
 
 # Visualise pipeline
 # targets::tar_visnetwork()
+```
+
+If you are intentionally working outside the restored `renv` library, the
+optional helper installs any missing DESCRIPTION packages:
+
+```r
+source("dependencies.R")
+install_project_dependencies()
 ```

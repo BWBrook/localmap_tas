@@ -1,35 +1,45 @@
-# Dependency manifest for the localmap compendium
+# Dependency helper for contributors who are not relying on renv::restore().
 
-# Returns a character vector of required packages for this project.
-project_dependencies <- function() {
-  c(
-    # pipeline & IO
-    "targets", "tarchetypes", "here", "yaml", "config",
-    "galah", "httr2", "arrow", "duckdb", "qs", "vroom", "fs",
-    # wrangling & utils
-    "dplyr", "readr", "purrr", "tidyr", "tibble", "stringr", "magrittr", "checkmate", "janitor",
-    # spatial
-    "sf", "terra", "geosphere", "rnaturalearth", "rnaturalearthdata",
-    # modelling / methods
-    "yardstick",
-    # parallel & progress & logging
-    "future", "future.batchtools", "pbmcapply", "progressr", "lgr",
-    # viz
-    "ggplot2", "RColorBrewer", "zoo", "patchwork", "maptiles", "tidyterra",
-    # ergonomics & errors
-    "cli", "rlang", "import",
-    # dev
-    "testthat", "lintr", "styler", "devtools", "pkgload", "pak", "renv", "quarto"
+read_description_dependencies <- function(
+  fields = c("Depends", "Imports", "Suggests")
+) {
+  desc <- read.dcf("DESCRIPTION", all = TRUE)
+  available_fields <- intersect(fields, colnames(desc))
+
+  if (!length(available_fields)) {
+    return(character())
+  }
+
+  entries <- unlist(
+    strsplit(paste(desc[1, available_fields], collapse = ","), ",", fixed = TRUE),
+    use.names = FALSE
   )
+  pkgs <- trimws(sub("\\s*\\(.*\\)$", "", entries))
+  unique(pkgs[nzchar(pkgs) & pkgs != "R"])
 }
 
-# Optional helper: install dependencies into the active project library.
-# This is not run automatically. Use in RStudio if needed.
+# Returns the package names declared in DESCRIPTION.
+project_dependencies <- function() {
+  read_description_dependencies()
+}
+
+# Optional helper: install any DESCRIPTION packages that are still missing from
+# the active library. Use this only when you are intentionally not restoring the
+# project via renv.
 install_project_dependencies <- function(pkgs = project_dependencies()) {
-  if (requireNamespace("pak", quietly = TRUE)) {
-    pak::pak(unique(pkgs), ask = FALSE)
-  } else {
-    install.packages(unique(pkgs), dependencies = TRUE)
+  pkgs <- unique(pkgs[nzchar(pkgs)])
+  missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+
+  if (!length(missing)) {
+    message("All DESCRIPTION packages are already installed.")
+    return(invisible(TRUE))
   }
+
+  if (requireNamespace("pak", quietly = TRUE)) {
+    pak::pkg_install(missing)
+  } else {
+    install.packages(missing, dependencies = TRUE)
+  }
+
   invisible(TRUE)
 }

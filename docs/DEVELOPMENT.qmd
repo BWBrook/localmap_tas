@@ -24,10 +24,16 @@ Common tasks (run in RStudio Console):
 
 ```r
 renv::restore(prompt = FALSE)
-source("dependencies.R")
-pak::pkg_install(project_dependencies())
 devtools::document()
 testthat::test_dir("tests/testthat", reporter = "summary")
 targets::tar_make()
 pkgdown::build_site(preview = FALSE)
+```
+
+If you are intentionally working outside the restored `renv` library, you can
+use the optional helper:
+
+```r
+source("dependencies.R")
+install_project_dependencies()
 ```

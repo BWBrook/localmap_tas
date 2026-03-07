@@ -97,3 +97,18 @@ testthat::test_that("site attributes outputs write long + wide products", {
   )
   testthat::expect_true(all(expected_cols %in% names(wide_tbl)))
 })
+
+testthat::test_that("attribute lookups stay empty-but-named without analysis layers", {
+  lookups <- localmap:::render_attribute_lookups(NULL)
+
+  testthat::expect_named(
+    lookups,
+    c(
+      "tasveg_group_lookup",
+      "geology_lookup",
+      "land_tenure_lookup",
+      "reserve_estate_lookup"
+    )
+  )
+  testthat::expect_true(all(vapply(lookups, function(x) identical(x, ""), logical(1))))
+})

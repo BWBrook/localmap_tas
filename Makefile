@@ -2,7 +2,7 @@
 
 help:
 	@echo "Common tasks:"
-	@echo "  make bootstrap   # restore renv and install deps"
+	@echo "  make bootstrap   # restore renv and refresh package docs"
 	@echo "  make test        # run unit tests"
 	@echo "  make pipeline    # run targets pipeline"
 	@echo "  make docs        # render docs/ with Quarto"
@@ -10,11 +10,10 @@ help:
 
 bootstrap:
 	@Rscript -e "if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore(prompt=FALSE)" \
-	        -e "source('dependencies.R'); if (exists('project_dependencies')) if (requireNamespace('pak', quietly=TRUE)) pak::pkg_install(project_dependencies()) else install.packages(project_dependencies())" \
 	        -e "if (requireNamespace('devtools', quietly=TRUE)) devtools::document()"
 
 test:
-	@Rscript -e "testthat::test_dir('tests/testthat', reporter='summary')"
+	@Rscript -e "devtools::test(reporter='summary')"
 
 pipeline:
 	@Rscript -e "targets::tar_make()"

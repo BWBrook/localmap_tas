@@ -18,11 +18,10 @@ You configure a site (points + extent) and desired GIS layers (from The List and
 renv::restore(prompt = FALSE)
 ```
 
-2. Install project dependencies (optional helper):
+2. Refresh package metadata (recommended for contributors):
 
 ```r
-source("dependencies.R")
-pak::pkg_install(project_dependencies())
+devtools::document()
 ```
 
 3. Run the pipeline:
@@ -32,6 +31,13 @@ targets::tar_make()
 ```
 
 Outputs are written to `outputs/` (ignored by git).
+
+Optional helper for non-`renv` workflows:
+
+```r
+source("dependencies.R")
+install_project_dependencies()
+```
 
 Optional local dataset (Judbury camera study):
 

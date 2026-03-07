@@ -86,4 +86,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
-- n/a
+- Bootstrap now relies on `renv::restore()` as the canonical dependency source instead of a stale hand-maintained package list.
+- `dependencies.R` now derives its optional helper installs from `DESCRIPTION`, so contributor instructions stay aligned with the package metadata.
+- `make test` and `R CMD check` now use package-aware test entrypoints, so the canonical checks exercise `localmap` instead of skipping most tests.
+- Demo output-schema validation now handles profiles without analysis layers and validates against a demo-specific expected-output map.
+- Removed the no-longer-required `pak` suggestion from the project metadata and refreshed `renv.lock`, restoring a clean `renv::status()`.

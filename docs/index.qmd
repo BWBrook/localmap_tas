@@ -21,7 +21,13 @@ Run locally (RStudio Console):
 
 ```r
 renv::restore(prompt = FALSE)
-source("dependencies.R")
-pak::pkg_install(project_dependencies())
+devtools::document()
 targets::tar_make()
+```
+
+If you need to supplement a non-`renv` library, run:
+
+```r
+source("dependencies.R")
+install_project_dependencies()
 ```

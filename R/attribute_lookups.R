@@ -119,9 +119,16 @@ write_attribute_lookup <- function(vector_path,
 }
 
 render_attribute_lookups <- function(analysis_layers) {
+  empty_result <- list(
+    tasveg_group_lookup = "",
+    geology_lookup = "",
+    land_tenure_lookup = "",
+    reserve_estate_lookup = ""
+  )
+
   if (is.null(analysis_layers) || !is.data.frame(analysis_layers) ||
       nrow(analysis_layers) == 0L) {
-    return(list())
+    return(empty_result)
   }
   layer_ids <- as.character(analysis_layers$id)
   path_lookup <- stats::setNames(analysis_layers$path, layer_ids)
@@ -149,7 +156,7 @@ render_attribute_lookups <- function(analysis_layers) {
                          max_len = 4L,
                          stopwords = NULL) {
     if (is.null(layer_id) || !nzchar(layer_id)) {
-      return(NA_character_)
+      return("")
     }
     vector_path <- path_lookup[[layer_id]]
     lookup_path <- if (!is.null(vector_path) && nzchar(vector_path)) {
@@ -167,7 +174,7 @@ render_attribute_lookups <- function(analysis_layers) {
     )
   }
 
-  list(
+  empty_result[names(empty_result)] <- list(
     tasveg_group_lookup = lookup_for(
       layer_id = find_layer("tasveg", exclude = "class"),
       label_field = "VEG_GROUP",
@@ -194,4 +201,6 @@ render_attribute_lookups <- function(analysis_layers) {
       max_len = 4L
     )
   )
+
+  empty_result
 }

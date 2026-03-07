@@ -51,7 +51,6 @@ Suggests:
     pkgload,
     future,
     future.batchtools,
-    pak,
     renv,
     lwgeom,
     pkgdown,

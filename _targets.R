@@ -680,6 +680,94 @@ list(
           attribution_report = attribution_report,
           run_manifest = run_manifest
         )
+      } else if (profile %in% c("demo")) {
+        list(
+          species_map = species_map,
+          camera_sites_map = camera_sites_map,
+          camera_sites_panel = camera_sites_panel,
+          camera_sites_tile = camera_sites_tile,
+          aoi_debug_plot = aoi_debug_plot,
+          coverage_summary = coverage_summary,
+          site_attributes_long = site_attributes_long_file,
+          site_attributes_wide = site_attributes_wide_file,
+          wms_layer = safe_lookup(layer_output_paths, "tasveg_wms"),
+          wms_layer_provenance = safe_lookup(layer_provenance_paths, "tasveg_wms"),
+          arcgis_layer = safe_lookup(layer_output_paths, "topography_arcgis"),
+          arcgis_layer_provenance = safe_lookup(layer_provenance_paths, "topography_arcgis"),
+          overview_map = overview_map,
+          panel_figure_png = panel_figure_png,
+          panel_figure_pdf = panel_figure_pdf,
+          fire_attributes_arcgis_layer = safe_lookup(layer_output_paths, "fire_attributes_arcgis"),
+          fire_attributes_arcgis_layer_provenance = safe_lookup(
+            layer_provenance_paths,
+            "fire_attributes_arcgis"
+          ),
+          soil_ph_wms_layer = safe_lookup(layer_output_paths, "soil_ph_wms"),
+          soil_ph_wms_layer_provenance = safe_lookup(layer_provenance_paths, "soil_ph_wms"),
+          vector_fire_attributes = safe_lookup(analysis_layer_paths, "demo_fire_attributes"),
+          vector_fire_attributes_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_fire_attributes"
+          ),
+          vector_fire_attributes_preview = safe_lookup(
+            analysis_layer_preview_paths,
+            "demo_fire_attributes"
+          ),
+          vector_geology = safe_lookup(analysis_layer_paths, "demo_geology"),
+          vector_geology_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_geology"
+          ),
+          vector_geology_preview = safe_lookup(analysis_layer_preview_paths, "demo_geology"),
+          vector_land_tenure = safe_lookup(analysis_layer_paths, "demo_land_tenure"),
+          vector_land_tenure_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_land_tenure"
+          ),
+          vector_land_tenure_preview = safe_lookup(
+            analysis_layer_preview_paths,
+            "demo_land_tenure"
+          ),
+          vector_reserve_estate = safe_lookup(analysis_layer_paths, "demo_reserve_estate"),
+          vector_reserve_estate_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_reserve_estate"
+          ),
+          vector_reserve_estate_preview = safe_lookup(
+            analysis_layer_preview_paths,
+            "demo_reserve_estate"
+          ),
+          raster_chm = safe_lookup(analysis_layer_paths, "demo_chm"),
+          raster_chm_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_chm"
+          ),
+          raster_chm_preview = safe_lookup(analysis_layer_preview_paths, "demo_chm"),
+          raster_soil_ph = safe_lookup(analysis_layer_paths, "demo_soil_ph"),
+          raster_soil_ph_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_soil_ph"
+          ),
+          raster_soil_ph_preview = safe_lookup(
+            analysis_layer_preview_paths,
+            "demo_soil_ph"
+          ),
+          raster_bio1 = safe_lookup(analysis_layer_paths, "demo_bio1"),
+          raster_bio1_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_bio1"
+          ),
+          raster_bio1_preview = safe_lookup(analysis_layer_preview_paths, "demo_bio1"),
+          raster_bio12 = safe_lookup(analysis_layer_paths, "demo_bio12"),
+          raster_bio12_provenance = safe_lookup(
+            analysis_layer_provenance_paths,
+            "demo_bio12"
+          ),
+          raster_bio12_preview = safe_lookup(analysis_layer_preview_paths, "demo_bio12"),
+          analysis_provenance = analysis_provenance,
+          attribution_report = attribution_report,
+          run_manifest = run_manifest
+        )
       } else {
         list(
           species_map = species_map,

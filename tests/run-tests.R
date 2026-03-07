@@ -1,6 +1,7 @@
-# Run tests for the localmap package (triggered by `R CMD check`).
+# Run tests for the localmap package from the repository root.
 
-if (requireNamespace("testthat", quietly = TRUE)) {
-  library(localmap)
-  testthat::test_dir("testthat", reporter = "summary")
+if (requireNamespace("devtools", quietly = TRUE)) {
+  devtools::test(reporter = "summary")
+} else if (requireNamespace("testthat", quietly = TRUE)) {
+  testthat::test_local(".", reporter = "summary")
 }
