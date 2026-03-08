@@ -11,6 +11,8 @@
     - `make test` passed with the same expected offline/spatial warnings and 1 expected skip.
   - Follow-up after push: run `22814104696` showed the `pak` override was fixed, but `Bootstrap QA environment` then failed while loading `units` because `libudunits2.so.0` was unavailable on the runner.
   - Narrow workflow fix applied: added `libudunits2-dev` to the CI apt packages, validated the workflow with `actionlint 1.7.11`, and left broader system-package expansion deferred unless CI exposes another concrete missing library.
+  - Follow-up after that push: run `22814283697` showed `units` was fixed, but `Bootstrap QA environment` then failed while loading `sf` because `libproj.so.25` was unavailable on the runner.
+  - Next narrow workflow fix applied: added `libproj-dev` to the CI apt packages, validated the workflow again with `actionlint`, and kept the approach incremental so the next missing geospatial runtime, if any, is exposed clearly.
 
 - 2026-03-07: Whole-repo QA repairs + characterization tests + conservative internal refactors.
   - Repaired the documented quality gates so runtime bootstrap, QA bootstrap, lint, tests, demo pipeline, and `R CMD check` now agree on the same repo entrypoints; reactivated GitHub Actions CI under `.github/workflows/ci.yaml`.
