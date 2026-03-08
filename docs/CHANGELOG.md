@@ -90,6 +90,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
+- GitHub Actions QA bootstrap now respects external `RENV_CONFIG_PAK_ENABLED` overrides because `.Rprofile` no longer unconditionally forces `pak` on during startup.
 - Bootstrap now relies on `renv::restore()` as the canonical dependency source instead of a stale hand-maintained package list.
 - `dependencies.R` now derives its optional helper installs from `DESCRIPTION`, so contributor instructions stay aligned with the package metadata.
 - `make test` and `R CMD check` now use package-aware test entrypoints, so the canonical checks exercise `localmap` instead of skipping most tests.

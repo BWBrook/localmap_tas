@@ -1,5 +1,16 @@
 # AGENT NOTES
 
+- 2026-03-08: Diagnosed GitHub Actions bootstrap failure on `main`.
+  - Investigated failing Actions run `22795216013` for commit `07e85cf`; the `ci` workflow failed in `Bootstrap QA environment` before lint/tests/checks ran.
+  - Pulled the job log via `gh api` and confirmed `renv::restore()` was entering a `pak` subprocess despite the workflow exporting `RENV_CONFIG_PAK_ENABLED=FALSE`.
+  - Root cause was `.Rprofile` unconditionally forcing `RENV_CONFIG_PAK_ENABLED=TRUE`, overriding CI/container startup intent.
+  - Updated `.Rprofile` to respect an existing `RENV_CONFIG_PAK_ENABLED` value while preserving the repo default (`TRUE`) for ordinary interactive sessions.
+  - Verification:
+    - clean startup probe with `Rscript --vanilla` now reports `pak env: FALSE` and `pak config: FALSE` when `RENV_CONFIG_PAK_ENABLED=FALSE` is supplied,
+    - `make lint` passed,
+    - `make test` passed with the same expected offline/spatial warnings and 1 expected skip.
+  - Remaining watch item: once the fix is pushed, CI may expose a second issue around Ubuntu system requirements for source installs; if so, patch `.github/workflows/ci.yaml` in a follow-up rather than broadening this fix pre-emptively.
+
 - 2026-03-07: Whole-repo QA repairs + characterization tests + conservative internal refactors.
   - Repaired the documented quality gates so runtime bootstrap, QA bootstrap, lint, tests, demo pipeline, and `R CMD check` now agree on the same repo entrypoints; reactivated GitHub Actions CI under `.github/workflows/ci.yaml`.
   - Added contract tests for demo output manifests, provenance sidecars, output-path resolution, site-attribute wide-table mapping, `_targets.R` helper behavior, overview-map aspect ratio, and `run_settings()` environment restoration.
