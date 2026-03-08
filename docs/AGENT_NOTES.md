@@ -14,6 +14,7 @@
   - Follow-up after that push: run `22814283697` showed `units` was fixed, but `Bootstrap QA environment` then failed while loading `sf` because `libproj.so.25` was unavailable on the runner.
   - Next narrow workflow fix applied: added `libproj-dev` to the CI apt packages, validated the workflow again with `actionlint`, and kept the approach incremental so the next missing geospatial runtime, if any, is exposed clearly.
   - Follow-up after that push: run `22814468127` showed `sf` got past the PROJ check but then failed because `libgdal.so.34` was unavailable; given the remaining `sf` stack, the next fix batches `libgdal-dev` and `libgeos-dev` together to reduce another immediate rerun cycle.
+  - Follow-up after that push: run `22814790736` showed the geospatial stack was finally sufficient for `sf`, but `igraph` then failed to load because `libglpk.so.40` was unavailable; the next CI fix adds `libglpk-dev`, which also pulls the needed GLPK runtime dependencies.
 
 - 2026-03-07: Whole-repo QA repairs + characterization tests + conservative internal refactors.
   - Repaired the documented quality gates so runtime bootstrap, QA bootstrap, lint, tests, demo pipeline, and `R CMD check` now agree on the same repo entrypoints; reactivated GitHub Actions CI under `.github/workflows/ci.yaml`.
