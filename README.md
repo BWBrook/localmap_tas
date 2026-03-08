@@ -43,6 +43,7 @@ QA/bootstrap for contributors who want lint and package checks:
 
 ```sh
 make bootstrap-qa
+make actionlint
 make lint
 make check
 ```
@@ -82,10 +83,15 @@ You are responsible for ensuring appropriate attribution and usage compliance fo
 Common tasks:
 
 * Bootstrap QA tools: `make bootstrap-qa`
+* Lint GitHub Actions workflows: `make actionlint`
 * Run lint: `make lint`
 * Run tests: `make test`
 * Run pipeline: `make pipeline`
 * Run R CMD check: `make check`
+
+The GitHub Actions workflow provisions the system libraries required by `{units}`,
+`{sf}`, and `{igraph}`, and uses `r-lib/actions/setup-pandoc@v2` so
+`R CMD check` can rebuild the vignette consistently.
 
 See `docs/workflow.md` for the required engineering and artefact-review workflow.
 

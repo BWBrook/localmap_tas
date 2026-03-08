@@ -6,6 +6,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Added
+- `make actionlint` as a first-class workflow check for GitHub Actions YAML.
 - Analysis-layer pipeline for AOI-clipped vector/raster data with cached GeoPackage/GeoTIFF outputs and provenance sidecars.
 - ArcGIS raster analysis layers (`raster_arcgis`) with MapServer export support and fixture fallback when offline.
 - Derived raster products (slope from DEM, NDVI/NBR from multiband rasters) with JC fixtures in `inst/extdata/`.

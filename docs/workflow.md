@@ -120,7 +120,16 @@ Default is to decide and proceed.
 Recommended command sequence for QA-enabled environments:
 
 - `make bootstrap-qa`
+- `make actionlint`
 - `make lint`
 - `make test`
 - `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
 - `make check`
+
+### CI environment notes
+- GitHub Actions provisions the system libraries required by the QA bootstrap:
+  - `libudunits2-dev` for `{units}`
+  - `libproj-dev`, `libgdal-dev`, and `libgeos-dev` for `{sf}`
+  - `libglpk-dev` for `{igraph}`
+- GitHub Actions provisions Pandoc via `r-lib/actions/setup-pandoc@v2` so `R CMD check` can rebuild the package vignette.
+- Validate workflow edits locally with `make actionlint` before pushing CI changes.

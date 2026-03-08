@@ -14,6 +14,7 @@ This checklist must be satisfied before tagging a release.
 
 ## 3) Quality gates
 - [ ] `make bootstrap-qa` completed
+- [ ] `make actionlint` passes
 - [ ] `make lint` passes (or exceptions documented)
 - [ ] `make test` passes
 - [ ] `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'` passes

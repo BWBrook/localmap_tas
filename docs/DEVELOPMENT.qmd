@@ -42,6 +42,15 @@ QA tasks from the shell:
 
 ```sh
 make bootstrap-qa
+make actionlint
 make lint
 make check
 ```
+
+CI-specific notes:
+
+- The GitHub Actions workflow provisions the system libraries needed for QA restores and checks:
+  - `libudunits2-dev` for `{units}`
+  - `libproj-dev`, `libgdal-dev`, and `libgeos-dev` for `{sf}`
+  - `libglpk-dev` for `{igraph}`
+- The workflow also provisions Pandoc with `r-lib/actions/setup-pandoc@v2` so `R CMD check` can rebuild `vignettes/intro.Rmd`.

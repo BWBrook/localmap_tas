@@ -1,5 +1,11 @@
 # AGENT NOTES
 
+- 2026-03-08: Documented the final green CI dependency set and workflow tooling.
+  - Added `make actionlint` to codify local GitHub Actions linting and updated the help text in `Makefile`.
+  - Clarified the CI apt dependency groups in `.github/workflows/ci.yaml` so the runner requirements for `{units}`, `{sf}`, and `{igraph}` are visible in the workflow itself.
+  - Updated `README.md`, `docs/workflow.md`, `docs/DEVELOPMENT.qmd`, and `docs/release_checklist.md` to include `make actionlint` and to document the final CI system-library/Pandoc setup.
+  - Verification: `make actionlint` passed; `make lint` passed.
+
 - 2026-03-08: Diagnosed GitHub Actions bootstrap failure on `main`.
   - Investigated failing Actions run `22795216013` for commit `07e85cf`; the `ci` workflow failed in `Bootstrap QA environment` before lint/tests/checks ran.
   - Pulled the job log via `gh api` and confirmed `renv::restore()` was entering a `pak` subprocess despite the workflow exporting `RENV_CONFIG_PAK_ENABLED=FALSE`.

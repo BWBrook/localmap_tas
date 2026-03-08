@@ -1,9 +1,10 @@
-.PHONY: help bootstrap bootstrap-qa lint test pipeline docs check
+.PHONY: help bootstrap bootstrap-qa actionlint lint test pipeline docs check
 
 help:
 	@echo "Common tasks:"
 	@echo "  make bootstrap   # restore renv and refresh package docs"
 	@echo "  make bootstrap-qa # install Suggests-based QA tools in the QA cache lib"
+	@echo "  make actionlint  # lint GitHub Actions workflows"
 	@echo "  make lint        # run lint checks (requires bootstrap-qa)"
 	@echo "  make test        # run unit tests"
 	@echo "  make pipeline    # run targets pipeline"
@@ -17,6 +18,13 @@ bootstrap:
 bootstrap-qa:
 	@Rscript -e "if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore(prompt=FALSE)" \
 	        -e "source('dependencies.R'); install_project_qa_dependencies()"
+
+actionlint:
+	@if ! command -v actionlint >/dev/null 2>&1; then \
+		echo "actionlint is not installed. Install it first, then rerun make actionlint."; \
+		exit 1; \
+	fi
+	@actionlint .github/workflows/ci.yaml
 
 lint:
 	@Rscript -e "source('dependencies.R'); with_qa_library({ if (!requireNamespace('lintr', quietly=TRUE)) stop('lintr is not installed. Run make bootstrap-qa first.'); l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) } })"
