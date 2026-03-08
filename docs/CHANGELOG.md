@@ -95,6 +95,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - GitHub Actions CI now installs `libproj-dev`, allowing `sf` to find the `libproj` runtime during QA bootstrap on Ubuntu runners.
 - GitHub Actions CI now installs `libgdal-dev` and `libgeos-dev` so `sf` can resolve the remaining GDAL/GEOS runtime libraries during QA bootstrap on Ubuntu runners.
 - GitHub Actions CI now installs `libglpk-dev` so `igraph` can resolve the GLPK runtime during QA bootstrap on Ubuntu runners.
+- GitHub Actions CI now provisions Pandoc explicitly with `r-lib/actions/setup-pandoc@v2`, allowing `R CMD check` to rebuild the package vignette.
 - Bootstrap now relies on `renv::restore()` as the canonical dependency source instead of a stale hand-maintained package list.
 - `dependencies.R` now derives its optional helper installs from `DESCRIPTION`, so contributor instructions stay aligned with the package metadata.
 - `make test` and `R CMD check` now use package-aware test entrypoints, so the canonical checks exercise `localmap` instead of skipping most tests.

@@ -27,6 +27,8 @@ jobs:
         with:
           use-public-rspm: true
 
+      - uses: r-lib/actions/setup-pandoc@v2
+
       - name: Install renv
         run: Rscript -e 'install.packages("renv")'
 

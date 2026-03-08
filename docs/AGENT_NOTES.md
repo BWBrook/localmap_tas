@@ -15,6 +15,8 @@
   - Next narrow workflow fix applied: added `libproj-dev` to the CI apt packages, validated the workflow again with `actionlint`, and kept the approach incremental so the next missing geospatial runtime, if any, is exposed clearly.
   - Follow-up after that push: run `22814468127` showed `sf` got past the PROJ check but then failed because `libgdal.so.34` was unavailable; given the remaining `sf` stack, the next fix batches `libgdal-dev` and `libgeos-dev` together to reduce another immediate rerun cycle.
   - Follow-up after that push: run `22814790736` showed the geospatial stack was finally sufficient for `sf`, but `igraph` then failed to load because `libglpk.so.40` was unavailable; the next CI fix adds `libglpk-dev`, which also pulls the needed GLPK runtime dependencies.
+  - Follow-up after that push: run `22815030643` completed bootstrap, lint, unit tests, and both offline pipelines, but `R CMD check` then failed rebuilding `vignettes/intro.Rmd` because Pandoc was unavailable on the GitHub runner.
+  - Applied a workflow-native fix by adding `r-lib/actions/setup-pandoc@v2`; validated the workflow again with `actionlint`.
 
 - 2026-03-07: Whole-repo QA repairs + characterization tests + conservative internal refactors.
   - Repaired the documented quality gates so runtime bootstrap, QA bootstrap, lint, tests, demo pipeline, and `R CMD check` now agree on the same repo entrypoints; reactivated GitHub Actions CI under `.github/workflows/ci.yaml`.
