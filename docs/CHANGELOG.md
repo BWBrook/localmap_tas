@@ -93,6 +93,7 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - GitHub Actions QA bootstrap now respects external `RENV_CONFIG_PAK_ENABLED` overrides because `.Rprofile` no longer unconditionally forces `pak` on during startup.
 - GitHub Actions CI now installs `libudunits2-dev`, allowing the `units` package to load during QA bootstrap on Ubuntu runners.
 - GitHub Actions CI now installs `libproj-dev`, allowing `sf` to find the `libproj` runtime during QA bootstrap on Ubuntu runners.
+- GitHub Actions CI now installs `libgdal-dev` and `libgeos-dev` so `sf` can resolve the remaining GDAL/GEOS runtime libraries during QA bootstrap on Ubuntu runners.
 - Bootstrap now relies on `renv::restore()` as the canonical dependency source instead of a stale hand-maintained package list.
 - `dependencies.R` now derives its optional helper installs from `DESCRIPTION`, so contributor instructions stay aligned with the package metadata.
 - `make test` and `R CMD check` now use package-aware test entrypoints, so the canonical checks exercise `localmap` instead of skipping most tests.
