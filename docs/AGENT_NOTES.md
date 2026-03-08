@@ -9,7 +9,8 @@
     - clean startup probe with `Rscript --vanilla` now reports `pak env: FALSE` and `pak config: FALSE` when `RENV_CONFIG_PAK_ENABLED=FALSE` is supplied,
     - `make lint` passed,
     - `make test` passed with the same expected offline/spatial warnings and 1 expected skip.
-  - Remaining watch item: once the fix is pushed, CI may expose a second issue around Ubuntu system requirements for source installs; if so, patch `.github/workflows/ci.yaml` in a follow-up rather than broadening this fix pre-emptively.
+  - Follow-up after push: run `22814104696` showed the `pak` override was fixed, but `Bootstrap QA environment` then failed while loading `units` because `libudunits2.so.0` was unavailable on the runner.
+  - Narrow workflow fix applied: added `libudunits2-dev` to the CI apt packages, validated the workflow with `actionlint 1.7.11`, and left broader system-package expansion deferred unless CI exposes another concrete missing library.
 
 - 2026-03-07: Whole-repo QA repairs + characterization tests + conservative internal refactors.
   - Repaired the documented quality gates so runtime bootstrap, QA bootstrap, lint, tests, demo pipeline, and `R CMD check` now agree on the same repo entrypoints; reactivated GitHub Actions CI under `.github/workflows/ci.yaml`.
