@@ -91,6 +91,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
+- macOS bootstrap now preflights required Homebrew geospatial/runtime libraries (`gdal`, `geos`, `proj`, `udunits`, `apache-arrow`) and fails with an actionable message instead of dying mid-restore.
+- Refreshed `renv.lock` to align `arrow` with the current `23.0.1.1` release and matching dependency updates, restoring a clean macOS restore path against Homebrew Arrow.
 - GitHub Actions QA bootstrap now respects external `RENV_CONFIG_PAK_ENABLED` overrides because `.Rprofile` no longer unconditionally forces `pak` on during startup.
 - GitHub Actions CI now installs `libudunits2-dev`, allowing the `units` package to load during QA bootstrap on Ubuntu runners.
 - GitHub Actions CI now installs `libproj-dev`, allowing `sf` to find the `libproj` runtime during QA bootstrap on Ubuntu runners.

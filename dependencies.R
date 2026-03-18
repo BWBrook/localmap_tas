@@ -88,3 +88,73 @@ install_project_qa_dependencies <- function(pkgs = project_qa_dependencies(),
                                             lib = qa_library_path()) {
   install_missing_packages(pkgs, lib = lib)
 }
+
+command_exists <- function(command) {
+  nzchar(Sys.which(command))
+}
+
+pkg_config_has <- function(module) {
+  if (!command_exists("pkg-config")) {
+    return(FALSE)
+  }
+  identical(
+    suppressWarnings(system2("pkg-config", c("--exists", module), stdout = NULL, stderr = NULL)),
+    0L
+  )
+}
+
+brew_prefix <- function(formula) {
+  if (!command_exists("brew")) {
+    return("")
+  }
+  out <- tryCatch(
+    suppressWarnings(system2("brew", c("--prefix", formula), stdout = TRUE, stderr = TRUE)),
+    error = function(e) character()
+  )
+  if (!length(out)) {
+    return("")
+  }
+  prefix <- out[[1]]
+  if (dir.exists(prefix)) prefix else ""
+}
+
+missing_system_requirements <- function() {
+  sysname <- Sys.info()[["sysname"]]
+  if (!identical(sysname, "Darwin")) {
+    return(character())
+  }
+
+  missing <- character()
+  if (!command_exists("gdal-config")) missing <- c(missing, "gdal")
+  if (!command_exists("geos-config")) missing <- c(missing, "geos")
+  if (!command_exists("proj")) missing <- c(missing, "proj")
+  udunits_prefix <- brew_prefix("udunits")
+  has_udunits <- pkg_config_has("udunits2") ||
+    command_exists("udunits2") ||
+    (nzchar(udunits_prefix) && file.exists(file.path(udunits_prefix, "lib", "libudunits2.dylib")))
+  if (!has_udunits) missing <- c(missing, "udunits")
+  if (!pkg_config_has("arrow")) missing <- c(missing, "apache-arrow")
+
+  unique(missing)
+}
+
+check_system_requirements <- function() {
+  missing <- missing_system_requirements()
+  if (!length(missing)) {
+    return(invisible(TRUE))
+  }
+
+  if (identical(Sys.info()[["sysname"]], "Darwin")) {
+    stop(
+      paste(
+        "Missing required macOS system libraries for localmap_tas.",
+        paste("Install them with Homebrew: brew install", paste(missing, collapse = " ")),
+        "Then rerun the bootstrap or restore command.",
+        sep = "\n"
+      ),
+      call. = FALSE
+    )
+  }
+
+  invisible(TRUE)
+}

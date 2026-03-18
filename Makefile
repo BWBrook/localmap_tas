@@ -12,11 +12,10 @@ help:
 	@echo "  make check       # run R CMD check (requires bootstrap-qa)"
 
 bootstrap:
-	@Rscript -e "if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore(prompt=FALSE)" \
-	        -e "if (requireNamespace('devtools', quietly=TRUE)) devtools::document()"
+	@Rscript scripts/bootstrap.R
 
 bootstrap-qa:
-	@Rscript -e "if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore(prompt=FALSE)" \
+	@Rscript -e "source('dependencies.R'); check_system_requirements(); if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore(prompt=FALSE)" \
 	        -e "source('dependencies.R'); install_project_qa_dependencies()"
 
 actionlint:

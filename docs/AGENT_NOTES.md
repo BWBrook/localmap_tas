@@ -1,5 +1,16 @@
 # AGENT NOTES
 
+- 2026-03-18: macOS compatibility pass for geospatial restore/bootstrap.
+  - Installed the missing macOS/Homebrew geospatial runtime stack on the local machine (`gdal`, `geos`, `proj`, `udunits`, `apache-arrow`) after `terra` initially failed with `gdal-config not found`.
+  - Updated the project to preflight those macOS requirements in `dependencies.R`, `scripts/bootstrap.R`, and `make bootstrap-qa`, so future restores fail immediately with a clear Homebrew command instead of during a long package build.
+  - Refreshed `renv.lock` to align `arrow` with CRAN `23.0.1.1`, matching the Homebrew Arrow C++ installation and unblocking parquet support on macOS.
+  - Verification:
+    - `make bootstrap-qa` passed after the system stack was installed.
+    - `make lint` passed.
+    - `make test` passed with expected offline/network warnings and one expected skip.
+    - `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'` passed in about 35s.
+    - `make check` passed with `0 errors | 0 warnings | 0 notes`.
+
 - 2026-03-08: Documented the final green CI dependency set and workflow tooling.
   - Added `make actionlint` to codify local GitHub Actions linting and updated the help text in `Makefile`.
   - Clarified the CI apt dependency groups in `.github/workflows/ci.yaml` so the runner requirements for `{units}`, `{sf}`, and `{igraph}` are visible in the workflow itself.

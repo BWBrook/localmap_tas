@@ -76,6 +76,13 @@ Fix and repeat until coherent.
 - The container bootstrap prefers r2u binaries to keep build times reasonable.
 - The container run should mount `data/` from the host when using local datasets (e.g., `data/raw/jc_camera_study/`).
 
+### macOS prerequisites
+- On macOS, install the required Homebrew geospatial/runtime stack before the
+  first restore:
+  - `brew install gdal geos proj udunits apache-arrow`
+- `scripts/bootstrap.R` and `make bootstrap-qa` now preflight these tools and
+  stop early with an actionable message if they are missing.
+
 ### Local datasets
 - Real-world datasets belong under `data/` (gitignored).
 - The Judbury camera study example lives at `data/raw/jc_camera_study/`.

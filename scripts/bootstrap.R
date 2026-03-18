@@ -1,6 +1,8 @@
 # Bootstrap script for local setup (run in RStudio Console)
 
 message("Restoring renv and preparing the project library...")
+source("dependencies.R")
+check_system_requirements()
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore(prompt = FALSE)
 if (requireNamespace("devtools", quietly = TRUE)) devtools::document()

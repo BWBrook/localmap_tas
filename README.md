@@ -18,6 +18,12 @@ You configure a site (points + extent) and desired GIS layers (from The List and
 renv::restore(prompt = FALSE)
 ```
 
+On macOS, install the required geospatial/runtime libraries once first:
+
+```sh
+brew install gdal geos proj udunits apache-arrow
+```
+
 2. Refresh package metadata (recommended for contributors):
 
 ```r
@@ -92,6 +98,8 @@ Common tasks:
 The GitHub Actions workflow provisions the system libraries required by `{units}`,
 `{sf}`, and `{igraph}`, and uses `r-lib/actions/setup-pandoc@v2` so
 `R CMD check` can rebuild the vignette consistently.
+For local macOS development, the equivalent Homebrew prerequisites are
+`gdal`, `geos`, `proj`, `udunits`, and `apache-arrow`.
 
 See `docs/workflow.md` for the required engineering and artefact-review workflow.
 
