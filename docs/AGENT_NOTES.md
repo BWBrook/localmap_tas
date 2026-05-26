@@ -1,5 +1,32 @@
 # AGENT NOTES
 
+- 2026-05-26: Mac mini dev-box orientation and bootstrap refresh.
+  - Verified the repo was clean on `main` and that `HEAD`, local `origin/main`,
+    and live GitHub `main` all matched `ff90e958` before making changes.
+  - Confirmed the live machine as `Mac-mini.lan` on macOS 26.5 arm64, with the
+    required Homebrew GIS/runtime stack already present (`gdal`, `geos`, `proj`,
+    `udunits`, `apache-arrow`) and installed missing QA tooling
+    (`actionlint`, with `shellcheck` as its Homebrew dependency).
+  - Found that shell `Rscript` resolved to Homebrew R 4.6.0, while the repo
+    lockfile is built for R 4.5.3 and a matching framework R 4.5.3 is installed
+    under `/Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/bin`.
+  - Updated the Makefile to prefer that R 4.5.3 framework on macOS when present,
+    avoiding accidental restores under Homebrew R 4.6.0.
+  - Refreshed `renv.lock` with `renv` tooling for the current Mac GIS stack:
+    `arrow` 24.0.0, `terra` 1.9-27, `sf` 1.1-1, `lwgeom` 0.2-16,
+    `tidyterra` 1.1.0, and required `dplyr` 1.2.1.
+  - Verification:
+    - `make bootstrap-qa` passed using R 4.5.3 after the lockfile refresh.
+    - `make actionlint`, `make lint`, and `make test` passed; unit tests kept
+      the expected offline/network warnings and one expected network skip.
+    - `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci make pipeline` passed in about
+      20s with expected placeholder warnings for offline/demo imagery.
+    - Demo artefacts inspected: `panel_figure.png` is coherent for the fixture
+      profile, with occurrence points in NW Tasmania, the camera-site panel at
+      local scale, and the intentionally sparse/placeholder overview panels.
+    - `make check` passed with `0 errors | 0 warnings | 0 notes`.
+    - `renv::status()` reports no issues.
+
 - 2026-03-18: macOS compatibility pass for geospatial restore/bootstrap.
   - Installed the missing macOS/Homebrew geospatial runtime stack on the local machine (`gdal`, `geos`, `proj`, `udunits`, `apache-arrow`) after `terra` initially failed with `gdal-config not found`.
   - Updated the project to preflight those macOS requirements in `dependencies.R`, `scripts/bootstrap.R`, and `make bootstrap-qa`, so future restores fail immediately with a clear Homebrew command instead of during a long package build.

@@ -69,6 +69,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   on satellite imagery.
 
 ### Changed
+- Makefile R entrypoints now prefer the installed macOS R 4.5.3 framework when
+  present, falling back to `Rscript` elsewhere.
 - `_targets.R` now delegates profile-specific expected-output assembly, report fallback rendering, TASVEG class lookup resolution, and manifest selection to internal helper functions to keep the pipeline declarative without changing target names or outputs.
 - Config handling is now split into load, migrate, validate, and resolve phases behind the existing `cfg_read()` entrypoint, preserving the schema and output layout while reducing coupling in `R/config.R`.
 - Camera-site internals are now separated by responsibility: defaults, graticule generation, and panel assembly live in dedicated helper modules instead of one oversized renderer file.
@@ -91,6 +93,13 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
+- Excluded the developer Makefile from R package builds so `R CMD check` does
+  not warn on GNU Make conveniences used by local workflow targets.
+- Refreshed the macOS spatial/runtime lockfile set for the current Homebrew GIS
+  stack (`gdal` 3.13 and `apache-arrow` 24), updating `terra`, `sf`, `lwgeom`,
+  `tidyterra`, `arrow`, and the required `dplyr` floor so `renv::restore()` no
+  longer tries to compile archived spatial sources against newer system
+  libraries.
 - macOS bootstrap now preflights required Homebrew geospatial/runtime libraries (`gdal`, `geos`, `proj`, `udunits`, `apache-arrow`) and fails with an actionable message instead of dying mid-restore.
 - Refreshed `renv.lock` to align `arrow` with the current `23.0.1.1` release and matching dependency updates, restoring a clean macOS restore path against Homebrew Arrow.
 - GitHub Actions QA bootstrap now respects external `RENV_CONFIG_PAK_ENABLED` overrides because `.Rprofile` no longer unconditionally forces `pak` on during startup.

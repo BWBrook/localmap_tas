@@ -13,6 +13,7 @@
 ^quarto\.yml$
 ^localmap\.Rproj$
 ^README\.md$
+^Makefile$
 ^_pkgdown\.yml$
 ^docs/pkgdown$
 ^\.Rproj\.user$
