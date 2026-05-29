@@ -65,6 +65,8 @@ Fix and repeat until coherent.
 ## 3) Reproducibility rules
 
 - All dependencies are managed via `renv`.
+- The current Mac mini baseline is Homebrew R 4.6.0; use the repo Makefile or
+  `Rscript` on `PATH` unless a future lockfile deliberately says otherwise.
 - Do not edit `renv.lock` manually.
 - Avoid hidden state:
   - no `setwd()`
@@ -94,7 +96,7 @@ Fix and repeat until coherent.
   - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\",\"species_map\"))'`
   - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
 - Offline JC run for CI:
-  - `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"species_map\",\"camera_sites_map\",\"camera_sites_panel\"))'`
+  - `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline`
 - Tasmania canonical example (LIST orthophoto + TASVEG + LIST DEM export with fixture fallback; optional roads/localities overlays):
   - `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 Rscript -e 'targets::tar_make()'`
   - Offline/CI-safe variant: `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
@@ -108,6 +110,8 @@ Fix and repeat until coherent.
 
 ### Offline/network contract
 - Offline mode is the default for CI and fixture profiles (`demo`, `jc_ci`).
+- `jc_ci` and `tas_canonical_ci` are clean-clone profiles and must use packaged
+  camera-site/vector fixtures rather than raw files under `data/`.
 - Network fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
 - When network is disabled, imagery fetches fall back to placeholders with a warning.
 - ArcGIS vector layers must provide a `fixture_path` when offline; otherwise the run fails with an actionable error.
@@ -131,6 +135,8 @@ Recommended command sequence for QA-enabled environments:
 - `make lint`
 - `make test`
 - `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
+- `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline`
+- `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci make pipeline`
 - `make check`
 
 ### CI environment notes

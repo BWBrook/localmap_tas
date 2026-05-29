@@ -1,5 +1,44 @@
 # AGENT NOTES
 
+- 2026-05-29: Mac mini R 4.6.0 migration and full offline pipeline sweep.
+  - Superseded the earlier R 4.5.3 Mac runtime pin: `renv.lock` now records R
+    4.6.0, `renv` is upgraded to 1.2.3, and the Makefile uses the active
+    Homebrew `Rscript` on `PATH`.
+  - Added packaged JC AOI vector fixtures for fire attributes, geology, land
+    tenure, and reserve estate, and wired them into both `jc` and
+    `tas_canonical` analysis layers so `jc_ci` / `tas_canonical_ci` can run
+    cleanly without live ArcGIS vector fetches.
+  - Fixed `tas_canonical_ci` to use `inst/extdata/jc_camera_sites_fixture.csv`
+    instead of raw Judbury camera-study files under `data/`, and added
+    regression tests for fixture-backed CI vectors/camera sites.
+  - Verification:
+    - `make bootstrap-qa`, `make actionlint`, `make lint`, and `make test`
+      passed under R 4.6.0; tests retained one expected network skip and
+      expected offline warnings.
+    - `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci make pipeline`,
+      `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline`, and
+      `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci make pipeline`
+      passed.
+    - `make check` passed with `0 errors | 0 warnings | 0 notes`, and
+      `renv::status()` reports no issues.
+  - Artefact review:
+    - Captured reviewed artefacts under
+      `outputs/canonical_runs/WP-028_2026-05-29_mac-mini-r46-readiness/` and
+      logged evidence in `docs/log/WP-028_2026-05-29_mac-mini-r46-readiness.md`.
+    - `outputs/jc/maps/panel_figure.png` and `outputs/tas/maps/panel_figure.png`
+      are 4200 x 3742 px, share coherent framing, and show all camera-site
+      points inside the AOI; the 200 m scale bar is plausible for the local
+      extent.
+    - Offline grey/placeholder panels are expected for no-network CI imagery;
+      the dark camera-site panel still shows aligned roads/site points at the
+      local scale.
+    - `outputs/jc/analysis/vector/jc_fire_attributes.png` shows the two-class
+      fixture split with sites on both sides; attribute tables populate fire,
+      geology, tenure, reserve, DEM, slope, NDVI, and NBR columns.
+    - Remaining: the new vector fixtures are deterministic CI fixtures, not
+      authoritative LIST/MRT extracts; live runs should still use
+      `LOCALMAP_ALLOW_NETWORK=1` when current source data are needed.
+
 - 2026-05-26: Mac mini dev-box orientation and bootstrap refresh.
   - Verified the repo was clean on `main` and that `HEAD`, local `origin/main`,
     and live GitHub `main` all matched `ff90e958` before making changes.

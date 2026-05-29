@@ -216,3 +216,76 @@ testthat::test_that("cfg_read resolves tas canonical outputs and DEM override", 
   testthat::expect_false(is.null(dem_layer))
   testthat::expect_true(dem_layer$type %in% c("raster_wcs", "raster_geodata", "raster_file"))
 })
+
+testthat::test_that("offline CI analysis vectors have local fixtures", {
+  profiles <- c("jc_ci", "tas_canonical_ci")
+
+  missing <- purrr::map_dfr(profiles, function(profile) {
+    cfg <- localmap::cfg_read(profile = profile)
+    layers <- cfg$data$analysis_layers
+    if (is.null(layers) || length(layers) == 0L) {
+      return(tibble::tibble())
+    }
+    purrr::map_dfr(layers, function(layer) {
+      if (!identical(layer$type, "vector_arcgis")) {
+        return(tibble::tibble())
+      }
+      fixture <- if (is.null(layer$fixture_path)) "" else layer$fixture_path
+      resolved_fixture <- if (nzchar(fixture)) {
+        localmap:::analysis_normalize_path(fixture, fixture)
+      } else {
+        ""
+      }
+      tibble::tibble(
+        profile = profile,
+        layer_id = layer$id,
+        fixture_path = fixture,
+        exists = nzchar(resolved_fixture) && file.exists(resolved_fixture)
+      )
+    })
+  }) |>
+    dplyr::filter(!.data$exists)
+
+  testthat::expect_equal(missing, tibble::tibble(
+    profile = character(),
+    layer_id = character(),
+    fixture_path = character(),
+    exists = logical()
+  ))
+})
+
+testthat::test_that("offline CI camera sites use packaged files", {
+  profiles <- c("jc_ci", "tas_canonical_ci")
+
+  missing <- purrr::map_dfr(profiles, function(profile) {
+    cfg <- localmap::cfg_read(profile = profile)
+    camera <- cfg$data$camera_sites
+    source_type <- if (is.null(camera$source)) "file" else camera$source
+    path <- if (identical(source_type, "file") && !is.null(camera$path)) {
+      camera$path
+    } else {
+      ""
+    }
+    resolved_path <- if (nzchar(path)) {
+      localmap:::analysis_normalize_path(path, path)
+    } else {
+      ""
+    }
+    tibble::tibble(
+      profile = profile,
+      source = source_type,
+      path = path,
+      exists = identical(source_type, "file") &&
+        nzchar(resolved_path) &&
+        file.exists(resolved_path)
+    )
+  }) |>
+    dplyr::filter(!.data$exists)
+
+  testthat::expect_equal(missing, tibble::tibble(
+    profile = character(),
+    source = character(),
+    path = character(),
+    exists = logical()
+  ))
+})

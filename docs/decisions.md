@@ -189,3 +189,19 @@ Format:
 **Decision:** Update renv settings to use only `Imports`, `Depends`, and `LinkingTo` when resolving package dependencies and ignore `dependencies.R` during renv scans.
 **Rationale:** Prevents `renv::snapshot()` from requiring the full dev/test suggestion tree (e.g., devtools/pak dependencies), while keeping runtime reproducibility intact.
 **Status:** Active.
+
+## 2026-05-29 — Mac mini runtime baseline is R 4.6.0
+**Decision:** Move the project lockfile and Makefile entrypoints forward to the
+Mac mini Homebrew R 4.6.0 baseline, treating the earlier R 4.5.3 pin as stale.
+**Rationale:** The Mac mini now has a complete Homebrew GIS/runtime stack for R
+4.6.0, and keeping the repo on the active host R reduces migration friction for
+ongoing R&D work.
+**Status:** Active.
+
+## 2026-05-29 — CI profiles use packaged offline fixtures
+**Decision:** `jc_ci` and `tas_canonical_ci` must run from package-included
+camera-site/vector fixtures for clean-clone offline validation.
+**Rationale:** Full offline pipelines should not depend on raw JC study files
+under `data/` or on live ArcGIS vector fetches; fixture-backed runs make the
+Mac mini and CI validation gates deterministic.
+**Status:** Active.

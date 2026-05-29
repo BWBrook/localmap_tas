@@ -612,6 +612,8 @@ jc:
           - "FLAMMAB"
         output_path: "outputs/jc/analysis/vector/jc_fire_attributes.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_fire_attributes.gpkg"
+        fixture_layer: "fire_attributes"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -625,6 +627,8 @@ jc:
           - "description"
         output_path: "outputs/jc/analysis/vector/jc_geology.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_geology.gpkg"
+        fixture_layer: "geology"
         attribution:
           source: "Mineral Resources Tasmania"
           license: "CC BY 4.0"
@@ -637,6 +641,8 @@ jc:
           - "TEN_CLASS"
         output_path: "outputs/jc/analysis/vector/jc_land_tenure.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_land_tenure.gpkg"
+        fixture_layer: "land_tenure"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -649,6 +655,8 @@ jc:
           - "RES_CLASS"
         output_path: "outputs/jc/analysis/vector/jc_reserve_estate.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_reserve_estate.gpkg"
+        fixture_layer: "reserve_estate"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -1154,6 +1162,8 @@ tas_canonical:
           - "FLAMMAB"
         output_path: "outputs/tas/analysis/vector/tas_fire_attributes.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_fire_attributes.gpkg"
+        fixture_layer: "fire_attributes"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -1167,6 +1177,8 @@ tas_canonical:
           - "description"
         output_path: "outputs/tas/analysis/vector/tas_geology.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_geology.gpkg"
+        fixture_layer: "geology"
         attribution:
           source: "Mineral Resources Tasmania"
           license: "CC BY 4.0"
@@ -1179,6 +1191,8 @@ tas_canonical:
           - "TEN_CLASS"
         output_path: "outputs/tas/analysis/vector/tas_land_tenure.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_land_tenure.gpkg"
+        fixture_layer: "land_tenure"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -1191,6 +1205,8 @@ tas_canonical:
           - "RES_CLASS"
         output_path: "outputs/tas/analysis/vector/tas_reserve_estate.gpkg"
         offline: false
+        fixture_path: "inst/extdata/jc_reserve_estate.gpkg"
+        fixture_layer: "reserve_estate"
         attribution:
           source: "The LIST"
           license: "CC BY 4.0"
@@ -1475,6 +1491,8 @@ tas_canonical_ci:
           license: "CC BY 4.0"
           credit: "Slope"
     camera_sites:
+      source: "file"
+      path: "inst/extdata/jc_camera_sites_fixture.csv"
       basemap:
         url: ""
         layers: []

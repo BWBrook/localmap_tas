@@ -1,4 +1,4 @@
-RSCRIPT ?= $(shell if [ -x /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/bin/Rscript ]; then printf '%s\n' /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/bin/Rscript; else command -v Rscript; fi)
+RSCRIPT = Rscript
 
 .PHONY: help bootstrap bootstrap-qa actionlint lint test pipeline docs check
 
