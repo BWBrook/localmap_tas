@@ -74,8 +74,8 @@ testthat::test_that("site attributes outputs write long + wide products", {
   long_path <- tempfile(fileext = ".parquet")
   wide_path <- tempfile(fileext = ".csv")
 
-  long_out <- localmap::write_site_attributes_long(long_tbl, output_path = long_path)
-  wide_out <- localmap::write_site_attributes_wide(
+  long_out <- localmap:::write_site_attributes_long(long_tbl, output_path = long_path)
+  wide_out <- localmap:::write_site_attributes_wide(
     long_tbl,
     sites = sites,
     output_path = wide_path
@@ -163,7 +163,7 @@ testthat::test_that("site attributes wide maps representative fields into stable
   sites <- tibble::tibble(site = "site_a", lat = -42, lon = 146)
   out_path <- tempfile(fileext = ".csv")
 
-  wide_out <- localmap::write_site_attributes_wide(
+  wide_out <- localmap:::write_site_attributes_wide(
     attributes,
     sites = sites,
     output_path = out_path

@@ -6,7 +6,6 @@
 #'
 #' @param manifest A tibble/data.frame containing `path` and `abs_path`.
 #' @return A tibble with the common columns across all readable CSV files.
-#' @export
 combine_manifest_csvs <- function(manifest) {
   if (!all(c("path", "abs_path") %in% names(manifest))) {
     rlang::abort(

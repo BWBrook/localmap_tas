@@ -26,6 +26,6 @@ testthat::test_that("network imagery fetch is gated behind LOCALMAP_ALLOW_NETWOR
     output_path = tempfile(fileext = ".png")
   )
 
-  res <- localmap::fetch_wms_imagery(cfg, bbox, offline = FALSE, cache_dir = tempfile())
+  res <- localmap:::fetch_wms_imagery(cfg, bbox, offline = FALSE, cache_dir = tempfile())
   testthat::expect_true(file.exists(res$path))
 })

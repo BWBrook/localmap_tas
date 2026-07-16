@@ -5,6 +5,10 @@
 #'
 #' @param manifest_path Character path to the CSV manifest.
 #' @return A tibble with columns `id`, `path`, and `abs_path`.
+#' @section Lifecycle:
+#' **Experimental.** This export remains available without a runtime warning
+#' for current callers who need manifest inspection. Start new workflows with
+#' [cfg_read()] or [run_settings()]; do not use this helper as the onboarding path.
 #' @export
 read_manifest <- function(manifest_path) {
   if (!is.character(manifest_path) || length(manifest_path) != 1L) {

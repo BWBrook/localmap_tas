@@ -2,7 +2,6 @@
 #'
 #' @param layers List of analysis layer definitions (from config).
 #' @return Normalized list of layer definitions.
-#' @export
 validate_analysis_layers <- function(layers) {
   if (is.null(layers)) {
     return(list())

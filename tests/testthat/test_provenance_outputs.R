@@ -29,7 +29,7 @@ testthat::test_that("provenance outputs capture layer metadata", {
   writeLines("schema_version: 2", cfg_path)
   writeLines("output_id,type,path", manifest_path)
 
-  prov_out <- localmap::build_layer_provenance(
+  prov_out <- localmap:::build_layer_provenance(
     layers = layers,
     analysis_layers = analysis_layers,
     output_path = prov_path
@@ -38,7 +38,7 @@ testthat::test_that("provenance outputs capture layer metadata", {
   prov_tbl <- utils::read.csv(prov_out)
   testthat::expect_true(all(c("imagery1", "analysis1") %in% prov_tbl$layer_id))
 
-  attr_out <- localmap::write_attribution_report(
+  attr_out <- localmap:::write_attribution_report(
     layers = layers,
     analysis_layers = analysis_layers,
     output_path = attr_path
@@ -48,7 +48,7 @@ testthat::test_that("provenance outputs capture layer metadata", {
   testthat::expect_true(any(grepl("imagery1", attr_lines)))
   testthat::expect_true(any(grepl("analysis1", attr_lines)))
 
-  run_out <- localmap::write_run_manifest(
+  run_out <- localmap:::write_run_manifest(
     cfg = list(schema_version = 2),
     cfg_file = cfg_path,
     layer_registry = list(list(

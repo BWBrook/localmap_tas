@@ -17,3 +17,9 @@ Tibble of layer metadata and output paths.
 \description{
 Fetch imagery layers from registry
 }
+\section{Lifecycle}{
+
+\strong{Experimental.} There is no stable direct replacement. This export remains
+callable without a runtime warning while the registry design settles.
+}
+

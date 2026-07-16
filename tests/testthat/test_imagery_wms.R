@@ -43,7 +43,7 @@ testthat::test_that("fetch_wms_imagery writes placeholder and provenance offline
     output_path = tempfile(fileext = ".png")
   )
 
-  res <- localmap::fetch_wms_imagery(cfg, bbox, offline = TRUE, cache_dir = tempfile())
+  res <- localmap:::fetch_wms_imagery(cfg, bbox, offline = TRUE, cache_dir = tempfile())
   testthat::expect_true(file.exists(res$path))
   testthat::expect_true(file.exists(res$provenance_path))
   testthat::expect_gt(file.info(res$provenance_path)$size, 0)
@@ -77,7 +77,7 @@ testthat::test_that("fetch_wms_imagery respects network gating", {
   }, add = TRUE)
   Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
 
-  res <- localmap::fetch_wms_imagery(cfg, bbox, offline = FALSE, cache_dir = tempfile())
+  res <- localmap:::fetch_wms_imagery(cfg, bbox, offline = FALSE, cache_dir = tempfile())
   prov <- readLines(res$provenance_path, warn = FALSE)
   testthat::expect_true(any(grepl("status: offline_placeholder", prov)))
 })

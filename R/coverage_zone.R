@@ -92,7 +92,6 @@ build_coverage_zone <- function(sites,
 #' @param coverage Coverage list from `build_coverage_zone()`.
 #' @param output_path Output CSV path.
 #' @return Output path.
-#' @export
 write_coverage_summary <- function(coverage,
                                    output_path = NULL) {
   if (is.null(output_path)) {

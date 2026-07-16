@@ -16,3 +16,10 @@ A tibble with columns \code{id}, \code{path}, and \code{abs_path}.
 Expects a CSV with columns \code{id} and \code{path}. Returns a tibble with an
 additional \code{abs_path} column resolved relative to the project root.
 }
+\section{Lifecycle}{
+
+\strong{Experimental.} This export remains available without a runtime warning
+for current callers who need manifest inspection. Start new workflows with
+\code{\link[=cfg_read]{cfg_read()}} or \code{\link[=run_settings]{run_settings()}}; do not use this helper as the onboarding path.
+}
+

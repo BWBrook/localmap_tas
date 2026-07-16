@@ -6,7 +6,6 @@
 #' @param manifest A data frame with columns `id`, `path`, and `abs_path`.
 #' @param n_max Maximum number of rows to read per file for preview.
 #' @return A tibble with columns `id`, `path`, `exists`, `n_rows`, `n_cols`.
-#' @export
 preview_manifest <- function(manifest, n_max = 100L) {
   if (!all(c("id", "path", "abs_path") %in% names(manifest))) {
     rlang::abort(

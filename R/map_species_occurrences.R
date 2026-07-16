@@ -367,6 +367,10 @@ create_graticule <- function(bbox) {
 #'
 #' @inheritParams map_species_occurrences
 #' @return Path to the rendered PNG file.
+#' @section Lifecycle:
+#' **Experimental.** Prefer [map_species_occurrences()] or
+#' [render_overview_map()] for documented workflows. This export remains
+#' callable for current callers without a runtime warning.
 #' @export
 generate_topo_tile_map <- function(occurrences,
                                    mapping_settings = NULL,

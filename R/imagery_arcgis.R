@@ -83,7 +83,6 @@ arcgis_wkid_from_crs <- function(crs) {
 #' @param cache_dir Cache directory.
 #' @param offline Logical; if TRUE, skip network fetch.
 #' @return List with `path`, `provenance_path`, and `cache_path`.
-#' @export
 fetch_arcgis_imagery <- function(arc_cfg,
                                  bbox,
                                  output_path = NULL,

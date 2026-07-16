@@ -6,6 +6,10 @@
 #'   `verbose`. If `email` is missing or empty, the function looks for the
 #'   `ALA_EMAIL` environment variable.
 #' @return A list with the resolved configuration.
+#' @section Lifecycle:
+#' **Experimental.** Prefer [cfg_read()] or [run_settings()]. This export is
+#' retained for current callers without a runtime warning while the
+#' configuration interface settles.
 #' @export
 ala_configure <- function(settings = NULL) {
   if (is.null(settings)) {

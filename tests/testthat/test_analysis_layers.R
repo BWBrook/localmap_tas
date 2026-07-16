@@ -459,7 +459,7 @@ testthat::test_that("derived layers require sources to appear earlier", {
   )
 
   testthat::expect_error(
-    localmap::validate_analysis_layers(layers),
+    localmap:::validate_analysis_layers(layers),
     class = "analysis_layer_source_order"
   )
 })

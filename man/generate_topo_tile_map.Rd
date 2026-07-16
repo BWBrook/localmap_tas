@@ -34,3 +34,10 @@ Path to the rendered PNG file.
 Fetches map tiles for the configured bounding box (defaulting to
 OpenTopoMap) and overlays species occurrences plus any additional points.
 }
+\section{Lifecycle}{
+
+\strong{Experimental.} Prefer \code{\link[=map_species_occurrences]{map_species_occurrences()}} or
+\code{\link[=render_overview_map]{render_overview_map()}} for documented workflows. This export remains
+callable for current callers without a runtime warning.
+}
+

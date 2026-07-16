@@ -17,3 +17,10 @@ A list with the resolved configuration.
 \description{
 Establishes a galah session using values from the project configuration.
 }
+\section{Lifecycle}{
+
+\strong{Experimental.} Prefer \code{\link[=cfg_read]{cfg_read()}} or \code{\link[=run_settings]{run_settings()}}. This export is
+retained for current callers without a runtime warning while the
+configuration interface settles.
+}
+

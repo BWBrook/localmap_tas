@@ -78,7 +78,6 @@ wms_build_query <- function(wms_cfg, bbox) {
 #' @param cache_dir Cache directory.
 #' @param offline Logical; if TRUE, skip network fetch.
 #' @return List with `path`, `provenance_path`, and `cache_path`.
-#' @export
 fetch_wms_imagery <- function(wms_cfg,
                               bbox,
                               output_path = NULL,

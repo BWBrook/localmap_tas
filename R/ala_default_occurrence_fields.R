@@ -4,7 +4,6 @@
 #' Australia when downloading occurrence records.
 #'
 #' @return Character vector of field names.
-#' @export
 ala_default_occurrence_fields <- function() {
   c(
     "decimalLatitude",

@@ -89,7 +89,6 @@ build_site_attributes_long <- function(sites,
 #' @param attributes Long attributes tibble.
 #' @param output_path Output parquet path.
 #' @return Output path.
-#' @export
 write_site_attributes_long <- function(attributes, output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
     output_path <- here::here("outputs", "tables", "jc", "site_attributes_long.parquet")
@@ -115,7 +114,6 @@ write_site_attributes_long <- function(attributes, output_path = NULL) {
 #' @param sites Optional sites data frame with `site`, `lat`, `lon`.
 #' @param output_path Output CSV path.
 #' @return Output path.
-#' @export
 write_site_attributes_wide <- function(attributes, sites = NULL, output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
     output_path <- here::here("outputs", "tables", "jc", "site_attributes_wide.csv")

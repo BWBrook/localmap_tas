@@ -4,7 +4,6 @@
 #' @param analysis_layers Tibble from `fetch_analysis_layers()`.
 #' @param output_path Output CSV path.
 #' @return Output path to the provenance CSV.
-#' @export
 build_layer_provenance <- function(layers,
                                    analysis_layers,
                                    output_path = NULL) {
@@ -49,7 +48,6 @@ build_layer_provenance <- function(layers,
 #' @param analysis_layers Tibble from `fetch_analysis_layers()`.
 #' @param output_path Output Markdown path.
 #' @return Output path to the attribution report.
-#' @export
 write_attribution_report <- function(layers,
                                      analysis_layers,
                                      output_path = NULL) {
@@ -106,7 +104,6 @@ write_attribution_report <- function(layers,
 #' @param output_manifest_file Output schema manifest path.
 #' @param output_path Output manifest path.
 #' @return Output path to the run manifest.
-#' @export
 write_run_manifest <- function(cfg,
                                cfg_file,
                                layer_registry,

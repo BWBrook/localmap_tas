@@ -2,7 +2,6 @@
 #'
 #' @param layers List of layer definitions (from config).
 #' @return Normalized list of layer definitions.
-#' @export
 validate_layer_registry <- function(layers) {
   if (is.null(layers)) {
     return(list())
@@ -101,6 +100,9 @@ validate_layer_registry <- function(layers) {
 #' @param layers Validated layer registry list.
 #' @param aoi AOI list from `build_aoi_from_config()`.
 #' @return Tibble of layer metadata and output paths.
+#' @section Lifecycle:
+#' **Experimental.** There is no stable direct replacement. This export remains
+#' callable without a runtime warning while the registry design settles.
 #' @export
 fetch_layer_registry <- function(layers, aoi) {
   layers <- validate_layer_registry(layers)
