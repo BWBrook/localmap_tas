@@ -4,7 +4,7 @@ message("Restoring renv and preparing the project library...")
 source("dependencies.R")
 check_system_requirements()
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
-renv::restore(prompt = FALSE)
+restore_project_library()
 if (requireNamespace("devtools", quietly = TRUE)) devtools::document()
 message(
   paste(

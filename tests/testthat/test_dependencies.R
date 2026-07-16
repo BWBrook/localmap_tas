@@ -57,3 +57,15 @@ testthat::test_that("project restore preserves bytes and errors on failure", {
   testthat::expect_s3_class(caught, "localmap_restore_failure")
   testthat::expect_identical(conditionMessage(caught), "restore callback failed")
 })
+
+testthat::test_that("bootstrap uses the byte-preserving project restore", {
+  bootstrap_path <- testthat::test_path("..", "..", "scripts", "bootstrap.R")
+  expressions <- parse(file = bootstrap_path)
+  code <- paste(
+    vapply(expressions, deparse1, character(1), width.cutoff = 500L),
+    collapse = "\n"
+  )
+
+  testthat::expect_match(code, "restore_project_library\\(\\)")
+  testthat::expect_false(grepl("renv::restore\\s*\\(", code, perl = TRUE))
+})
