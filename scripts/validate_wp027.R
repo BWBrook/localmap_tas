@@ -8,11 +8,24 @@
     character(1)
   )
   candidates <- candidates[!is.na(candidates) & nzchar(candidates)]
-  if (length(candidates) > 0L) {
-    path <- candidates[[length(candidates)]]
+  harness_candidates <- candidates[basename(candidates) == "validate_wp027.R"]
+  working_candidate <- file.path(getwd(), "scripts", "validate_wp027.R")
+  file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  invoked <- if (length(file_arg) == 1L) sub("^--file=", "", file_arg) else NA_character_
+  invoked_root <- if (is.na(invoked)) NA_character_ else dirname(dirname(invoked))
+  invoked_is_repo_harness <- !is.na(invoked) &&
+    identical(basename(invoked), "validate_wp027.R") &&
+    identical(basename(dirname(invoked)), "scripts") &&
+    file.exists(file.path(invoked_root, "Makefile")) &&
+    file.exists(file.path(invoked_root, "DESCRIPTION"))
+  if (file.exists(working_candidate)) {
+    path <- working_candidate
+  } else if (length(harness_candidates) > 0L) {
+    path <- harness_candidates[[length(harness_candidates)]]
+  } else if (invoked_is_repo_harness) {
+    path <- invoked
   } else {
-    file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
-    path <- if (length(file_arg) == 1L) sub("^--file=", "", file_arg) else NA_character_
+    path <- NA_character_
   }
   if (is.na(path)) NA_character_ else normalizePath(path, winslash = "/", mustWork = FALSE)
 })
@@ -1196,12 +1209,60 @@ wp027_git_head <- function(root) {
   unname(output[[1L]])
 }
 
-wp027_write_metadata <- function(run_dir, root, status, started_utc, ended_utc = "") {
+wp027_repo_state <- function(root) {
+  tracked_status <- wp027_git(
+    root,
+    c("status", "--porcelain", "--untracked-files=no")
+  )
+  list(
+    head = wp027_git_head(root),
+    clean = length(tracked_status) == 0L,
+    detail = unname(tracked_status)
+  )
+}
+
+wp027_require_clean_repo <- function(
+  root,
+  expected_head = NULL,
+  state_reader = wp027_repo_state
+) {
+  state <- state_reader(root)
+  valid <- is.list(state) &&
+    identical(length(state$head), 1L) &&
+    is.character(state$head) &&
+    identical(length(state$clean), 1L) &&
+    is.logical(state$clean) &&
+    !is.na(state$clean)
+  if (!valid) stop("Repository state reader returned an invalid result.", call. = FALSE)
+  if (!isTRUE(state$clean)) {
+    detail <- if (length(state$detail) > 0L) paste(state$detail, collapse = "; ") else ""
+    separator <- if (nzchar(detail)) ": " else ""
+    stop(
+      paste0("Tracked repository state is not clean", separator, detail),
+      call. = FALSE
+    )
+  }
+  if (!is.null(expected_head) && !identical(unname(state$head), expected_head)) {
+    stop(
+      paste0("Validation HEAD changed: expected ", expected_head, ", found ", state$head),
+      call. = FALSE
+    )
+  }
+  state
+}
+
+wp027_write_metadata <- function(
+  run_dir,
+  validated_head,
+  status,
+  started_utc,
+  ended_utc = ""
+) {
   writeLines(
     c(
       "work_package=WP-027",
       paste0("status=", status),
-      paste0("validated_head=", wp027_git_head(root)),
+      paste0("validated_head=", validated_head),
       paste0("started_utc=", started_utc),
       paste0("ended_utc=", ended_utc),
       "canonical_evidence=true",
@@ -1211,10 +1272,87 @@ wp027_write_metadata <- function(run_dir, root, status, started_utc, ended_utc =
   )
 }
 
-wp027_run_canonical <- function(root = .wp027_root) {
+wp027_mark_canonical_failed <- function(
+  run_dir,
+  validated_head,
+  started_utc,
+  stage,
+  detail
+) {
+  wp027_write_metadata(
+    run_dir,
+    validated_head,
+    "FAILED",
+    started_utc,
+    wp027_utc()
+  )
+  failed_path <- file.path(run_dir, "FAILED")
+  existing <- if (file.exists(failed_path)) {
+    readLines(failed_path, warn = FALSE)
+  } else {
+    character()
+  }
+  detail <- gsub("[\r\n]+", " ", detail)
+  writeLines(c(existing, paste0("stage=", stage), paste0("detail=", detail)), failed_path)
+  invisible(failed_path)
+}
+
+wp027_finalize_canonical <- function(
+  temp_run,
+  final_run,
+  root,
+  validated_head,
+  started_utc,
+  state_reader = wp027_repo_state,
+  hash_manifest = wp027_hash_manifest,
+  external_verify = wp027_verify_hash_manifest_system2,
+  promote = wp027_promote_verified
+) {
+  stage <- "repository-state"
+  tryCatch({
+    wp027_require_clean_repo(
+      root,
+      expected_head = validated_head,
+      state_reader = state_reader
+    )
+    stage <- "metadata"
+    wp027_write_metadata(
+      temp_run,
+      validated_head,
+      "PASS",
+      started_utc,
+      wp027_utc()
+    )
+    stage <- "hash"
+    hash_manifest(temp_run)
+    stage <- "external-verification"
+    external_verify(temp_run)
+    stage <- "promotion"
+    promote(temp_run, final_run)
+  }, error = function(error) {
+    detail <- conditionMessage(error)
+    if (dir.exists(temp_run)) {
+      wp027_mark_canonical_failed(
+        temp_run,
+        validated_head,
+        started_utc,
+        stage,
+        detail
+      )
+    }
+    stop(detail, call. = FALSE)
+  })
+}
+
+wp027_run_canonical <- function(
+  root = .wp027_root,
+  state_reader = wp027_repo_state
+) {
   root <- normalizePath(root, winslash = "/", mustWork = TRUE)
   old <- setwd(root)
   on.exit(setwd(old), add = TRUE)
+  initial_state <- wp027_require_clean_repo(root, state_reader = state_reader)
+  validated_head <- unname(initial_state$head)
   wp027_assert_make_test_recipe(root)
   wp027_assert_protected_metadata(root)
 
@@ -1238,19 +1376,30 @@ wp027_run_canonical <- function(root = .wp027_root) {
   }
   dir.create(temp_run)
   started <- wp027_utc()
-  wp027_write_metadata(temp_run, root, "RUNNING", started)
+  wp027_write_metadata(temp_run, validated_head, "RUNNING", started)
 
   tryCatch(
     wp027_execute_specs(wp027_canonical_specs(root), temp_run),
     error = function(error) {
-      wp027_write_metadata(temp_run, root, "FAILED", started, wp027_utc())
-      stop(conditionMessage(error), call. = FALSE)
+      detail <- conditionMessage(error)
+      wp027_mark_canonical_failed(
+        temp_run,
+        validated_head,
+        started,
+        "gates",
+        detail
+      )
+      stop(detail, call. = FALSE)
     }
   )
-  wp027_write_metadata(temp_run, root, "PASS", started, wp027_utc())
-  wp027_hash_manifest(temp_run)
-  wp027_verify_hash_manifest_system2(temp_run)
-  promoted <- wp027_promote_verified(temp_run, final_run)
+  promoted <- wp027_finalize_canonical(
+    temp_run = temp_run,
+    final_run = final_run,
+    root = root,
+    validated_head = validated_head,
+    started_utc = started,
+    state_reader = state_reader
+  )
   cat(promoted, "\n", sep = "")
   invisible(promoted)
 }

@@ -102,7 +102,7 @@ testthat::test_that("canonical formals and test inventories match their contract
     .wp027_suite_minima[["expectations"]]
   )
   harness <- inventory[inventory$path == "tests/testthat/test-wp027-harness.R", ]
-  testthat::expect_identical(harness$test_that, 8L)
+  testthat::expect_identical(harness$test_that, 11L)
 
   summary_stdout <- tempfile("wp027-summary-", fileext = ".log")
   summary_stderr <- tempfile("wp027-summary-stderr-", fileext = ".log")
@@ -469,4 +469,176 @@ testthat::test_that("the CLI rejects invalid input and passes both dry-run fixtu
   if (is.null(success_status)) success_status <- 0L
   testthat::expect_identical(as.integer(success_status), 0L)
   testthat::expect_identical(as.character(success), "WP-027 dry run PASS")
+})
+
+testthat::test_that("nested Rscript sourcing returns without invoking main", {
+  sandbox <- tempfile("wp027-nested-source-")
+  dir.create(file.path(sandbox, "scripts"), recursive = TRUE)
+  sandbox_script <- file.path(sandbox, "scripts", "validate_wp027.R")
+  wrapper <- file.path(sandbox, "validate_wp027.R")
+  testthat::expect_true(file.copy(wp027_test_script, sandbox_script))
+  writeLines(c(
+    "source_env <- new.env(parent = globalenv())",
+    sprintf(
+      "sys.source(%s, envir = source_env)",
+      encodeString(sandbox_script, quote = "\"")
+    ),
+    "cat('WP-027 nested source returned\\n')"
+  ), wrapper)
+  before <- wp027_snapshot_tree(file.path(wp027_test_root, "outputs"))
+
+  output <- suppressWarnings(system2(
+    file.path(R.home("bin"), "Rscript"),
+    wrapper,
+    stdout = TRUE,
+    stderr = TRUE
+  ))
+  status <- attr(output, "status")
+  if (is.null(status)) status <- 0L
+  after <- wp027_snapshot_tree(file.path(wp027_test_root, "outputs"))
+
+  testthat::expect_identical(as.integer(status), 0L)
+  testthat::expect_identical(
+    as.character(output),
+    "WP-027 nested source returned"
+  )
+  testthat::expect_false(dir.exists(file.path(sandbox, "outputs")))
+  testthat::expect_identical(after, before)
+})
+
+testthat::test_that("post-gate finalization failures retain explicit failed evidence", {
+  clean_state <- function(root) list(
+    head = "abc123",
+    clean = TRUE,
+    detail = character()
+  )
+  fail_at <- function(stage) {
+    force(stage)
+    function(...) stop(paste("injected", stage, "failure"), call. = FALSE)
+  }
+  pass <- function(...) invisible(TRUE)
+  scenarios <- list(
+    hash = list(
+      hash_manifest = fail_at("hash"),
+      external_verify = pass,
+      promote = pass
+    ),
+    `external-verification` = list(
+      hash_manifest = pass,
+      external_verify = fail_at("external verification"),
+      promote = pass
+    ),
+    promotion = list(
+      hash_manifest = pass,
+      external_verify = pass,
+      promote = fail_at("promotion")
+    )
+  )
+
+  for (stage in names(scenarios)) {
+    parent <- tempfile(paste0("wp027-finalize-", stage, "-"))
+    dir.create(parent)
+    temp_run <- file.path(parent, ".WP-027_TEST.tmp")
+    final_run <- file.path(parent, "WP-027_TEST")
+    dir.create(temp_run)
+    writeLines("payload", file.path(temp_run, "payload.txt"))
+    scenario <- scenarios[[stage]]
+
+    testthat::expect_error(
+      wp027_finalize_canonical(
+        temp_run = temp_run,
+        final_run = final_run,
+        root = "unused",
+        validated_head = "abc123",
+        started_utc = "2026-07-16T00:00:00Z",
+        state_reader = clean_state,
+        hash_manifest = scenario$hash_manifest,
+        external_verify = scenario$external_verify,
+        promote = scenario$promote
+      ),
+      "injected",
+      fixed = TRUE
+    )
+    metadata <- readLines(file.path(temp_run, "metadata.txt"), warn = FALSE)
+    failed <- readLines(file.path(temp_run, "FAILED"), warn = FALSE)
+    testthat::expect_true(dir.exists(temp_run), info = stage)
+    testthat::expect_false(dir.exists(final_run), info = stage)
+    testthat::expect_true("status=FAILED" %in% metadata, info = stage)
+    testthat::expect_false("status=PASS" %in% metadata, info = stage)
+    testthat::expect_true(paste0("stage=", stage) %in% failed, info = stage)
+    testthat::expect_true(any(startsWith(failed, "detail=injected")), info = stage)
+  }
+})
+
+testthat::test_that("canonical repository state is clean and immutable", {
+  dirty_state <- function(root) list(
+    head = "abc123",
+    clean = FALSE,
+    detail = " M scripts/validate_wp027.R"
+  )
+  testthat::expect_error(
+    wp027_require_clean_repo("unused", state_reader = dirty_state),
+    "Tracked repository state is not clean",
+    fixed = TRUE
+  )
+
+  canonical_body <- paste(deparse(body(wp027_run_canonical)), collapse = "\n")
+  preflight_position <- regexpr(
+    "wp027_require_clean_repo",
+    canonical_body,
+    fixed = TRUE
+  )
+  gates_position <- regexpr("wp027_execute_specs", canonical_body, fixed = TRUE)
+  testthat::expect_gt(preflight_position, 0L)
+  testthat::expect_lt(preflight_position, gates_position)
+
+  changed_states <- list(
+    dirty = list(
+      state = list(head = "abc123", clean = FALSE, detail = " M tracked-file"),
+      message = "Tracked repository state is not clean"
+    ),
+    head = list(
+      state = list(head = "def456", clean = TRUE, detail = character()),
+      message = "Validation HEAD changed"
+    )
+  )
+  for (name in names(changed_states)) {
+    parent <- tempfile(paste0("wp027-repo-state-", name, "-"))
+    dir.create(parent)
+    temp_run <- file.path(parent, ".WP-027_TEST.tmp")
+    final_run <- file.path(parent, "WP-027_TEST")
+    dir.create(temp_run)
+    writeLines("payload", file.path(temp_run, "payload.txt"))
+    hash_calls <- 0L
+    hash_manifest <- function(...) {
+      hash_calls <<- hash_calls + 1L
+      invisible(TRUE)
+    }
+    state <- changed_states[[name]]
+    state_reader <- function(root) state$state
+
+    testthat::expect_error(
+      wp027_finalize_canonical(
+        temp_run = temp_run,
+        final_run = final_run,
+        root = "unused",
+        validated_head = "abc123",
+        started_utc = "2026-07-16T00:00:00Z",
+        state_reader = state_reader,
+        hash_manifest = hash_manifest,
+        external_verify = function(...) invisible(TRUE),
+        promote = function(...) invisible(TRUE)
+      ),
+      state$message,
+      fixed = TRUE
+    )
+    metadata <- readLines(file.path(temp_run, "metadata.txt"), warn = FALSE)
+    failed <- readLines(file.path(temp_run, "FAILED"), warn = FALSE)
+    testthat::expect_identical(hash_calls, 0L, info = name)
+    testthat::expect_true(dir.exists(temp_run), info = name)
+    testthat::expect_false(dir.exists(final_run), info = name)
+    testthat::expect_true("status=FAILED" %in% metadata, info = name)
+    testthat::expect_true("validated_head=abc123" %in% metadata, info = name)
+    testthat::expect_true("stage=repository-state" %in% failed, info = name)
+  }
 })
