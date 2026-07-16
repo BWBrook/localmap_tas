@@ -39,6 +39,39 @@ internal_names <- c(
 
 expected_exports <- sort(c(stable_exports, experimental_exports))
 
+approved_complete_disposition <- c(
+  "ala_configure",
+  "ala_default_occurrence_fields",
+  "ala_fetch_occurrences",
+  "ala_resolve_species",
+  "assemble_panel_figure",
+  "build_aoi_from_config",
+  "build_coverage_zone",
+  "build_layer_provenance",
+  "build_site_attributes_long",
+  "cfg_read",
+  "combine_manifest_csvs",
+  "fetch_analysis_layers",
+  "fetch_arcgis_imagery",
+  "fetch_layer_registry",
+  "fetch_wms_imagery",
+  "generate_topo_tile_map",
+  "map_species_occurrences",
+  "preview_manifest",
+  "read_manifest",
+  "read_species_requests",
+  "render_overview_map",
+  "run_settings",
+  "validate_analysis_layers",
+  "validate_layer_registry",
+  "validate_output_manifest",
+  "write_attribution_report",
+  "write_coverage_summary",
+  "write_run_manifest",
+  "write_site_attributes_long",
+  "write_site_attributes_wide"
+)
+
 stable_formals <- list(
   cfg_read = c(
     profile = "Sys.getenv(\"R_CONFIG_ACTIVE\", \"default\")",
@@ -130,13 +163,38 @@ canonical_formals <- function(fn) {
 }
 
 testthat::test_that("public exports match the exact tier contract", {
+  namespace_lines <- readLines(
+    testthat::test_path("..", "..", "NAMESPACE"),
+    warn = FALSE
+  )
+  export_declarations <- grep("^export\\(", namespace_lines, value = TRUE)
+  declared_exports <- sub(
+    "^export\\(([^)]+)\\)$",
+    "\\1",
+    export_declarations
+  )
   namespace_exports <- sort(getNamespaceExports("localmap"))
+  complete_disposition <- c(
+    stable_exports,
+    experimental_exports,
+    internal_names
+  )
 
   testthat::expect_length(stable_exports, 13L)
   testthat::expect_length(experimental_exports, 4L)
   testthat::expect_length(internal_names, 13L)
+  testthat::expect_length(unique(internal_names), 13L)
   testthat::expect_length(intersect(stable_exports, experimental_exports), 0L)
   testthat::expect_length(unique(c(stable_exports, experimental_exports)), 17L)
+  testthat::expect_length(complete_disposition, 30L)
+  testthat::expect_identical(anyDuplicated(complete_disposition), 0L)
+  testthat::expect_identical(
+    sort(complete_disposition),
+    approved_complete_disposition
+  )
+  testthat::expect_length(declared_exports, 17L)
+  testthat::expect_identical(anyDuplicated(declared_exports), 0L)
+  testthat::expect_identical(sort(declared_exports), expected_exports)
   testthat::expect_identical(namespace_exports, expected_exports)
   testthat::expect_false(any(internal_names %in% namespace_exports))
 })
