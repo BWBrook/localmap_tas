@@ -381,7 +381,19 @@ testthat::test_that("arcgis vector fixtures are clipped in AOI CRS", {
 
   res <- localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = cache_dir)
   vec <- sf::st_read(res$path[[1]], quiet = TRUE)
+  provenance <- yaml::read_yaml(res$provenance_path[[1]])
   testthat::expect_equal(sf::st_crs(vec)$epsg, sf::st_crs(aoi$aoi)$epsg)
+  testthat::expect_identical(provenance$status, "offline_fixture")
+  testthat::expect_true(provenance[["params.offline"]])
+  testthat::expect_identical(
+    provenance[["params.fixture_path"]],
+    "inst/extdata/jc_habitats.gpkg"
+  )
+
+  file.remove(res$path[[1]])
+  cached <- localmap::fetch_analysis_layers(list(layer), aoi = aoi, cache_dir = cache_dir)
+  cached_provenance <- yaml::read_yaml(cached$provenance_path[[1]])
+  testthat::expect_identical(cached_provenance$status, "offline_fixture")
 })
 
 testthat::test_that("analysis layer previews render PNGs", {

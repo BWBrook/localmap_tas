@@ -71,8 +71,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   on satellite imagery.
 
 ### Changed
-- R/renv baseline moved forward to Homebrew R 4.6.0 on the Mac mini; Makefile
-  R entrypoints now use the active `Rscript` on `PATH`.
+- R/renv baseline moved forward to R 4.6.x; Makefile R entrypoints use the
+  active `Rscript` on `PATH`, with decisive Mac mini validation on R 4.6.1.
 - `_targets.R` now delegates profile-specific expected-output assembly, report fallback rendering, TASVEG class lookup resolution, and manifest selection to internal helper functions to keep the pipeline declarative without changing target names or outputs.
 - Config handling is now split into load, migrate, validate, and resolve phases behind the existing `cfg_read()` entrypoint, preserving the schema and output layout while reducing coupling in `R/config.R`.
 - Camera-site internals are now separated by responsibility: defaults, graticule generation, and panel assembly live in dedicated helper modules instead of one oversized renderer file.
@@ -95,6 +95,10 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
+- `make bootstrap-qa` now preserves tracked `renv/activate.R` byte-for-byte
+  around `renv::restore()`, keeping repeated QA setup runs git-clean.
+- Fixture-backed offline ArcGIS vectors now retain `offline_fixture` provenance
+  on creation and cache reuse; genuine cached inputs retain `cache_hit`.
 - `jc_ci` and `tas_canonical_ci` now run full offline pipelines from packaged
   camera-site/vector fixtures instead of inheriting raw JC inputs or
   remote-only ArcGIS vector layers.

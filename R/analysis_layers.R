@@ -145,6 +145,10 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       units = layer$units,
       source_id = layer$source_id
     )
+    uses_offline_fixture <- identical(type, "vector_arcgis") &&
+      isTRUE(offline_flag) &&
+      !is.null(layer$fixture_path) &&
+      nzchar(layer$fixture_path)
     if (type %in% c("derived_slope", "derived_ndvi", "derived_nbr")) {
       source_key <- layer_cache_keys[[layer$source_id]]
       if (!is.null(source_key)) {
@@ -184,7 +188,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
         provenance_path,
         list(
           type = type,
-          status = "cache_hit",
+          status = if (uses_offline_fixture) "offline_fixture" else "cache_hit",
           cache_key = cache_key,
           cache_path = cache_path,
           output_path = output_path,
@@ -196,7 +200,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
     } else {
       prov_params <- params
       prov_source <- source_descriptor
-      prov_status <- "created"
+      prov_status <- if (uses_offline_fixture) "offline_fixture" else "created"
       prov_meta <- NULL
 
       if (identical(type, "vector_file")) {

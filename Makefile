@@ -17,7 +17,7 @@ bootstrap:
 	@$(RSCRIPT) scripts/bootstrap.R
 
 bootstrap-qa:
-	@$(RSCRIPT) -e "source('dependencies.R'); check_system_requirements(); if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); renv::restore(prompt=FALSE)" \
+	@$(RSCRIPT) -e "source('dependencies.R'); check_system_requirements(); if (!requireNamespace('renv', quietly=TRUE)) install.packages('renv'); restore_project_library()" \
 	        -e "source('dependencies.R'); install_project_qa_dependencies()"
 
 actionlint:

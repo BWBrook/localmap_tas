@@ -55,5 +55,5 @@ Verification commands:
 - Treat the new vector fixtures as deterministic CI fixtures only; live
   analyses that need authoritative LIST/MRT data should run with
   `LOCALMAP_ALLOW_NETWORK=1`.
-- Consider a later provenance polish so fixture-backed ArcGIS vectors report
-  an explicit `offline_fixture` status in their sidecar YAML.
+- Resolved in the WP-027 opening hygiene gate: fixture-backed ArcGIS vectors
+  report an explicit `offline_fixture` status in their sidecar YAML.

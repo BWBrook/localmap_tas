@@ -190,12 +190,13 @@ Format:
 **Rationale:** Prevents `renv::snapshot()` from requiring the full dev/test suggestion tree (e.g., devtools/pak dependencies), while keeping runtime reproducibility intact.
 **Status:** Active.
 
-## 2026-05-29 — Mac mini runtime baseline is R 4.6.0
+## 2026-05-29 — Mac mini runtime baseline is R 4.6.x
 **Decision:** Move the project lockfile and Makefile entrypoints forward to the
-Mac mini Homebrew R 4.6.0 baseline, treating the earlier R 4.5.3 pin as stale.
-**Rationale:** The Mac mini now has a complete Homebrew GIS/runtime stack for R
-4.6.0, and keeping the repo on the active host R reduces migration friction for
-ongoing R&D work.
+R 4.6 series, treating the earlier R 4.5.3 pin as stale. The migration began on
+Homebrew R 4.6.0; decisive current host validation used Homebrew R 4.6.1.
+**Rationale:** The Mac mini has a complete Homebrew GIS/runtime stack for R
+4.6.x, and keeping the repo on the active host R reduces migration friction for
+ongoing R&D work without implying an exact patch-release pin.
 **Status:** Active.
 
 ## 2026-05-29 — CI profiles use packaged offline fixtures

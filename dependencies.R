@@ -89,6 +89,23 @@ install_project_qa_dependencies <- function(pkgs = project_qa_dependencies(),
   install_missing_packages(pkgs, lib = lib)
 }
 
+restore_project_library <- function(
+  activation_path = "renv/activate.R",
+  restore = function() renv::restore(prompt = FALSE)
+) {
+  if (!file.exists(activation_path)) {
+    return(restore())
+  }
+
+  original <- readBin(
+    activation_path,
+    what = "raw",
+    n = file.info(activation_path)$size
+  )
+  on.exit(writeBin(original, activation_path), add = TRUE)
+  restore()
+}
+
 command_exists <- function(command) {
   nzchar(Sys.which(command))
 }

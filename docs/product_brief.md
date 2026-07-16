@@ -44,7 +44,8 @@ localmap_tas is a reproducible workflow for generating **publication-quality loc
 
 ## Constraints & assumptions
 
-- R 4.6.0 via the project `renv` lockfile
+- R 4.6.x with dependencies managed by the project `renv` lockfile; decisive
+  Mac mini host validation used R 4.6.1
 - Reproducibility: `renv` is the source of truth for the environment
 - Orchestration: `{targets}` is the canonical workflow runner
 - Spatial stack: `sf` and `terra` for geometry/raster operations; plotting via `ggplot2` (with optional extensions)

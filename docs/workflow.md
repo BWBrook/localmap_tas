@@ -65,8 +65,9 @@ Fix and repeat until coherent.
 ## 3) Reproducibility rules
 
 - All dependencies are managed via `renv`.
-- The current Mac mini baseline is Homebrew R 4.6.0; use the repo Makefile or
-  `Rscript` on `PATH` unless a future lockfile deliberately says otherwise.
+- The supported runtime baseline is R 4.6.x. The decisive Mac mini host
+  validation used Homebrew R 4.6.1; use the repo Makefile or `Rscript` on
+  `PATH` unless a future lockfile deliberately says otherwise.
 - Do not edit `renv.lock` manually.
 - Avoid hidden state:
   - no `setwd()`
@@ -84,6 +85,8 @@ Fix and repeat until coherent.
   - `brew install gdal geos proj udunits apache-arrow`
 - `scripts/bootstrap.R` and `make bootstrap-qa` now preflight these tools and
   stop early with an actionable message if they are missing.
+- `make bootstrap-qa` preserves the tracked `renv/activate.R` bytes around
+  `renv::restore()` so repeated QA setup does not dirty a clean checkout.
 
 ### Local datasets
 - Real-world datasets belong under `data/` (gitignored).
@@ -115,6 +118,8 @@ Fix and repeat until coherent.
 - Network fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
 - When network is disabled, imagery fetches fall back to placeholders with a warning.
 - ArcGIS vector layers must provide a `fixture_path` when offline; otherwise the run fails with an actionable error.
+- Fixture-backed offline ArcGIS vector sidecars report `status: offline_fixture`;
+  `status: cache_hit` is reserved for ordinary cached inputs.
 - Large downloads (e.g., canopy height) are gated by `LOCALMAP_ALLOW_LARGE_DOWNLOADS`; when disabled, placeholder rasters are written with a warning and no cache is saved.
 
 ## 5) When to ask the human

@@ -1,5 +1,27 @@
 # AGENT NOTES
 
+- 2026-07-16: WP-027 opening hygiene gate.
+  - Made `make bootstrap-qa` preserve tracked `renv/activate.R` byte-for-byte
+    around `renv::restore()`, preventing the renv 1.2.3 activation template
+    from leaving 344 trailing-whitespace-only line changes.
+  - Changed fixture-backed offline ArcGIS vector sidecars from generic
+    `created` / `cache_hit` states to `offline_fixture`, while preserving
+    `cache_hit` for ordinary cached inputs.
+  - Aligned current runtime guidance to R 4.6.x and recorded R 4.6.1 as the
+    decisive Mac mini host validation; dated R 4.6.0 runs remain historical.
+  - Verification:
+    - Focused regressions failed first on the missing restore wrapper and the
+      old `created` / `cache_hit` fixture statuses, then passed after the fixes.
+    - Two consecutive `make bootstrap-qa` runs passed under R 4.6.1; after
+      each run the tracked-diff SHA-256 remained `50746fcd0e90ea4097e1a6bdd4b71ad1d45efd1c77c945c5597e5be67aaacd2f`
+      and `renv/activate.R` remained `e94dd25c92b41d5137174135fe98825c153d42abe3ffe4ad7102d5475a341555`.
+    - `make lint` and `make test` passed; tests retained one expected network
+      skip and seven expected offline/spatial warnings.
+  - Provenance review: structured sidecar assertions confirmed
+    `status: offline_fixture`, `params.offline: TRUE`, and the packaged fixture
+    path on creation and cache reuse; the vector remained clipped in the AOI
+    CRS, and the ordinary raster cache test retained `status: cache_hit`.
+
 - 2026-05-29: Mac mini R 4.6.0 migration and full offline pipeline sweep.
   - Superseded the earlier R 4.5.3 Mac runtime pin: `renv.lock` now records R
     4.6.0, `renv` is upgraded to 1.2.3, and the Makefile uses the active
