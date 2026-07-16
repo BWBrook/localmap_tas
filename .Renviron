@@ -1,1 +1,1 @@
-RENV_PATHS_SANDBOX=renv/sandbox
+RENV_PATHS_SANDBOX="${PWD}/renv/sandbox"

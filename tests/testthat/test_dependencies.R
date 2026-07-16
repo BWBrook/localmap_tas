@@ -69,3 +69,46 @@ testthat::test_that("bootstrap uses the byte-preserving project restore", {
   testthat::expect_match(code, "restore_project_library\\(\\)")
   testthat::expect_false(grepl("renv::restore\\s*\\(", code, perl = TRUE))
 })
+
+testthat::test_that("plain R startup keeps sandbox paths valid after cwd changes", {
+  project_root <- normalizePath(
+    testthat::test_path("..", ".."),
+    winslash = "/",
+    mustWork = TRUE
+  )
+  probe <- tempfile(fileext = ".R")
+  writeLines(
+    c(
+      "is_absolute <- function(path) {",
+      "  slash <- intToUtf8(92L)",
+      "  startsWith(path, '/') || grepl('^[A-Za-z]:', path) || startsWith(path, paste0(slash, slash))",
+      "}",
+      "sandbox <- Sys.getenv('RENV_PATHS_SANDBOX')",
+      "grid_before <- find.package('grid')",
+      "setwd('man')",
+      "grid_after <- find.package('grid')",
+      "checks <- c(",
+      "  sandbox_absolute = is_absolute(sandbox),",
+      "  base_library_absolute = is_absolute(.Library),",
+      "  grid_before_absolute = is_absolute(grid_before),",
+      "  grid_after_absolute = is_absolute(grid_after),",
+      "  grid_namespace_exists = file.exists(file.path(grid_after, 'NAMESPACE'))",
+      ")",
+      "cat(paste(names(checks), checks, sep = '='), sep = '\\n')",
+      "if (!all(checks)) quit(status = 1L)"
+    ),
+    probe
+  )
+
+  withr::local_envvar(c(R_LIBS = NA, R_CMD = NA, R_LIBS_USER = NA))
+  output <- withr::with_dir(
+    project_root,
+    suppressWarnings(system2(file.path(R.home("bin"), "Rscript"), probe,
+      stdout = TRUE, stderr = TRUE
+    ))
+  )
+  status <- attr(output, "status", exact = TRUE)
+  if (is.null(status)) status <- 0L
+
+  testthat::expect_identical(status, 0L, info = paste(output, collapse = "\n"))
+})
