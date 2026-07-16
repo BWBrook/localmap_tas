@@ -6,6 +6,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Added
+- Settings-first onboarding across the README, Quarto site, vignette, and user
+  guides, with separate deterministic `jc_ci` and prerequisite-backed real-data
+  routes.
 - `make actionlint` as a first-class workflow check for GitHub Actions YAML.
 - Packaged offline vector fixtures for JC/TAS fire attributes, geology, land
   tenure, and reserve estate analysis layers.
@@ -71,6 +74,24 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   on satellite imagery.
 
 ### Changed
+- The pre-release public API is grouped into 13 stable functions and four
+  experimental transitional exports (`ala_configure()`,
+  `fetch_layer_registry()`, `generate_topo_tile_map()`, and `read_manifest()`).
+- Thirteen pipeline helpers are now internal, with these migration routes:
+  `ala_default_occurrence_fields()` to resolved fields from `cfg_read()`;
+  `build_layer_provenance()`, `write_attribution_report()`,
+  `write_coverage_summary()`, and `write_run_manifest()` to generated products
+  plus `validate_output_manifest()`; `combine_manifest_csvs()` to the configured
+  pipeline; `fetch_arcgis_imagery()` and `fetch_wms_imagery()` to configured
+  layers through `run_settings()`; `preview_manifest()` to `read_manifest()` and
+  ordinary table inspection; `validate_analysis_layers()` to
+  `fetch_analysis_layers()` or `run_settings()`; `validate_layer_registry()` to
+  the configured layer workflow; `write_site_attributes_long()` to
+  `build_site_attributes_long()`; and `write_site_attributes_wide()` to the
+  generated wide-table product. Internalization adds no runtime deprecation or
+  lifecycle warnings before release.
+- Generated documentation now goes to `outputs/quarto` and `outputs/pkgdown`;
+  the JC report renders to `outputs/reports/paper.html`.
 - R/renv baseline moved forward to R 4.6.x; Makefile R entrypoints use the
   active `Rscript` on `PATH`, with decisive Mac mini validation on R 4.6.1.
 - `_targets.R` now delegates profile-specific expected-output assembly, report fallback rendering, TASVEG class lookup resolution, and manifest selection to internal helper functions to keep the pipeline declarative without changing target names or outputs.
@@ -95,6 +116,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
+- Moved the Quarto project contract to recognized `docs/_quarto.yml`, repaired
+  its navigation and output root, and corrected the JC report YAML and all six
+  map/table/provenance paths under `outputs/jc/`.
 - `make bootstrap-qa` now preserves tracked `renv/activate.R` byte-for-byte
   around `renv::restore()`, keeping repeated QA setup runs git-clean.
 - Fixture-backed offline ArcGIS vectors now retain `offline_fixture` provenance

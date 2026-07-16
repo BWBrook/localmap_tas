@@ -1,108 +1,83 @@
-# localmap_tas — Reproducible local mapping workflow for Tasmania
+# localmap_tas: Reproducible local mapping for Tasmania
 
-localmap_tas is an R-based workflow for generating **publication-quality maps of field sites in Tasmania**.
-You configure a site (points + extent) and desired GIS layers (from The List and elsewhere), then run a reproducible pipeline to produce map figures and (optionally) site-level extracted attributes.
+`localmap` is an R package and `{targets}` workflow for configured Tasmanian
+field-site mapping. It turns site coordinates, an area of interest, and selected
+spatial layers into publication-ready maps, site-attribute tables, and explicit
+provenance.
 
-## What you get
+## Deterministic JC demonstration
 
-- A **site overview map** (basemap + site points + annotations)
-- A **multi-panel figure** (e.g., orthophoto, vegetation, elevation/slope, canopy)
-- Optional **site attribute extraction** (tidy table with provenance)
-- Reproducible runs via `renv` + `{targets}`
+From a clean checkout, restore the project environment and run the offline JC
+profile:
 
-## Quickstart (local)
-
-1. Restore the R environment:
-
-```r
-renv::restore(prompt = FALSE)
+```sh
+make bootstrap
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
 ```
 
-On macOS, install the required geospatial/runtime libraries once first:
+`jc_ci` uses packaged occurrence and camera-site fixtures, offline WMS/ArcGIS
+placeholders, and disabled topographic tiles. It does not promise
+`outputs/jc/maps/species_topo.png`, and its placeholder imagery is not evidence
+of a successful live service request.
+
+The deterministic route produces non-empty evidence including:
+
+- maps under `outputs/jc/maps/`, including species occurrences, overview,
+  camera sites, and PNG/PDF panel figures;
+- `coverage_summary.csv`, long Parquet attributes, and wide CSV attributes under
+  `outputs/jc/tables/`;
+- offline `tasveg_wms.png` and `topography_arcgis.png` placeholders under
+  `outputs/jc/layers/`; and
+- attribution and run-manifest records under `outputs/jc/provenance/`.
+
+## Real-data settings route
+
+`settings.example.yaml` is a real-data-only template. Before running it,
+`site.csv` must exist in the configured input directory with `site`, `lat`, and
+`lon` columns. `obs.csv` and `op.csv` are optional.
+
+```r
+localmap::run_settings("settings.example.yaml")
+```
+
+The command resolves the selected base profile, writes
+`outputs/<project>/run_config.yaml`, and runs the standard pipeline. The shell
+wrapper provides the same route:
+
+```sh
+Rscript scripts/run_project.R settings.example.yaml
+```
+
+See the [settings guide](../quarto/settings.html) for field resolution and input
+requirements, the [configuration reference](../quarto/config_reference.html)
+for the full profile schema, and the [layer guide](../quarto/layers_guide.html)
+before using live or local spatial sources.
+
+## Outputs and interpretation
+
+Outputs are written under `outputs/<profile>/` or the configured project output
+directory and are ignored by Git. Read
+[the output schema](../quarto/output_schema_v1.html) alongside provenance
+sidecars and the attribution report before interpreting a map or extracted
+value.
+
+## Contributors
+
+The supported commands and review order are in
+[Development Notes](../quarto/DEVELOPMENT.html). The mandatory implementation
+and artifact-review process is in [Workflow](../quarto/workflow.html);
+architecture and scope remain maintained in `docs/architecture.md` and
+`docs/roadmap.md`.
+
+On macOS, the spatial/runtime prerequisites are:
 
 ```sh
 brew install gdal geos proj udunits apache-arrow
 ```
 
-2. Refresh package metadata (recommended for contributors):
-
-```r
-devtools::document()
-```
-
-3. Run the pipeline:
-
-```r
-targets::tar_make()
-```
-
-Outputs are written to `outputs/` (ignored by git).
-
-Optional helper for non-`renv` workflows:
-
-```r
-source("dependencies.R")
-install_project_dependencies()
-```
-
-QA/bootstrap for contributors who want lint and package checks:
-
-```sh
-make bootstrap-qa
-make actionlint
-make lint
-make check
-```
-
-Optional local dataset (Judbury camera study):
-
-```r
-Sys.setenv(R_CONFIG_ACTIVE = "jc", TARGETS_PROFILE = "ci")
-targets::tar_make(names = c("camera_sites_file", "camera_sites_data", "aoi", "aoi_debug_plot"))
-```
-
-## Configuration
-
-Configuration lives in `config/config.yaml` and supports multiple profiles.
-Typical configuration includes:
-
-* site points input path (CSV/GeoPackage)
-* centroid and AOI size
-* layer/panel definitions
-* output paths and styling
-
-See:
-
-* `docs/product_brief.md`
-* `docs/architecture.md`
-* `docs/config_reference.md`
-* `docs/output_schema_v1.md`
-* `docs/roadmap.md`
-
-## Data sources and attribution
-
-This project is designed to work with spatial data from Land Tasmania’s “The List” open data services and downloads, as well as other sources.
-You are responsible for ensuring appropriate attribution and usage compliance for any layers you include in your figures.
-
-## Development
-
-Common tasks:
-
-* Bootstrap QA tools: `make bootstrap-qa`
-* Lint GitHub Actions workflows: `make actionlint`
-* Run lint: `make lint`
-* Run tests: `make test`
-* Run pipeline: `make pipeline`
-* Run R CMD check: `make check`
-
-The GitHub Actions workflow provisions the system libraries required by `{units}`,
-`{sf}`, and `{igraph}`, and uses `r-lib/actions/setup-pandoc@v2` so
-`R CMD check` can rebuild the vignette consistently.
-For local macOS development, the equivalent Homebrew prerequisites are
-`gdal`, `geos`, `proj`, `udunits`, and `apache-arrow`.
-
-See `docs/workflow.md` for the required engineering and artefact-review workflow.
+Common gates are `make test`, `make lint`, `make docs`, `make site`, and
+`make check`. Run `make bootstrap-qa` before lint or package checks.
 
 ## License
 
-MIT (see LICENSE).
+MIT (see `LICENSE`).

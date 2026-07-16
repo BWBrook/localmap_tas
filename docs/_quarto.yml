@@ -1,0 +1,45 @@
+project:
+  title: localmap
+  type: website
+  output-dir: ../outputs/quarto
+  render: [index.qmd, settings.md, PIPELINE.md, config_reference.md, layers_guide.md, output_schema_v1.md, workflow.md, DEVELOPMENT.qmd]
+
+website:
+  title: localmap
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: settings.md
+        text: Get started
+      - href: PIPELINE.md
+        text: Pipeline
+      - text: Guides
+        menu:
+          - href: config_reference.md
+            text: Configuration
+          - href: layers_guide.md
+            text: Layers
+          - href: output_schema_v1.md
+            text: Outputs
+          - href: workflow.md
+            text: Workflow
+          - href: DEVELOPMENT.qmd
+            text: Development
+      - href: ../pkgdown/articles/intro.html
+        text: Vignette
+      - href: ../pkgdown/reference/index.html
+        text: Reference
+      - href: ../reports/paper.html
+        text: JC report
+
+execute:
+  freeze: auto
+  echo: false
+  warning: false
+  message: false
+
+format:
+  html:
+    theme: cosmo
+    toc: true

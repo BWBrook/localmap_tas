@@ -1,15 +1,26 @@
 # Layer registry guide
 
-This guide describes how to add imagery layers via `data.layers` in `config/config.yaml`.
+This guide covers imagery selection, attribution, offline behavior, and
+interpretation for `data.layers` in `config/config.yaml`. Analysis-grade vector
+and raster inputs use `data.analysis_layers`; their complete fields are in the
+[configuration reference](config_reference.md).
 
-## 1) Define a layer
+## Choose a layer role
 
-Each layer entry must include:
-- `id`: unique ID used by maps and panels.
-- `type`: `wms`, `arcgis_export`, or `file`.
-- `attribution`: list with at least `source` (and optionally `license`, `credit`).
+- Use `wms` or `arcgis_export` for rendered contextual imagery. These products
+  can become visible placeholders when network access is unavailable.
+- Use `file` for a local image whose origin and licensing are already known.
+- Use `data.analysis_layers` when pixels or vector features feed site-attribute
+  extraction. Configure an offline fixture where supported; do not treat an
+  imagery placeholder as analysis data.
 
-### WMS example
+Every imagery entry needs a unique `id`, a `type`, and `attribution` containing
+at least `source`. Add `license` and `credit` whenever the provider supplies
+them. Confirm that the source scale, CRS, currency, resolution, and licence fit
+the intended scientific interpretation before selecting it.
+
+## WMS example
+
 ```yaml
 data:
   layers:
@@ -32,7 +43,8 @@ data:
         credit: "TASVEG"
 ```
 
-### ArcGIS export example
+## ArcGIS export example
+
 ```yaml
 data:
   layers:
@@ -52,7 +64,8 @@ data:
         credit: "Topography"
 ```
 
-### File example
+## Local-file example
+
 ```yaml
 data:
   layers:
@@ -64,9 +77,9 @@ data:
         source: "Local raster"
 ```
 
-## 2) Use layers in maps
+## Use layers in maps
 
-Overview maps can reference layer IDs:
+Overview maps reference layer IDs rather than repeating source definitions:
 
 ```yaml
 data:
@@ -77,8 +90,27 @@ data:
         opacity: 0.35
 ```
 
-## 3) Provenance and caching
+Check overlay CRS/alignment, opacity, labels, and whether the provider's useful
+scale matches the AOI. A successfully composed panel is not by itself evidence
+that every source was acquired live.
 
-- Each imagery output writes a sidecar `.yml` provenance file with request metadata.
-- Cached imagery is stored under `data/cache/` with deterministic keys.
-- Use `offline: true` to force placeholder imagery (CI-safe).
+## Provenance, cache, and placeholders
+
+- Imagery outputs have `.yml` sidecars with request and status metadata. Cached
+  imagery lives under `data/cache/` with deterministic keys.
+- `offline: true` or `LOCALMAP_ALLOW_NETWORK=0` forces an imagery placeholder
+  where that source supports graceful offline behavior. Expected warnings make
+  this substitution explicit.
+- `status: offline_placeholder` means the PNG is layout evidence only, not
+  fetched imagery and not a basis for ecological interpretation.
+- `status: cache_hit` means an existing acquired cache entry was reused; inspect
+  its request/provenance rather than assuming freshness.
+- `status: offline_fixture` identifies packaged/local analysis evidence used in
+  place of a remote source. It is deterministic demonstration evidence, not a
+  live-service check.
+- Attribution remains required for configured sources even when a placeholder
+  is rendered, because the final live workflow is designed around that source.
+
+Review layer sidecars together with `provenance/attribution.md` and
+`provenance/run_manifest.yml`. The [output guide](output_schema_v1.md) explains
+how those records relate to the declared products.

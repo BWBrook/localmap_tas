@@ -103,6 +103,29 @@ are validated in the pipeline via the `output_schema_v1` target.
 - `run_manifest` → `outputs/<profile>/provenance/run_manifest.yml`
 - `aoi_debug_plot` → `outputs/<profile>/maps/aoi_debug.png`
 
+## Interpreting outputs
+
+The manifest declares expected products and locations; file existence alone is
+not scientific validation. Interpret each product with its run context:
+
+- Maps and panel figures should be checked for AOI coverage, site placement,
+  CRS/alignment, annotation, source scale, and resolution.
+- Long attributes preserve one row per site/layer/attribute observation and are
+  the primary audit surface. The wide CSV is a convenience representation;
+  confirm its columns map back to the long table before analysis.
+- Layer `.yml` sidecars identify acquisition and cache status. In particular,
+  `offline_placeholder` or `placeholder` is layout-only imagery,
+  `offline_fixture` is deterministic fixture-backed evidence, and `cache_hit`
+  reuses a prior acquisition.
+- `provenance/analysis_layers.csv` records analysis-layer processing;
+  `provenance/attribution.md` supplies source credits; and
+  `provenance/run_manifest.yml` ties expected products to the completed run.
+- A placeholder must never be described as imagery fetched live, and its pixels
+  must not be used for ecological interpretation or attribute extraction.
+
+Read [Layer registry guide](layers_guide.md) for source selection and placeholder
+policy, and follow [Workflow](workflow.md) for visual and table review.
+
 ## Validation
 
 The `validate_output_manifest()` helper checks:

@@ -1,60 +1,66 @@
-# localmap_tas — Product brief
+# localmap_tas product brief
 
-## Summary
+## Product posture
 
-localmap_tas is a reproducible workflow for generating **publication-quality local maps of field sites in Tasmania**. Users specify a target location (centroid), map extent, site coordinates, and desired GIS layers (from The List and other sources). The workflow fetches and caches spatial layers, renders polished map panels, and can optionally extract per-site attributes from selected layers.
+`localmap` is a settings-first R package and reproducible `{targets}` workflow
+for configured Tasmanian field-site mapping. Users provide site coordinates,
+choose an AOI and spatial layers, and receive manuscript-ready maps, optional
+site attributes, and provenance that records sources and processing context.
 
-## Target users
+The product is Tasmania-centric rather than a general-purpose GIS or an
+interactive web-mapping application. Its primary users are ecologists,
+conservation practitioners, land managers, and students who need repeatable
+local spatial products.
 
-- Ecologists and conservation biologists
-- Land managers and practitioners
-- Students learning reproducible GIS workflows in R
+## Primary outcomes
 
-## Primary user outcomes
+1. Consistently framed overview, camera-site, occurrence, and multi-panel maps.
+2. Optional long and wide site-attribute tables derived from configured raster
+   and vector layers.
+3. Cached acquisitions, attribution, and run manifests that make outputs
+   reviewable and reproducible.
+4. Explicit offline degradation: imagery placeholders carry warnings and
+   provenance rather than silently representing live data.
 
-1. **Fast, repeatable figure generation** for manuscripts and reports:
-   - A site overview map (basemap + site points + optional coverage polygon)
-   - Multi-panel figures showing key covariates (e.g., vegetation, elevation, slope, canopy)
+## Deterministic demonstration route
 
-2. **Traceable provenance**:
-   - Every layer used in a figure is recorded (source, request params, CRS, date)
-   - Cached artefacts are reused across runs
+The repository demonstration is the two-step offline JC profile:
 
-3. **Optional site enrichment**:
-   - Extract raster/vector attributes at site points and write a tidy table
+```sh
+make bootstrap
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
+```
 
-## Core workflow (UX)
+`jc_ci` uses packaged occurrence and camera-site fixtures, offline WMS/ArcGIS
+placeholders, and disabled topographic tiles. It does not promise
+`outputs/jc/maps/species_topo.png`. The route demonstrates pipeline assembly and
+artifact contracts, not successful live imagery acquisition.
 
-1. Edit `config/config.yaml`:
-   - site points input (CSV / GeoPackage)
-   - centroid + bounding box size (and optional rotation)
-   - list of layers/panels to render
-2. Run a single command:
-   - `targets::tar_make()` (or `make pipeline`)
-3. Collect outputs from `outputs/`:
-   - `outputs/<profile>/maps/` (single maps + panels)
-   - `outputs/<profile>/tables/` (optional extracted attributes)
-   - `outputs/<profile>/provenance/` (metadata)
+## Real-data settings route
 
-## Non-goals
+`settings.example.yaml` is real-data only. Before running it, `site.csv` must
+exist in the configured input directory with `site`, `lat`, and `lon` columns;
+`obs.csv` and `op.csv` are optional.
 
-- Interactive web maps or a Shiny app (not in v1.0 scope)
-- A full general-purpose GIS replacement
-- Global-scale mapping; the default assumptions are Tasmania-centric
+```r
+localmap::run_settings("settings.example.yaml")
+```
 
-## Constraints & assumptions
+The authoritative field and resolution rules are in
+[Simplified settings workflow](settings.md). Advanced profile semantics remain
+in [Config reference](config_reference.md).
 
-- R 4.6.x with dependencies managed by the project `renv` lockfile; decisive
-  Mac mini host validation used R 4.6.1
-- Reproducibility: `renv` is the source of truth for the environment
-- Orchestration: `{targets}` is the canonical workflow runner
-- Spatial stack: `sf` and `terra` for geometry/raster operations; plotting via `ggplot2` (with optional extensions)
-- Primary data source: Land Tasmania “The List” open data services and downloads
-- The workflow must degrade gracefully when offline (placeholders + warnings)
+## Constraints
 
-## Definition of “publication quality”
+- R 4.6.x with the project `renv` lockfile as the dependency source of truth.
+- `{targets}` is the canonical pipeline runner; `sf` and `terra` provide the
+  spatial stack.
+- Land Tasmania LIST services and configured local/remote sources require
+  source-specific attribution and licensing review.
+- Network and large-download access must be explicit. Offline placeholders and
+  fixtures must remain distinguishable from fetched live data.
 
-- Consistent framing and CRS across panels
-- Scale bars and north arrows where appropriate
-- Configurable labels, fonts, and panel layout
-- Outputs at 300+ DPI suitable for manuscript figures
+Publication quality means coherent AOI framing and CRS, legible annotations,
+consistent panel layout, appropriate resolution, and provenance that supports
+scientific interpretation. Visual review remains required after technical
+tests pass.

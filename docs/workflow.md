@@ -1,153 +1,109 @@
-# Workflow (how work must be done in this repo)
+# Workflow
 
-This workflow is mandatory for the Codex CLI engineer and is also recommended for human contributors.
+This is the authoritative run, validation, and artifact-review workflow for
+contributors and automation.
 
-## 1) Core loop
+## 1. Choose a supported route
 
-1. Update plan and scope:
-   - Keep `docs/roadmap.md` current (what is “in scope” right now).
-   - Record any major design choices in `docs/decisions.md`.
+### Deterministic JC demonstration
 
-2. Implement incrementally:
-   - Keep `_targets.R` thin; implement logic in `R/`.
-   - Prefer small, composable functions.
+From a clean checkout, run:
 
-3. Verify technically:
-   - Run unit tests and lint.
-   - Ensure the demo profile runs end-to-end.
-   - Use the QA bootstrap before lint/package checks.
+```sh
+make bootstrap
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
+```
 
-4. Verify scientifically (Artefact Review Cycle):
-   - Generate maps/panels/tables.
-   - Inspect them and write interpretation notes.
-   - Iterate until outputs are coherent.
+`jc_ci` uses packaged occurrence and camera-site fixtures, offline WMS/ArcGIS
+placeholders, and disabled topographic tiles. It does not promise
+`outputs/jc/maps/species_topo.png`. Use this route for repeatable pipeline and
+artifact-contract evidence, not as proof that live map services work.
 
-5. Document:
-   - Update README and relevant docs when behavior/config changes.
-   - Add changelog entries for user-facing changes.
-   - Record WP evidence in `docs/log/` and create canonical run folders under
-     `outputs/canonical_runs/` (see `docs/log/README.md`).
+### Real-data settings
 
-## 2) Artefact Review Cycle (maps are “results”)
+Use the [settings guide](settings.md) for the primary real-data route.
+`settings.example.yaml` is real-data only: its configured input directory must
+contain `site.csv` with `site`, `lat`, and `lon`; `obs.csv` and `op.csv` are
+optional. The shell entry point is:
 
-For any mapping-related change:
+```sh
+Rscript scripts/run_project.R settings.yaml
+```
 
-### 2.1 Build artefacts
-Generate:
-- overview map(s)
-- panel figure(s)
-- optional attribute tables
-- provenance files
+The script delegates to the public settings API, writes the resolved run config
+under the project output directory, and runs the same target graph.
 
-### 2.2 Sanity checks (domain-level)
-Confirm:
-- site points are inside the AOI
-- basemap and overlays align (no obvious offsets)
-- scale bar distance is plausible for AOI size
-- north arrow behaves sensibly
-- legends/labels match configuration
-- output resolution matches expectations (e.g., 300 DPI)
+## 2. Implement incrementally
 
-### 2.3 Interpretation notes
-Add a short section to `docs/AGENT_NOTES.md`:
-- what the map shows
-- what looks wrong
-- what you will change next
+1. Keep the active roadmap scope and costly design decisions current.
+2. Keep `_targets.R` thin and place reusable logic in focused package functions.
+3. Add or update tests before behavior changes; preserve deterministic fixtures.
+4. Update user documentation and the Unreleased changelog when contracts change.
+5. Keep runtime data in `data/` and generated products in `outputs/`; never use
+   generated HTML or output artifacts as source files.
 
-Also add a WP log entry in `docs/log/` with:
-- artefacts inspected,
-- sanity/interpretation notes,
-- canonical run folder path.
+## 3. Validate technically
 
-### 2.4 Iterate
-Fix and repeat until coherent.
+Use the repository commands rather than softer ad hoc substitutes:
 
-## 3) Reproducibility rules
+```sh
+make bootstrap-qa
+make actionlint
+make lint
+LOCALMAP_ALLOW_NETWORK=0 make test
+make docs
+make site
+make check
+git diff --check
+```
 
-- All dependencies are managed via `renv`.
-- The supported runtime baseline is R 4.6.x. The decisive Mac mini host
-  validation used Homebrew R 4.6.1; use the repo Makefile or `Rscript` on
-  `PATH` unless a future lockfile deliberately says otherwise.
-- Do not edit `renv.lock` manually.
-- Avoid hidden state:
-  - no `setwd()`
-  - resolve paths via `here::here()`
-- All outputs go to `outputs/` and runtime caches to `data/`.
+`make test` is decisive and returns nonzero on a failure. Network-dependent
+tests stay gated by default. An established offline warning or network skip is
+not permission to accept a new warning, skip, or failure.
 
-### Container builds
-- Use `scripts/bootstrap_container.R` for Docker/Apptainer images (renv restore only).
-- The container bootstrap prefers r2u binaries to keep build times reasonable.
-- The container run should mount `data/` from the host when using local datasets (e.g., `data/raw/jc_camera_study/`).
+## 4. Review artifacts as scientific results
 
-### macOS prerequisites
-- On macOS, install the required Homebrew geospatial/runtime stack before the
-  first restore:
-  - `brew install gdal geos proj udunits apache-arrow`
-- `scripts/bootstrap.R` and `make bootstrap-qa` now preflight these tools and
-  stop early with an actionable message if they are missing.
-- `make bootstrap-qa` preserves the tracked `renv/activate.R` bytes around
-  `renv::restore()` so repeated QA setup does not dirty a clean checkout.
+After every output-affecting change:
 
-### Local datasets
-- Real-world datasets belong under `data/` (gitignored).
-- The Judbury camera study example lives at `data/raw/jc_camera_study/`.
-- Use profile `jc` to derive a compatible camera-site table at `data/interim/jc_camera_sites.csv`.
-- Simplified run (recommended for new users):
-  - Copy `settings.example.yaml` to `settings.yaml` and edit the paths/toggles.
-  - Run `Rscript scripts/run_project.R settings.yaml` (writes a run-specific config in `outputs/<project>/run_config.yaml`).
-- Minimal JC run:
-  - `R_CONFIG_ACTIVE=jc TARGETS_PROFILE=ci Rscript -e 'targets::tar_make(names = c(\"camera_sites_file\",\"camera_sites_data\",\"aoi\",\"aoi_debug_plot\",\"species_map\"))'`
-  - JC fixtures: `inst/extdata/occurrences_jc.csv` with species list `metadata/species_requests_jc.csv`.
-- Offline JC run for CI:
-  - `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline`
-- Tasmania canonical example (LIST orthophoto + TASVEG + LIST DEM export with fixture fallback; optional roads/localities overlays):
-  - `R_CONFIG_ACTIVE=tas_canonical LOCALMAP_ALLOW_NETWORK=1 Rscript -e 'targets::tar_make()'`
-  - Offline/CI-safe variant: `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
+1. Generate overview, occurrence/camera, and panel maps; site-attribute tables;
+   layer sidecars; attribution; and run-manifest products relevant to the run.
+2. Confirm all site points lie within the AOI and that base layers, overlays,
+   graticules, labels, scale bars, north arrows, legends, and panel extents are
+   coherent.
+3. Check dimensions and resolution against the intended use, and compare table
+   row/column content with the configured sites and layers.
+4. Read provenance before interpreting pixels or values. In particular,
+   distinguish live acquisition and cache hits from `offline_fixture`,
+   `offline_placeholder`, or other placeholder status.
+5. Record what the artifacts show, anything suspicious, and any required
+   iteration in the work package that owns the change.
+6. Fix, rerun, and reinspect until the products are coherent. Passing tests alone
+   is not artifact acceptance.
 
-## 4) Data acquisition rules
+See [Layer registry guide](layers_guide.md) and
+[Output schema v1](output_schema_v1.md) for the interpretation contracts.
 
-- Remote layers must be cached deterministically.
-- Remote failures must be explicit (warnings/errors) and never silently produce empty maps.
-- Network-dependent tests must be gated (off by default).
-- See `docs/layers_guide.md` for adding WMS/ArcGIS/file layers via the registry.
+## 5. Reproducibility and acquisition rules
 
-### Offline/network contract
-- Offline mode is the default for CI and fixture profiles (`demo`, `jc_ci`).
-- `jc_ci` and `tas_canonical_ci` are clean-clone profiles and must use packaged
-  camera-site/vector fixtures rather than raw files under `data/`.
-- Network fetches are disabled unless `LOCALMAP_ALLOW_NETWORK=1` is set.
-- When network is disabled, imagery fetches fall back to placeholders with a warning.
-- ArcGIS vector layers must provide a `fixture_path` when offline; otherwise the run fails with an actionable error.
-- Fixture-backed offline ArcGIS vector sidecars report `status: offline_fixture`;
-  `status: cache_hit` is reserved for ordinary cached inputs.
-- Large downloads (e.g., canopy height) are gated by `LOCALMAP_ALLOW_LARGE_DOWNLOADS`; when disabled, placeholder rasters are written with a warning and no cache is saved.
+- `renv.lock` is authoritative; never hand-edit it.
+- Avoid hidden state and resolve project paths consistently.
+- Cache remote layers deterministically. Network or source failures must warn or
+  fail explicitly and must never silently produce a misleading map.
+- Network fetches require `LOCALMAP_ALLOW_NETWORK=1`. Large downloads require
+  `LOCALMAP_ALLOW_LARGE_DOWNLOADS=1` and compatible configuration.
+- Offline imagery may use visible placeholders. Offline ArcGIS vector/raster
+  analysis requires configured fixtures or an actionable failure.
+- Fixture-backed sidecars retain `offline_fixture`; ordinary cached inputs use
+  `cache_hit`. Placeholder status must remain visible in provenance.
+- Containers use `scripts/bootstrap_container.R` and mount real datasets rather
+  than baking them into images.
 
-## 5) When to ask the human
+On macOS, install `gdal`, `geos`, `proj`, `udunits`, and `apache-arrow` through
+Homebrew before the first restore. The bootstrap scripts preflight this stack.
 
-Write succinct questions into `docs/questions_for_human.md` only when:
-- blocked by missing credentials or a required dataset choice,
-- a major design fork is ambiguous and costly to reverse,
-- repeated attempts fail and you need guidance.
+## 6. Stop and escalate
 
-Default is to decide and proceed.
-
-## 6) QA command set
-
-Recommended command sequence for QA-enabled environments:
-
-- `make bootstrap-qa`
-- `make actionlint`
-- `make lint`
-- `make test`
-- `R_CONFIG_ACTIVE=demo TARGETS_PROFILE=ci Rscript -e 'targets::tar_make()'`
-- `R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline`
-- `R_CONFIG_ACTIVE=tas_canonical_ci TARGETS_PROFILE=ci make pipeline`
-- `make check`
-
-### CI environment notes
-- GitHub Actions provisions the system libraries required by the QA bootstrap:
-  - `libudunits2-dev` for `{units}`
-  - `libproj-dev`, `libgdal-dev`, and `libgeos-dev` for `{sf}`
-  - `libglpk-dev` for `{igraph}`
-- GitHub Actions provisions Pandoc via `r-lib/actions/setup-pandoc@v2` so `R CMD check` can rebuild the package vignette.
-- Validate workflow edits locally with `make actionlint` before pushing CI changes.
+Stop when required credentials/data are unavailable, a consequential design fork
+is ambiguous, a validation/render/link gate fails, warnings or skips exceed the
+accepted baseline, or repeated attempts cannot resolve a problem. Preserve the
+evidence and ask one succinct question rather than broadening scope.

@@ -37,6 +37,26 @@ internal_names <- c(
   "write_site_attributes_wide"
 )
 
+documented_internal_topics <- c(
+  "ala_default_occurrence_fields",
+  "analysis_layer_types",
+  "build_layer_provenance",
+  "combine_manifest_csvs",
+  "fetch_arcgis_imagery",
+  "fetch_camera_wms_tile",
+  "fetch_wms_imagery",
+  "prepare_camera_site_context",
+  "preview_manifest",
+  "render_aoi_debug_plot",
+  "validate_analysis_layers",
+  "validate_layer_registry",
+  "write_attribution_report",
+  "write_coverage_summary",
+  "write_run_manifest",
+  "write_site_attributes_long",
+  "write_site_attributes_wide"
+)
+
 expected_exports <- sort(c(stable_exports, experimental_exports))
 
 approved_complete_disposition <- c(
@@ -209,4 +229,107 @@ testthat::test_that("stable exports preserve ordered formals and default text", 
       info = function_name
     )
   }
+})
+
+testthat::test_that("pkgdown indexes every public export exactly once", {
+  config <- yaml::read_yaml(testthat::test_path("..", "..", "_pkgdown.yml"))
+  internal_sections <- vapply(
+    config$reference,
+    function(section) identical(tolower(section$title), "internal"),
+    logical(1)
+  )
+  public_reference <- config$reference[!internal_sections]
+  public_indexed <- unname(unlist(
+    lapply(public_reference, `[[`, "contents"),
+    use.names = FALSE
+  ))
+  internal_indexed <- unname(unlist(
+    lapply(config$reference[internal_sections], `[[`, "contents"),
+    use.names = FALSE
+  ))
+
+  testthat::expect_identical(sum(internal_sections), 1L)
+  testthat::expect_identical(
+    vapply(public_reference, function(section) length(section$contents), integer(1)),
+    c(2L, 4L, 3L, 4L, 4L)
+  )
+  testthat::expect_identical(sort(public_indexed), expected_exports)
+  testthat::expect_identical(anyDuplicated(public_indexed), 0L)
+  testthat::expect_false(any(internal_names %in% public_indexed))
+  testthat::expect_identical(
+    sort(internal_indexed),
+    sort(documented_internal_topics)
+  )
+  testthat::expect_identical(anyDuplicated(internal_indexed), 0L)
+  testthat::expect_length(intersect(internal_indexed, expected_exports), 0L)
+})
+
+testthat::test_that("documentation namespace calls use public exports", {
+  root <- testthat::test_path("..", "..")
+  paths <- c(
+    file.path(root, "README.md"),
+    list.files(
+      file.path(root, "docs"),
+      "[.](md|qmd)$",
+      recursive = TRUE,
+      full.names = TRUE
+    ),
+    file.path(root, "vignettes", "intro.Rmd"),
+    file.path(root, "reports", "paper.qmd")
+  )
+  text <- paste(
+    vapply(
+      paths,
+      function(path) paste(readLines(path, warn = FALSE), collapse = "\n"),
+      character(1)
+    ),
+    collapse = "\n"
+  )
+  hits <- regmatches(
+    text,
+    gregexpr(
+      "localmap::(?!:)[A-Za-z][A-Za-z0-9_.]*(?=\\s*\\()",
+      text,
+      perl = TRUE
+    )
+  )[[1]]
+  names_used <- sub("localmap::", "", hits, fixed = TRUE)
+  testthat::expect_true(all(names_used %in% expected_exports))
+})
+
+testthat::test_that("Makefile test target stops on test failure", {
+  expected <- paste0(
+    "\t@$(RSCRIPT) -e \"",
+    "devtools::test(reporter='summary', stop_on_failure=TRUE)\""
+  )
+  makefile <- testthat::test_path("..", "..", "Makefile")
+  testthat::expect_true(expected %in% readLines(makefile, warn = FALSE))
+})
+
+testthat::test_that("report output stays outside the source tree", {
+  root <- testthat::test_path("..", "..")
+
+  testthat::expect_false(file.exists(file.path(root, "reports", "paper.html")))
+  testthat::expect_true(
+    "/reports/paper.html" %in% readLines(file.path(root, ".gitignore"), warn = FALSE)
+  )
+})
+
+testthat::test_that("standalone report embeds generated media", {
+  report <- readLines(
+    testthat::test_path("..", "..", "reports", "paper.qmd"),
+    warn = FALSE
+  )
+  front_matter_end <- which(report == "---")[[2L]]
+  metadata <- yaml::yaml.load(
+    paste(report[2L:(front_matter_end - 1L)], collapse = "\n")
+  )
+
+  embeds_media <- is.list(metadata$format) &&
+    is.list(metadata$format$html) &&
+    isTRUE(metadata$format$html$`embed-resources`)
+  testthat::expect_true(embeds_media)
+  testthat::expect_length(grep("knitr::asis_output", report, fixed = TRUE), 2L)
+  testthat::expect_length(grep("knitr::image_uri", report, fixed = TRUE), 2L)
+  testthat::expect_length(grep("knitr::include_graphics", report, fixed = TRUE), 0L)
 })

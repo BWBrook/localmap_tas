@@ -1,33 +1,37 @@
-title: localmap Overview
-format: html
+---
+title: localmap
 ---
 
-Welcome to localmap, the species occurrence mapping compendium.
+`localmap` creates reproducible maps, site-attribute tables, and provenance for
+configured Tasmanian field sites. Start with one of two deliberately separate
+routes.
 
-- Environment: `renv`
-- Pipeline: `{targets}`
-- Tests: `{testthat}`
-- Docs: Quarto (`docs/` and `reports/`)
-- Species data sourced with `{galah}` from the Atlas of Living Australia
+## Deterministic JC demonstration
 
-Quick links:
-
-- Pipeline overview: `docs/PIPELINE.md`
-- Development notes: `docs/DEVELOPMENT.qmd`
-- Report: `reports/paper.qmd`
-- Species requests: `metadata/species_requests.csv`
-
-Run locally (RStudio Console):
-
-```r
-renv::restore(prompt = FALSE)
-devtools::document()
-targets::tar_make()
+```sh
+make bootstrap
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
 ```
 
-If you need to supplement a non-`renv` library, run:
+`jc_ci` uses packaged occurrence and camera-site fixtures, offline WMS/ArcGIS
+placeholders, and disabled topographic tiles. It does not promise
+`outputs/jc/maps/species_topo.png`; placeholder layers are not live imagery.
+
+## Real-data settings route
+
+`settings.example.yaml` is a real-data-only template. Before running it,
+`site.csv` must exist in the configured input directory with `site`, `lat`, and
+`lon` columns. `obs.csv` and `op.csv` are optional.
 
 ```r
-source("dependencies.R")
-install_project_dependencies()
+localmap::run_settings("settings.example.yaml")
 ```
+
+Read the [settings guide](settings.md) for inputs and field resolution, then use
+the [pipeline overview](PIPELINE.md), [configuration reference](config_reference.md),
+[layer guide](layers_guide.md), and [output guide](output_schema_v1.md) as needed.
+
+Package-level examples are in the
+[getting-started vignette](../pkgdown/articles/intro.html), all public functions
+are in the [reference index](../pkgdown/reference/index.html), and the rendered
+fixture-backed evidence is in the [JC report](../reports/paper.html).

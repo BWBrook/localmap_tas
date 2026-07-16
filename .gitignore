@@ -32,6 +32,7 @@ src/
 
 # outputs
 outputs/
+/reports/paper.html
 /*.tar.gz
 /*.zip
 

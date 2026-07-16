@@ -1,3 +1,6 @@
+# Real-data-only template; this is not the clean-checkout demonstration input.
+# Before running, input_dir must contain site.csv with site, lat, and lon.
+# obs.csv and op.csv are optional. Set either filename to "" when absent.
 settings:
   project: "judbury_cameras"
   base_profile: "jc"

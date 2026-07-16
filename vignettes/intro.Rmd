@@ -7,32 +7,53 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This vignette introduces the localmap compendium structure and shows how to
-access configuration and the input manifest without attaching the package.
+This vignette introduces the primary settings and configuration APIs, then one
+bounded advanced ALA workflow. The repository's deterministic `jc_ci` route is
+fixture-backed; the settings example below is deliberately real-data only.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 ```
 
-```{r}
-# Read config and manifest using fully-qualified calls
-cfg <- localmap::cfg_read()
-mf  <- localmap::read_manifest(cfg$data$manifest)
-mf
+## Run a real-data project
+
+Before running `settings.example.yaml`, `site.csv` must exist in the configured
+input directory with `site`, `lat`, and `lon` columns. `obs.csv` and `op.csv` are
+optional.
+
+```{r run-settings, eval=FALSE}
+localmap::run_settings("settings.example.yaml")
 ```
 
-```{r}
-#| eval: false
-# Resolve species queries defined in metadata/species_requests.csv
-requests <- localmap::read_species_requests(cfg$data$species_requests)
-resolved <- localmap::ala_resolve_species(requests)
-head(resolved)
+Use `cfg_read()` when you need to inspect a complete named profile without
+starting the pipeline:
+
+```{r read-config}
+cfg <- localmap::cfg_read(profile = "jc_ci")
+names(cfg$data)
 ```
 
-If you've executed the pipeline (`targets::tar_make()`), you can also read
-targets directly:
+## Bounded advanced ALA example
 
-```{r}
-#| eval: false
-targets::tar_read(manifest_summary)
+The advanced ALA functions support a controlled workflow below settings. This
+example limits resolution and acquisition to the first requested taxon and is
+not evaluated during the vignette build because it requires live ALA access.
+
+```{r ala-example, eval=FALSE}
+requests <- localmap::read_species_requests("metadata/species_requests.csv")
+one_taxon <- localmap::ala_resolve_species(requests[1, , drop = FALSE])
+occurrences <- localmap::ala_fetch_occurrences(
+  one_taxon,
+  min_year = 2020,
+  state_province = "Tasmania"
+)
+head(occurrences)
 ```
+
+## Experimental exports
+
+`ala_configure()`, `fetch_layer_registry()`, `generate_topo_tile_map()`, and
+`read_manifest()` remain callable for transitional workflows but are
+experimental. New end-to-end work should begin with `run_settings()`; use
+`cfg_read()` and the grouped stable reference when lower-level control is
+required.

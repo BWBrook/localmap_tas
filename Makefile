@@ -1,6 +1,6 @@
 RSCRIPT = Rscript
 
-.PHONY: help bootstrap bootstrap-qa actionlint lint test pipeline docs check
+.PHONY: help bootstrap bootstrap-qa actionlint lint test pipeline docs site check
 
 help:
 	@echo "Common tasks:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make test        # run unit tests"
 	@echo "  make pipeline    # run targets pipeline"
 	@echo "  make docs        # render docs/ with Quarto"
+	@echo "  make site        # build the pkgdown reference site"
 	@echo "  make check       # run R CMD check (requires bootstrap-qa)"
 
 bootstrap:
@@ -31,7 +32,7 @@ lint:
 	@$(RSCRIPT) -e "source('dependencies.R'); with_qa_library({ if (!requireNamespace('lintr', quietly=TRUE)) stop('lintr is not installed. Run make bootstrap-qa first.'); l <- lintr::lint_package(); if (length(l) > 0) { print(l); quit(status = 1) } })"
 
 test:
-	@$(RSCRIPT) -e "devtools::test(reporter='summary')"
+	@$(RSCRIPT) -e "devtools::test(reporter='summary', stop_on_failure=TRUE)"
 
 pipeline:
 	@$(RSCRIPT) -e "targets::tar_make()"

@@ -1,56 +1,60 @@
 ---
-title: Development Notes
-format: gfm
+title: Development
 ---
 
-This repository hosts localmap, the species occurrence sourcing and mapping
-workflow.
+Contributors work on the `localmap` R package and its reproducible `{targets}`
+workflow. Keep `_targets.R` declarative, put package logic in `R/`, use explicit
+package namespaces, keep small fixtures in `inst/extdata/`, and never commit
+runtime data or generated outputs.
 
-Conventions:
+## Environment
 
-- Dependencies managed with `renv`; do not commit large data.
-- Pipeline with `{targets}`; helpers live in `R/` and are sourced via `tar_source("R")`.
-- Use explicit namespace qualifiers (`pkg::fun()`) inside functions; avoid `library()` calls in package code.
-- Tests in `tests/testthat/` with table-driven cases.
-- Small example data under `inst/extdata/`.
-- Species queries live in `metadata/species_requests.csv`; add rows with
-  `species_id`, `common_name`, and/or `scientific_name`. The pipeline resolves
-  names via `{galah}` and downloads occurrences into `species_occurrences`.
-  Set occurrence filters (year, state province, optional latitude, polygon
-  boundaries) in `config/config.yaml` under `data$occurrence`. Ensure the ALA
-  section includes a valid email and `download_reason_id`.
-
-Common tasks (run in RStudio Console):
-
-```r
-renv::restore(prompt = FALSE)
-devtools::document()
-testthat::test_dir("tests/testthat", reporter = "summary")
-targets::tar_make()
-pkgdown::build_site(preview = FALSE)
-```
-
-If you are intentionally working outside the restored `renv` library, you can
-use the optional helper:
-
-```r
-source("dependencies.R")
-install_project_dependencies()
-```
-
-QA tasks from the shell:
+On macOS, install the spatial/runtime libraries once:
 
 ```sh
+brew install gdal geos proj udunits apache-arrow
+```
+
+Restore the project environment and package metadata with:
+
+```sh
+make bootstrap
+```
+
+`renv.lock` is the dependency source of truth. Use `make bootstrap-qa` before
+lint and package checks; do not edit the lockfile by hand.
+
+## Validation order
+
+Run the narrowest relevant test while developing, then use this repository-level
+order before review:
+
+```sh
+make bootstrap
 make bootstrap-qa
 make actionlint
 make lint
+LOCALMAP_ALLOW_NETWORK=0 make test
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
+make docs
+make site
+R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci quarto render reports/paper.qmd --output-dir outputs/reports
 make check
+git diff --check
 ```
 
-CI-specific notes:
+Tests are decisive: `make test` exits nonzero on any failure. The accepted
+offline suite warnings describe deliberate placeholder/spatial conditions, and
+the network test skips unless `LOCALMAP_ALLOW_NETWORK=1`; new warnings or skips
+require investigation rather than normalization.
 
-- The GitHub Actions workflow provisions the system libraries needed for QA restores and checks:
-  - `libudunits2-dev` for `{units}`
-  - `libproj-dev`, `libgdal-dev`, and `libgeos-dev` for `{sf}`
-  - `libglpk-dev` for `{igraph}`
-- The workflow also provisions Pandoc with `r-lib/actions/setup-pandoc@v2` so `R CMD check` can rebuild `vignettes/intro.Rmd`.
+After the pipeline and renders, inspect maps, tables, provenance, both sites,
+and the report. Follow the [workflow](workflow.md) for the required artifact
+review cycle and [output guide](output_schema_v1.md) for interpretation.
+
+## CI notes
+
+GitHub Actions provisions `libudunits2-dev`, `libproj-dev`, `libgdal-dev`,
+`libgeos-dev`, and `libglpk-dev`, plus Pandoc through
+`r-lib/actions/setup-pandoc@v2`. Local workflow edits should pass
+`make actionlint` before they are proposed for CI.

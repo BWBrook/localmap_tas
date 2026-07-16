@@ -1,13 +1,13 @@
 template:
   bootstrap: 5
 
-destination: docs/pkgdown
+destination: outputs/pkgdown
 
 url: ~
 
 home:
   title: localmap
-  description: Toolkit for species occurrence sourcing and mapping
+  description: Reproducible, settings-first local mapping for Tasmanian field sites
 
 navbar:
   structure:
@@ -15,23 +15,37 @@ navbar:
     right: [search]
 
 reference:
-  - title: Configuration
+  - title: Primary
+    contents: [cfg_read, run_settings]
+  - title: "Advanced: configuration and spatial"
+    contents: [build_aoi_from_config, build_coverage_zone, fetch_analysis_layers, build_site_attributes_long]
+  - title: "Advanced: ALA"
+    contents: [read_species_requests, ala_resolve_species, ala_fetch_occurrences]
+  - title: "Advanced: rendering and outputs"
+    contents: [render_overview_map, map_species_occurrences, assemble_panel_figure, validate_output_manifest]
+  - title: Experimental
+    contents: [ala_configure, fetch_layer_registry, generate_topo_tile_map, read_manifest]
+  - title: internal
     contents:
-      - cfg_read
-  - title: Manifests
-    contents:
-      - read_manifest
-      - preview_manifest
-      - combine_manifest_csvs
-  - title: Atlas of Living Australia
-    contents:
-      - read_species_requests
-      - ala_resolve_species
-      - ala_fetch_occurrences
       - ala_default_occurrence_fields
-      - ala_configure
+      - analysis_layer_types
+      - build_layer_provenance
+      - combine_manifest_csvs
+      - fetch_arcgis_imagery
+      - fetch_camera_wms_tile
+      - fetch_wms_imagery
+      - prepare_camera_site_context
+      - preview_manifest
+      - render_aoi_debug_plot
+      - validate_analysis_layers
+      - validate_layer_registry
+      - write_attribution_report
+      - write_coverage_summary
+      - write_run_manifest
+      - write_site_attributes_long
+      - write_site_attributes_wide
 
 articles:
   - title: Vignettes
     contents:
-      - vignettes/intro.Rmd
+      - intro

@@ -3,6 +3,13 @@
 This document describes the configuration schema used by `config/config.yaml`.
 The active profile is selected via `R_CONFIG_ACTIVE` (default: `default`).
 
+Most real-data users should begin with the concise
+[settings workflow](settings.md), which resolves a small project overlay against
+one of these profiles. Use this reference when selecting a base profile or when
+the settings interface does not expose the required advanced field. This guide
+describes existing configuration semantics; it does not create a second run
+interface.
+
 ## Schema version
 
 - `schema_version` (integer, required): current schema version. Must be `2`.
@@ -198,7 +205,12 @@ Derived fields:
 
 Profiles can `inherit` from `default` and override keys (e.g., `demo`, `ci`).
 Always keep `schema_version` in the active profile (inherited from `default` if not overridden).
-The `jc_ci` profile inherits `jc` but forces offline-safe settings for CI runs.
+The `jc` profile represents the Judbury camera-study configuration and expects
+its configured real inputs unless settings override them.
+The `jc_ci` profile inherits `jc` but uses packaged occurrence and camera-site
+fixtures, forces WMS/ArcGIS imagery to offline placeholders, and disables
+topographic tiles. It is the deterministic checkout profile and does not produce
+or promise `outputs/jc/maps/species_topo.png`.
 The `tas_canonical` profile provides the Tasmania layer stack (Orthophoto + TASVEG + DEM) anchored to the JC AOI.
 The `tas_canonical_ci` profile inherits `tas_canonical` and forces offline-safe imagery/vector settings.
 ### `data.coverage`
