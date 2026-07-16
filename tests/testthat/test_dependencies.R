@@ -147,3 +147,54 @@ testthat::test_that("sandbox startup test clears inherited state and checks exac
   )))
   testthat::expect_true(any(grepl("sandbox_exact", target_test, fixed = TRUE)))
 })
+
+testthat::test_that("source builds exclude checkout-only validation contracts", {
+  project_root <- normalizePath(
+    testthat::test_path("..", ".."),
+    winslash = "/",
+    mustWork = TRUE
+  )
+  build_dir <- tempfile("localmap-source-build-")
+  dir.create(build_dir)
+  output <- withr::with_dir(
+    build_dir,
+    suppressWarnings(system2(
+      file.path(R.home("bin"), "R"),
+      c(
+        "CMD", "build", "--no-build-vignettes", "--no-resave-data",
+        shQuote(project_root)
+      ),
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+  )
+  status <- attr(output, "status", exact = TRUE)
+  if (is.null(status)) status <- 0L
+  testthat::expect_identical(status, 0L, info = paste(output, collapse = "\n"))
+
+  tarballs <- list.files(
+    build_dir,
+    pattern = "[.]tar[.]gz$",
+    full.names = TRUE
+  )
+  testthat::expect_length(tarballs, 1L)
+  manifest <- utils::untar(tarballs[[1L]], list = TRUE)
+  checkout_only <- file.path(
+    "tests",
+    "testthat",
+    c(
+      "test_dependencies.R",
+      "test-documentation-site.R",
+      "test-public-api-checkout.R",
+      "test-wp027-harness.R"
+    )
+  )
+
+  testthat::expect_false(any(startsWith(manifest, "localmap/.superpowers")))
+  testthat::expect_false(any(
+    file.path("localmap", checkout_only) %in% manifest
+  ))
+  testthat::expect_true(
+    "localmap/tests/testthat/test-public-api.R" %in% manifest
+  )
+})

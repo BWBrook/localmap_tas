@@ -20,3 +20,8 @@
 ^\.renvignore$
 ^CITATION\.cff$
 ^reports/CITATION\.cff$
+^\.superpowers$
+^tests/testthat/test_dependencies\.R$
+^tests/testthat/test-documentation-site\.R$
+^tests/testthat/test-public-api-checkout\.R$
+^tests/testthat/test-wp027-harness\.R$
