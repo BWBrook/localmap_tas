@@ -1,5 +1,30 @@
 # AGENT NOTES
 
+- 2026-07-16: WP-027 public API and documentation freeze closeout. Canonical
+  evidence is `outputs/canonical_runs/WP-027_20260716T140421Z` at validated
+  HEAD `cc363426bebcf4275dba8275f11a45c5ceefcef5`; the full ledger is
+  `docs/log/WP-027_2026-07-16_public-api-docs-freeze.md`.
+  - Overview/species maps: all 13 fixture sites are internally aligned, and
+    the overview and occurrence maps pass Tasmanian frame, AOI/coverage,
+    point-placement, and cartographic-element sanity checks.
+  - Camera/panel maps: site alignment and PNG/PDF panel consistency hold;
+    transparency may render black in some viewers, right annotations can clip,
+    and the topography fallback duplicates the occurrence map.
+  - Two imagery placeholders: TASVEG WMS and topography ArcGIS PNGs are uniform
+    and lack in-image labels, but sidecars/docs record `offline_placeholder`;
+    accepted as non-live fixture evidence, not release imagery.
+  - Three tables: coverage is one positive `0.4353884464` km2 row for 13 sites
+    at 50 m in `EPSG:28355`; long data are 234 rows/156 non-missing with unique
+    keys, and wide data are 13 rows/182 of 273 scientific cells non-missing;
+    all-null placeholders, 26 null provenance paths, and the TASVEG fixture
+    schema gap remain non-blocking.
+  - Quarto/pkgdown: desktop Chromium review passed settings-first/two-workflow
+    framing, navigation, five tiers, 17 exports, no internal reference pages,
+    and all 395 generated links with none missing.
+  - Report: the standalone canonical HTML passed with two embedded maps, two
+    table previews, attribution, run-manifest content, and all six corrected
+    `outputs/jc/` paths.
+
 - 2026-07-16: WP-027 opening hygiene gate.
   - Made `make bootstrap-qa` preserve tracked `renv/activate.R` byte-for-byte
     around `renv::restore()`, preventing the renv 1.2.3 activation template
