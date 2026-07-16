@@ -1,32 +1,26 @@
-.wp027_script_file <- local({
-  frames <- sys.frames()
-  candidates <- vapply(
-    frames,
-    function(frame) {
-      if (is.null(frame$ofile)) NA_character_ else as.character(frame$ofile)
+.wp027_is_sourced <- local({
+  calls <- sys.calls()
+  any(vapply(
+    calls,
+    function(call) {
+      call_name <- paste(deparse(call[[1L]]), collapse = "")
+      call_name %in% c("source", "base::source", "sys.source", "base::sys.source")
     },
-    character(1)
-  )
-  candidates <- candidates[!is.na(candidates) & nzchar(candidates)]
-  harness_candidates <- candidates[basename(candidates) == "validate_wp027.R"]
-  working_candidate <- file.path(getwd(), "scripts", "validate_wp027.R")
+    logical(1)
+  ))
+})
+
+.wp027_script_file <- local({
   file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
   invoked <- if (length(file_arg) == 1L) sub("^--file=", "", file_arg) else NA_character_
   invoked_root <- if (is.na(invoked)) NA_character_ else dirname(dirname(invoked))
-  invoked_is_repo_harness <- !is.na(invoked) &&
+  invoked_is_harness <- !.wp027_is_sourced &&
+    !is.na(invoked) &&
     identical(basename(invoked), "validate_wp027.R") &&
     identical(basename(dirname(invoked)), "scripts") &&
     file.exists(file.path(invoked_root, "Makefile")) &&
     file.exists(file.path(invoked_root, "DESCRIPTION"))
-  if (file.exists(working_candidate)) {
-    path <- working_candidate
-  } else if (length(harness_candidates) > 0L) {
-    path <- harness_candidates[[length(harness_candidates)]]
-  } else if (invoked_is_repo_harness) {
-    path <- invoked
-  } else {
-    path <- NA_character_
-  }
+  path <- if (invoked_is_harness) invoked else NA_character_
   if (is.na(path)) NA_character_ else normalizePath(path, winslash = "/", mustWork = FALSE)
 })
 
@@ -1327,6 +1321,12 @@ wp027_finalize_canonical <- function(
     hash_manifest(temp_run)
     stage <- "external-verification"
     external_verify(temp_run)
+    stage <- "repository-state"
+    wp027_require_clean_repo(
+      root,
+      expected_head = validated_head,
+      state_reader = state_reader
+    )
     stage <- "promotion"
     promote(temp_run, final_run)
   }, error = function(error) {
@@ -1411,7 +1411,7 @@ wp027_main <- function(args = commandArgs(trailingOnly = TRUE)) {
 }
 
 wp027_is_direct_invocation <- function() {
-  if (is.na(.wp027_script_file)) return(FALSE)
+  if (.wp027_is_sourced || is.na(.wp027_script_file)) return(FALSE)
   file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
   if (length(file_arg) != 1L) return(FALSE)
   invoked <- sub("^--file=", "", file_arg)

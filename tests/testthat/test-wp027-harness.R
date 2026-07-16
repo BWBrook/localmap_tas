@@ -474,25 +474,27 @@ testthat::test_that("the CLI rejects invalid input and passes both dry-run fixtu
 testthat::test_that("nested Rscript sourcing returns without invoking main", {
   sandbox <- tempfile("wp027-nested-source-")
   dir.create(file.path(sandbox, "scripts"), recursive = TRUE)
-  sandbox_script <- file.path(sandbox, "scripts", "validate_wp027.R")
-  wrapper <- file.path(sandbox, "validate_wp027.R")
-  testthat::expect_true(file.copy(wp027_test_script, sandbox_script))
+  wrapper <- file.path(sandbox, "scripts", "validate_wp027.R")
   writeLines(c(
     "source_env <- new.env(parent = globalenv())",
     sprintf(
       "sys.source(%s, envir = source_env)",
-      encodeString(sandbox_script, quote = "\"")
+      encodeString(wp027_test_script, quote = "\"")
     ),
     "cat('WP-027 nested source returned\\n')"
   ), wrapper)
   before <- wp027_snapshot_tree(file.path(wp027_test_root, "outputs"))
 
-  output <- suppressWarnings(system2(
-    file.path(R.home("bin"), "Rscript"),
-    wrapper,
-    stdout = TRUE,
-    stderr = TRUE
-  ))
+  output <- local({
+    old <- setwd(sandbox)
+    on.exit(setwd(old), add = TRUE)
+    suppressWarnings(system2(
+      file.path(R.home("bin"), "Rscript"),
+      wrapper,
+      stdout = TRUE,
+      stderr = TRUE
+    ))
+  })
   status <- attr(output, "status")
   if (is.null(status)) status <- 0L
   after <- wp027_snapshot_tree(file.path(wp027_test_root, "outputs"))
@@ -641,4 +643,52 @@ testthat::test_that("canonical repository state is clean and immutable", {
     testthat::expect_true("validated_head=abc123" %in% metadata, info = name)
     testthat::expect_true("stage=repository-state" %in% failed, info = name)
   }
+
+  parent <- tempfile("wp027-repo-state-after-hash-")
+  dir.create(parent)
+  temp_run <- file.path(parent, ".WP-027_TEST.tmp")
+  final_run <- file.path(parent, "WP-027_TEST")
+  dir.create(temp_run)
+  writeLines("payload", file.path(temp_run, "payload.txt"))
+  mutated <- FALSE
+  promotion_calls <- 0L
+  state_reader <- function(root) {
+    if (mutated) {
+      list(head = "abc123", clean = FALSE, detail = " M hash-mutated-file")
+    } else {
+      list(head = "abc123", clean = TRUE, detail = character())
+    }
+  }
+  hash_manifest <- function(...) {
+    mutated <<- TRUE
+    invisible(TRUE)
+  }
+  promote <- function(...) {
+    promotion_calls <<- promotion_calls + 1L
+    invisible(TRUE)
+  }
+
+  testthat::expect_error(
+    wp027_finalize_canonical(
+      temp_run = temp_run,
+      final_run = final_run,
+      root = "unused",
+      validated_head = "abc123",
+      started_utc = "2026-07-16T00:00:00Z",
+      state_reader = state_reader,
+      hash_manifest = hash_manifest,
+      external_verify = function(...) invisible(TRUE),
+      promote = promote
+    ),
+    "Tracked repository state is not clean",
+    fixed = TRUE
+  )
+  metadata <- readLines(file.path(temp_run, "metadata.txt"), warn = FALSE)
+  failed <- readLines(file.path(temp_run, "FAILED"), warn = FALSE)
+  testthat::expect_identical(promotion_calls, 0L)
+  testthat::expect_true(dir.exists(temp_run))
+  testthat::expect_false(dir.exists(final_run))
+  testthat::expect_true("status=FAILED" %in% metadata)
+  testthat::expect_true("stage=repository-state" %in% failed)
+  testthat::expect_true(any(grepl("hash-mutated-file", failed, fixed = TRUE)))
 })
