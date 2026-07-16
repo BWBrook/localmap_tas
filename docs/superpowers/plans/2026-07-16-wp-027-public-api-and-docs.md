@@ -22,7 +22,7 @@
 - Do not alter `DESCRIPTION`, `_targets.R`, `config/config.yaml`, `renv.lock`, `docs/release_checklist.md`, versions, tags, or release metadata.
 - Do not fetch, pull, push, publish, contact remotes, create a release payload, or begin WP-028 packaging.
 - Use local commits with the exact task messages below. Stage exact paths only.
-- Stop on a dirty or conflicting owned path, unexplained inventory drift, unexpected warning/skip, failed gate, or scope expansion; preserve evidence and report the owning task.
+- Stop on a dirty or conflicting owned path, unexplained inventory drift, any warning/skip outside the exact accepted baselines below, failed gate, or scope expansion; preserve evidence and report the owning task.
 
 ## Execution And Review Protocol
 
@@ -123,7 +123,7 @@ Add two `test_that` blocks: one compares sorted namespace exports to the exact 1
 - [ ] **Step 3: Prove the intended red state**
 
 ```sh
-Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary')"
+Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary', stop_on_failure = TRUE)"
 ```
 
 Expected: only export-tier expectations fail because the 13 helpers remain exported; all 13 formal comparisons already pass. Stop on any other failure.
@@ -161,23 +161,49 @@ Change only `localmap::name` to `localmap:::name`; preserve all 32 tests and 80 
 - [ ] **Step 6: Regenerate and inspect package metadata**
 
 ```sh
+manuals=(
+  man/ala_configure.Rd
+  man/fetch_layer_registry.Rd
+  man/generate_topo_tile_map.Rd
+  man/read_manifest.Rd
+)
+first_diff="$(mktemp "${TMPDIR:-/tmp}/wp027-roxygen-first.XXXXXX")"
+second_diff="$(mktemp "${TMPDIR:-/tmp}/wp027-roxygen-second.XXXXXX")"
+trap 'rm -f "$first_diff" "$second_diff"' EXIT HUP INT TERM
+
 Rscript -e "devtools::document()"
 git diff --name-only -- DESCRIPTION NAMESPACE man
 sed -n '/^export(/p' NAMESPACE
+
+first_hashes="$(shasum -a 256 "${manuals[@]}")"
+git diff --binary -- NAMESPACE "${manuals[@]}" > "$first_diff"
+
+Rscript -e "devtools::document()"
+second_hashes="$(shasum -a 256 "${manuals[@]}")"
+git diff --binary -- NAMESPACE "${manuals[@]}" > "$second_diff"
+test "$first_hashes" = "$second_hashes"
+cmp -s "$first_diff" "$second_diff"
+
+for file in "${manuals[@]}"; do
+  perl -0777 -e 'exit((/\n\n\z/ && !/\n\n\n\z/) ? 0 : 1)' "$file"
+done
+
+rm -f "$first_diff" "$second_diff"
+trap - EXIT HUP INT TERM
 ```
 
-Expected: only `NAMESPACE` and the four transitional manuals change; `NAMESPACE` contains the exact 17 exports and retains `importFrom(rlang,.data)`; `DESCRIPTION` and internal manuals remain unchanged.
+Expected: only `NAMESPACE` and the four transitional manuals change; `NAMESPACE` contains the exact 17 exports and retains `importFrom(rlang,.data)`; `DESCRIPTION` and internal manuals remain unchanged. Roxygen2 8.0.0 generates exactly one terminal blank line in each named transitional manual. The second `devtools::document()` preserves all four manual hashes and the full `NAMESPACE`/manual diff byte-for-byte. Never hand-edit `NAMESPACE` or any `.Rd` file to remove these generator-owned blank lines.
 
 - [ ] **Step 7: Run focused and full verification**
 
 ```sh
-Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary')"
-LOCALMAP_ALLOW_NETWORK=0 Rscript -e "devtools::test(filter = 'provenance_outputs|combine|imagery_arcgis|imagery_wms|network_optional|preview|analysis_layers|layer_registry|site_attributes', reporter = 'summary')"
-LOCALMAP_ALLOW_NETWORK=0 make test
-git diff --check
+Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary', stop_on_failure = TRUE)"
+LOCALMAP_ALLOW_NETWORK=0 Rscript -e "devtools::test(filter = 'provenance_outputs|combine|imagery_arcgis|imagery_wms|network_optional|preview|analysis_layers|layer_registry|site_attributes', reporter = 'summary', stop_on_failure = TRUE)"
+LOCALMAP_ALLOW_NETWORK=0 Rscript -e "devtools::test(reporter = 'summary', stop_on_failure = TRUE)"
+git diff --check -- R tests/testthat NAMESPACE
 ```
 
-Expected: `FAIL 0`, `WARN 0`; only the explicitly disabled network test skips with its established reason. Internal public-access scan is empty, triple-colon files equal the nine-file allowlist, migrated counts remain `32/80`, and post-Task-1 lexical totals are exactly `94/252`.
+Expected: the public-API run has `FAIL 0`, `WARN 0`, `SKIP 0`. The focused migrated run has exactly `FAIL 0`, six pre-existing offline/spatial warnings, and one skip with exact reason `Network fetch disabled (set LOCALMAP_ALLOW_NETWORK=1 to enable).` The full suite has exactly `FAIL 0`, seven pre-existing offline/spatial warnings, and that same single network skip. Capture the complete warning text and test context from both summaries; any additional warning, skip, or failure blocks Task 1. Internal public-access scan is empty, triple-colon files equal the nine-file allowlist, migrated counts remain `32/80`, and post-Task-1 lexical totals are exactly `94/252`. The scoped diff check reports no finding outside the four generator-owned manuals handled after staging.
 
 - [ ] **Step 8: Review checkpoint and exact local commit**
 
@@ -185,11 +211,21 @@ Independent spec review must compare the 30-function disposition and all default
 
 ```sh
 git add R/ala_configure.R R/ala_default_occurrence_fields.R R/analysis_layer_validation.R R/coverage_zone.R R/data_preview.R R/data_readers.R R/imagery_arcgis.R R/imagery_wms.R R/layer_registry.R R/manifest.R R/map_species_occurrences.R R/provenance_outputs.R R/site_attributes.R tests/testthat/test-public-api.R tests/testthat/test_provenance_outputs.R tests/testthat/test_combine.R tests/testthat/test_imagery_arcgis.R tests/testthat/test_imagery_wms.R tests/testthat/test_network_optional.R tests/testthat/test_preview.R tests/testthat/test_analysis_layers.R tests/testthat/test_layer_registry.R tests/testthat/test_site_attributes.R NAMESPACE man/ala_configure.Rd man/fetch_layer_registry.Rd man/generate_topo_tile_map.Rd man/read_manifest.Rd
-git diff --cached --check
+cached_check="$(git diff --cached --check 2>&1)" || cached_status=$?
+cached_status="${cached_status:-0}"
+test "$cached_status" -ne 0
+actual="$(printf '%s\n' "$cached_check" | sed -E 's/:[0-9]+:/:LINE:/' | LC_ALL=C sort)"
+expected="$(printf '%s\n' \
+  'man/ala_configure.Rd:LINE: new blank line at EOF.' \
+  'man/fetch_layer_registry.Rd:LINE: new blank line at EOF.' \
+  'man/generate_topo_tile_map.Rd:LINE: new blank line at EOF.' \
+  'man/read_manifest.Rd:LINE: new blank line at EOF.' | LC_ALL=C sort)"
+test "$actual" = "$expected"
+git diff --cached --name-only
 git commit -m "agent: refactor(WP-027): freeze public API contract"
 ```
 
-Expected: exactly 28 staged paths, successful local commit, then a clean worktree. Record its SHA; do not push.
+Expected: exactly 28 staged paths. The cached diff check has exactly four findings, each `new blank line at EOF.` for one named roxygen2-generated transitional manual, and no other whitespace finding; these are accepted only because Step 6 proved one terminal blank line plus idempotent hashes/full diff. Any different path, duplicate finding, trailing whitespace, or other cached warning blocks the commit. Commit locally, record its SHA, and do not push.
 
 ---
 
@@ -214,7 +250,7 @@ Expected: exactly 28 staged paths, successful local commit, then a clean worktre
 ```sh
 git status --short
 git show -s --format=%s HEAD
-Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary')"
+Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary', stop_on_failure = TRUE)"
 ```
 
 Expected: clean tree; HEAD message is Task 1's exact commit message; the working checkout's exact export/formals contract passes.
@@ -275,9 +311,17 @@ testthat::test_that("documentation namespace calls use public exports", {
   names_used <- sub("localmap::", "", hits, fixed = TRUE)
   testthat::expect_true(all(names_used %in% expected_exports))
 })
+
+testthat::test_that("Makefile test target stops on test failure", {
+  expected <- paste0(
+    "\t@$(RSCRIPT) -e \"",
+    "devtools::test(reporter='summary', stop_on_failure=TRUE)\""
+  )
+  testthat::expect_true(expected %in% readLines("Makefile", warn = FALSE))
+})
 ```
 
-Run the focused test before editing docs and expect the new pkgdown test to fail on stale/incomplete groups; after source changes both tests must pass.
+Run the focused test with `stop_on_failure = TRUE` before editing docs and expect the new pkgdown/Makefile contracts to fail on stale configuration; after source changes all contract tests must pass.
 
 - [ ] **Step 5: Define pkgdown, Quarto, and Makefile interfaces**
 
@@ -307,7 +351,37 @@ project:
   render: [index.qmd, settings.md, PIPELINE.md, config_reference.md, layers_guide.md, output_schema_v1.md, workflow.md, DEVELOPMENT.qmd]
 ```
 
-Navigation must link Home, Get started, Pipeline, all guides, `../pkgdown/articles/intro.html`, `../pkgdown/reference/index.html`, and `../reports/paper.html`. Add `site` to `.PHONY` and Makefile help; retain the existing `site` recipe and `docs: quarto render docs/` recipe.
+Navigation must link Home, Get started, Pipeline, all guides, `../pkgdown/articles/intro.html`, `../pkgdown/reference/index.html`, and `../reports/paper.html`. Add `site` to `.PHONY` and Makefile help; retain the existing `site` recipe and `docs: quarto render docs/` recipe. Replace the Makefile test recipe with this exact decisive gate:
+
+```make
+test:
+	@$(RSCRIPT) -e "devtools::test(reporter='summary', stop_on_failure=TRUE)"
+```
+
+After the static contract test passes, run this controlled probe to prove an actual failing test makes `make test` return nonzero without retaining a probe file:
+
+```sh
+probe=tests/testthat/test-wp027-make-failure-probe.R
+probe_log="$(mktemp "${TMPDIR:-/tmp}/wp027-make-test.XXXXXX")"
+test ! -e "$probe"
+cleanup_probe() { rm -f "$probe" "$probe_log"; }
+trap cleanup_probe EXIT HUP INT TERM
+printf '%s\n' \
+  'testthat::test_that("WP-027 controlled make failure", {' \
+  '  testthat::expect_true(FALSE, info = "WP027 controlled failure")' \
+  '})' > "$probe"
+set +e
+LOCALMAP_ALLOW_NETWORK=0 make test > "$probe_log" 2>&1
+probe_status=$?
+set -e
+test "$probe_status" -ne 0
+rg -n -F 'WP027 controlled failure' "$probe_log"
+cleanup_probe
+trap - EXIT HUP INT TERM
+test ! -e "$probe"
+```
+
+Expected: the controlled run is nonzero and its raw output contains the named failure. A zero status blocks Task 2. After cleanup, rerun the normal focused/full gates; no probe file or log may enter Git.
 
 - [ ] **Step 6: Correct the report and Unreleased changelog**
 
@@ -327,7 +401,8 @@ Under Unreleased in `docs/CHANGELOG.md`, record settings-first onboarding, 13 st
 - [ ] **Step 7: Run source, pipeline, render, and link checks in order**
 
 ```sh
-Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary')"
+Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary', stop_on_failure = TRUE)"
+LOCALMAP_ALLOW_NETWORK=0 make test
 make bootstrap
 LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
 make docs
@@ -336,7 +411,7 @@ R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci quarto render reports/paper.qmd --outpu
 git diff --check
 ```
 
-Expected: all commands exit `0`; every required JC product from A4 is non-empty; Quarto, pkgdown, and report entry points are non-empty. Run a base-R HTML scan that extracts `href`, ignores scheme/protocol-relative/mail/data/anchor links, strips query/fragment suffixes, resolves relative targets, and reports zero missing links.
+Expected: all commands exit `0`; hardened `make test` reports exactly `FAIL 0`, seven accepted offline/spatial warnings, and one established network skip with no additional warning/skip; every required JC product from A4 is non-empty; Quarto, pkgdown, and report entry points are non-empty. Run a base-R HTML scan that extracts `href`, ignores scheme/protocol-relative/mail/data/anchor links, strips query/fragment suffixes, resolves relative targets, and reports zero missing links.
 
 The non-empty JC assertion must use exactly these paths:
 
@@ -383,6 +458,7 @@ Expected: only named sources are staged; no `outputs/` path is staged; commit su
 - Pure/tested helpers: `wp027_normalize_formals()`, `wp027_inventory_tests()`, `wp027_scan_internal_references()`, `wp027_assert_nonempty()`, `wp027_extract_relative_links()`, `wp027_scan_relative_links()`, `wp027_hash_manifest()`, `wp027_verify_hash_manifest()`, `wp027_promote_verified()`, `wp027_run_gate()`, `wp027_execute_specs()`.
 - Entry points: `wp027_run_dry_run()`, `wp027_run_canonical()`, `wp027_main()`; CLI is `Rscript scripts/validate_wp027.R [--dry-run]`.
 - `commands.tsv` columns are exactly `sequence`, `gate`, `kind`, `started_utc`, `ended_utc`, `command`, `arguments`, `environment`, `exit_status`, `stdout_path`, `stderr_path`.
+- The Tests gate consumes Task 2's hardened `make test` recipe, so any test failure returns nonzero. Its separate raw stdout/stderr remain under `steps/`; Test contracts writes `test-warning-inventory.tsv` with exact columns `scope`, `kind`, `ordinal`, `test`, `text`, `accepted` and rejects a full-suite inventory other than seven accepted offline/spatial warnings plus the one established network skip.
 - Canonical output is exactly one `outputs/canonical_runs/WP-027_<UTC_TIMESTAMP>` promoted from sibling `.WP-027_<UTC_TIMESTAMP>.tmp` by verified `file.rename()` only.
 
 **Stop Conditions:** Do not run the canonical no-argument harness in Task 3. Stop if the script runs when sourced, dry-run touches repository outputs or real commands, failure evidence is lost, hashes can be bypassed, command order differs, or full tests regress.
@@ -404,11 +480,11 @@ testthat::expect_true(dir.exists(bad_run))
 testthat::expect_false(dir.exists(bad_final))
 ```
 
-Run `Rscript -e "devtools::test(filter = 'wp027-harness', reporter = 'summary')"`; expected red state is inability to source the absent script, not unrelated package failure.
+Run `Rscript -e "devtools::test(filter = 'wp027-harness', reporter = 'summary', stop_on_failure = TRUE)"`; expected controlled nonzero red state is inability to source the absent script, not unrelated package failure.
 
 - [ ] **Step 2: Implement fixed inventories and source-safe dispatch**
 
-Encode the 13 internal names, nine allowed test paths, per-file `test_that`/`expect_*` baselines, suite minima `92/243`, 11 command columns, and required JC/docs/report paths as constants. Guard direct invocation:
+Encode the 13 internal names, nine allowed test paths, per-file `test_that`/`expect_*` baselines, suite minima `92/243`, warning baselines `focused = 6 warnings + 1 network skip` and `full = 7 warnings + 1 network skip`, 11 command columns, and required JC/docs/report paths as constants. Guard direct invocation:
 
 ```r
 wp027_main <- function(args = commandArgs(trailingOnly = TRUE)) {
@@ -436,13 +512,13 @@ c(
 )
 ```
 
-Map them respectively to: `make bootstrap`; `make bootstrap-qa`; `Rscript -e "devtools::document()"`; `make test`; internal test contracts; `Rscript scripts/validate_wp027.R --dry-run`; `make lint`; offline profiled `make pipeline`; `make docs`; `make site`; profiled Quarto report render; internal artifact assertions; internal link scan; `make check`; `git diff --check`; internal evidence collection.
+Map them respectively to: `make bootstrap`; `make bootstrap-qa`; `Rscript -e "devtools::document()"`; hardened `make test`; internal test/warning contracts; `Rscript scripts/validate_wp027.R --dry-run`; `make lint`; offline profiled `make pipeline`; `make docs`; `make site`; profiled Quarto report render; internal artifact assertions; internal link scan; `make check`; `git diff --check`; internal evidence collection.
 
-Bootstrap must precede QA bootstrap, and QA bootstrap must precede both lint and package check. The JC environment is exactly `LOCALMAP_ALLOW_NETWORK=0`, `LOCALMAP_ALLOW_LARGE_DOWNLOADS=0`, `R_CONFIG_ACTIVE=jc_ci`, `TARGETS_PROFILE=ci`; report environment is exactly `R_CONFIG_ACTIVE=jc_ci`, `TARGETS_PROFILE=ci`.
+Bootstrap must precede QA bootstrap, and QA bootstrap must precede both lint and package check. Before canonical execution, assert the Makefile Tests command is exactly `devtools::test(reporter='summary', stop_on_failure=TRUE)`; do not duplicate or bypass it with a softer direct test call. The JC environment is exactly `LOCALMAP_ALLOW_NETWORK=0`, `LOCALMAP_ALLOW_LARGE_DOWNLOADS=0`, `R_CONFIG_ACTIVE=jc_ci`, `TARGETS_PROFILE=ci`; report environment is exactly `R_CONFIG_ACTIVE=jc_ci`, `TARGETS_PROFILE=ci`.
 
 - [ ] **Step 4: Implement first-failure logging and evidence collection**
 
-For each gate, write separate `steps/<sequence>-<slug>.stdout.log` and `.stderr.log`, UTC start/end, exact ordered argument/environment encodings, integer status, and one concise `validation.log` record. On first nonzero status, write `FAILED` with gate/status/detail, print the retained temp path, stop, and never create/replace canonical output.
+For each gate, write separate `steps/<sequence>-<slug>.stdout.log` and `.stderr.log`, UTC start/end, exact ordered argument/environment encodings, integer status, and one concise `validation.log` record. Preserve the Tests gate's raw summary output, extract every warning/skip with its test context into `test-warning-inventory.tsv`, and require exactly seven accepted offline/spatial warnings plus one skip with text `Network fetch disabled (set LOCALMAP_ALLOW_NETWORK=1 to enable).`; any additional warning, skip, or failure stops the run. On first nonzero status, write `FAILED` with gate/status/detail, print the retained temp path, stop, and never create/replace canonical output.
 
 The Test contracts and Relative links gates write `test-contract-counts.tsv` and `docs/link-scan.tsv` directly inside the temporary run. After all gates pass, retain those ledger files and copy accepted `outputs/jc/`, `outputs/quarto/`, `outputs/pkgdown/`, and `outputs/reports/paper.html` into:
 
@@ -451,6 +527,7 @@ metadata.txt
 commands.tsv
 validation.log
 test-contract-counts.tsv
+test-warning-inventory.tsv
 SHA256SUMS
 steps/
 jc/
@@ -475,13 +552,13 @@ Dry-run specs must contain none of `Rscript`, `make`, `quarto`, `git`, or `valid
 - [ ] **Step 6: Verify focused tests, dry run, and full suite**
 
 ```sh
-Rscript -e "devtools::test(filter = 'wp027-harness', reporter = 'summary')"
+Rscript -e "devtools::test(filter = 'wp027-harness', reporter = 'summary', stop_on_failure = TRUE)"
 Rscript scripts/validate_wp027.R --dry-run
 make test
 git diff --check
 ```
 
-Expected: eight focused blocks pass; dry-run prints its exact pass line and creates no repository output; full suite passes and remains above `92/243`; all migrated-file counts and internal-reference rules remain exact.
+Expected: eight focused blocks pass; dry-run prints its exact pass line and creates no repository output; hardened `make test` returns zero with exactly seven accepted offline/spatial warnings and one established network skip, while the suite remains above `92/243`; all migrated-file counts and internal-reference rules remain exact. Any extra warning/skip or absent raw warning inventory blocks Task 3.
 
 - [ ] **Step 7: Review checkpoint and exact local commit**
 
@@ -506,7 +583,7 @@ Expected: exactly two staged files, successful local commit, clean worktree. Rec
 
 **Interfaces:**
 - Consumes: a committed clean Tasks 1-3 tree and no-argument `Rscript scripts/validate_wp027.R`.
-- Consumes canonical `metadata.txt`, `commands.tsv`, `validation.log`, `test-contract-counts.tsv`, `docs/link-scan.tsv`, `SHA256SUMS`, gate logs, JC products, both sites, and report.
+- Consumes canonical `metadata.txt`, `commands.tsv`, `validation.log`, `test-contract-counts.tsv`, `test-warning-inventory.tsv`, `docs/link-scan.tsv`, `SHA256SUMS`, gate logs, JC products, both sites, and report.
 - Produces: one evidence ledger, one AGENT_NOTES closeout with six artifact interpretation bullets, and exact commit `agent: docs(WP-027): record validation closeout`.
 - Does not edit canonical evidence or produce release/version/tag/push/WP-028 artifacts.
 
@@ -545,10 +622,11 @@ test ! -e "$canonical/FAILED"
 (cd "$canonical" && shasum -a 256 -c SHA256SUMS)
 column -t -s $'\t' "$canonical/commands.tsv"
 column -t -s $'\t' "$canonical/test-contract-counts.tsv"
+column -t -s $'\t' "$canonical/test-warning-inventory.tsv"
 column -t -s $'\t' "$canonical/docs/link-scan.tsv"
 ```
 
-Expected: canonical structure matches Task 3; 16 ordered status-zero command rows have separate existing streams; nine migrated baselines are unchanged and suite totals do not fall; link columns are `source,href,target,exists` with all `TRUE`; no `FAILED`; every hash is `OK`.
+Expected: canonical structure matches Task 3; 16 ordered status-zero command rows have separate existing streams; nine migrated baselines are unchanged and suite totals do not fall; the warning inventory has exactly seven accepted offline/spatial warning rows and one established network-skip row with no additional warning/skip/failure; link columns are `source,href,target,exists` with all `TRUE`; no `FAILED`; every hash is `OK`.
 
 Audit behavior and return-value evidence with this exact stable-function map:
 
@@ -598,7 +676,7 @@ Create the WP log with exactly these headings:
 ## Acceptance audit
 ```
 
-Record baseline and validated HEAD; 13/4/13 disposition; nine pre/post rows and full counts; all 13 focused behavior/return test mappings; all 16 command/environment/results with raw relative pointers; literal canonical path; dry-run, check, link, hash, and atomic rename results; two-route/report sanity; every inspected artifact and observed concern; A1-A15 direct evidence. Retain three uncertainties: fixtures are demonstration evidence, offline placeholders do not test live services, and visual review is not quantitative spatial-accuracy validation.
+Record baseline and validated HEAD; 13/4/13 disposition; nine pre/post rows and full counts; all 13 focused behavior/return test mappings; all 16 command/environment/results with raw relative pointers; literal canonical path; dry-run, check, link, hash, and atomic rename results; two-route/report sanity; every inspected artifact and observed concern; A1-A15 direct evidence. Under test evidence, record the exact accepted baseline: public API `0 warnings/0 skips/0 failures`; focused migrations `6 warnings/1 established network skip/0 failures`; full suite `7 warnings/1 established network skip/0 failures`, with the complete normalized warning text/test context and a statement that no additional warning or skip occurred. Under generated metadata, record that roxygen2 8.0.0 produced exactly one terminal blank line in each of `man/ala_configure.Rd`, `man/fetch_layer_registry.Rd`, `man/generate_topo_tile_map.Rd`, and `man/read_manifest.Rd`; a second `devtools::document()` preserved their SHA-256 hashes and full generated diff; the cached diff check contained exactly those four `new blank line at EOF.` findings; and no generated file was hand-edited. Retain three uncertainties: fixtures are demonstration evidence, offline placeholders do not test live services, and visual review is not quantitative spatial-accuracy validation.
 
 Append a dated `2026-07-16` WP-027 closeout near the top of `docs/AGENT_NOTES.md`. Include exactly six interpretation bullets for: overview/species maps; camera/panel maps; two imagery placeholders; three tables; Quarto/pkgdown; report. Re-read, but do not rewrite, the complete Unreleased changelog.
 
@@ -630,13 +708,13 @@ Run a fresh independent review of baseline-to-HEAD diff, all four commits, prote
 | A4 | Goal 002: exact deterministic quickstart | Harness bootstrap/offline pipeline records and every required non-empty JC map/table/layer; no `species_topo.png` promise |
 | A5 | Goal 002: documentation architecture | Every ownership source has its assigned role; valid `docs/_quarto.yml`; generated HTML remains evidence |
 | A6 | Goal 002: report correction | Profiled report gate and visual inspection prove all six corrected `outputs/jc/` paths |
-| A7 | Goal 002: compatibility boundary | Stable formals/behavior unchanged; four experimental exports retained; 13 helpers lose export only; no warnings |
-| A8 | Goal 002: validation | 16 ordered command records cover the 14 design gates plus Test contracts and Evidence collection with streams/status/environment |
-| A9 | WP-027: test migration | Nine `:::` files, unchanged per-file counts, no forbidden `::`, nondecreasing suite, focused behavior audit |
+| A7 | Goal 002: compatibility boundary | Stable formals/behavior unchanged; four experimental exports retained; 13 helpers lose export only; no new runtime lifecycle warning |
+| A8 | Goal 002: validation | 16 ordered command records cover the 14 design gates plus Test contracts and Evidence collection with streams/status/environment/raw warning inventory |
+| A9 | WP-027: test migration | Nine `:::` files, unchanged per-file counts, no forbidden `::`, nondecreasing suite, exact 6-warning focused and 7-warning full baselines, one established network skip |
 | A10 | WP-027: public API freeze | API/formals tests and pkgdown prove 17 unique exports, no internal index entries |
 | A11 | WP-027: user-facing docs polish | Quarto/pkgdown/report render, zero missing relative links, manual stale-framing/path review |
-| A12 | WP-027: validation harness | Pure helpers, sourceability, dry-run failure retention/success promotion, hash-gated rename evidence |
-| A13 | WP-027: tracked closeout | WP log, six-bullet AGENT_NOTES interpretation, and complete Unreleased changelog |
+| A12 | WP-027: validation harness | Pure helpers, sourceability, hardened nonzero `make test`, warning inventory, dry-run failure retention/success promotion, hash-gated rename evidence |
+| A13 | WP-027: tracked closeout | WP log records exact warning/manual-generator exceptions; six-bullet AGENT_NOTES interpretation and complete Unreleased changelog |
 | A14 | WP-027: canonical run | Exactly one verified promoted directory with raw logs, counts, links, JC products, docs, report; explicitly not release payload |
 | A15 | WP-027/WP-028 separation | Protected runtime/release diff empty; no version, tag, push, release packaging, target/schema/output behavior change |
 
