@@ -142,7 +142,11 @@ testthat::test_that("DESCRIPTION reflects the settings-first mapping product", {
     "configured Tasmanian field sites",
     fixed = TRUE
   )
-  testthat::expect_false(grepl("species occurrence", description[[1L, "Description"]], ignore.case = TRUE))
+  testthat::expect_false(grepl(
+    "species occurrence",
+    description[[1L, "Description"]],
+    ignore.case = TRUE
+  ))
 })
 
 testthat::test_that("Quarto retains the mandated external output destination", {

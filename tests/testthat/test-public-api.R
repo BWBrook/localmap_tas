@@ -170,7 +170,7 @@ canonical_formals <- function(fn) {
   canonical <- vapply(
     seq_along(fn_formals),
     function(index) {
-      if (identical(fn_formals[[index]], quote(expr=))) {
+      if (identical(fn_formals[[index]], quote(expr = ))) {
         "<missing>"
       } else {
         deparse1(fn_formals[[index]], width.cutoff = 500L)

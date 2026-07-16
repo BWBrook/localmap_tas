@@ -81,10 +81,16 @@ testthat::test_that("plain R startup keeps sandbox paths valid after cwd changes
     c(
       "is_absolute <- function(path) {",
       "  slash <- intToUtf8(92L)",
-      "  startsWith(path, '/') || grepl('^[A-Za-z]:', path) || startsWith(path, paste0(slash, slash))",
+      paste0(
+        "  startsWith(path, '/') || grepl('^[A-Za-z]:', path) || ",
+        "startsWith(path, paste0(slash, slash))"
+      ),
       "}",
       "sandbox <- Sys.getenv('RENV_PATHS_SANDBOX')",
-      "expected_sandbox <- normalizePath(file.path(getwd(), 'renv', 'sandbox'), winslash = '/', mustWork = TRUE)",
+      paste0(
+        "expected_sandbox <- normalizePath(file.path(getwd(), 'renv', 'sandbox'), ",
+        "winslash = '/', mustWork = TRUE)"
+      ),
       "sandbox <- normalizePath(sandbox, winslash = '/', mustWork = TRUE)",
       "grid_before <- find.package('grid')",
       "setwd('man')",

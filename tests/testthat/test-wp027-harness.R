@@ -509,11 +509,13 @@ testthat::test_that("nested Rscript sourcing returns without invoking main", {
 })
 
 testthat::test_that("post-gate finalization failures retain explicit failed evidence", {
-  clean_state <- function(root) list(
-    head = "abc123",
-    clean = TRUE,
-    detail = character()
-  )
+  clean_state <- function(root) {
+    list(
+      head = "abc123",
+      clean = TRUE,
+      detail = character()
+    )
+  }
   fail_at <- function(stage) {
     force(stage)
     function(...) stop(paste("injected", stage, "failure"), call. = FALSE)
@@ -573,11 +575,13 @@ testthat::test_that("post-gate finalization failures retain explicit failed evid
 })
 
 testthat::test_that("canonical repository state is clean and immutable", {
-  dirty_state <- function(root) list(
-    head = "abc123",
-    clean = FALSE,
-    detail = " M scripts/validate_wp027.R"
-  )
+  dirty_state <- function(root) {
+    list(
+      head = "abc123",
+      clean = FALSE,
+      detail = " M scripts/validate_wp027.R"
+    )
+  }
   testthat::expect_error(
     wp027_require_clean_repo("unused", state_reader = dirty_state),
     "Tracked repository state is not clean",
