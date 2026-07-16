@@ -44,4 +44,4 @@ check:
 	@$(RSCRIPT) -e "source('dependencies.R'); with_qa_library({ if (!requireNamespace('rcmdcheck', quietly=TRUE)) stop('rcmdcheck is not installed. Run make bootstrap-qa first.'); rcmdcheck::rcmdcheck(args = c('--no-manual'), error_on = 'warning') })"
 
 site:
-	@$(RSCRIPT) -e "if (requireNamespace('pkgdown', quietly=TRUE)) pkgdown::build_site(preview = FALSE) else install.packages('pkgdown'); pkgdown::build_site(preview = FALSE)"
+	@$(RSCRIPT) scripts/build_public_site.R

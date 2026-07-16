@@ -239,29 +239,26 @@ testthat::test_that("pkgdown indexes every public export exactly once", {
     logical(1)
   )
   public_reference <- config$reference[!internal_sections]
-  public_indexed <- unname(unlist(
+  indexed <- unname(unlist(
     lapply(public_reference, `[[`, "contents"),
     use.names = FALSE
   ))
-  internal_indexed <- unname(unlist(
+  suppressed <- unname(unlist(
     lapply(config$reference[internal_sections], `[[`, "contents"),
     use.names = FALSE
   ))
 
   testthat::expect_identical(sum(internal_sections), 1L)
+  testthat::expect_length(public_reference, 5L)
   testthat::expect_identical(
     vapply(public_reference, function(section) length(section$contents), integer(1)),
     c(2L, 4L, 3L, 4L, 4L)
   )
-  testthat::expect_identical(sort(public_indexed), expected_exports)
-  testthat::expect_identical(anyDuplicated(public_indexed), 0L)
-  testthat::expect_false(any(internal_names %in% public_indexed))
-  testthat::expect_identical(
-    sort(internal_indexed),
-    sort(documented_internal_topics)
-  )
-  testthat::expect_identical(anyDuplicated(internal_indexed), 0L)
-  testthat::expect_length(intersect(internal_indexed, expected_exports), 0L)
+  testthat::expect_identical(sort(indexed), expected_exports)
+  testthat::expect_identical(anyDuplicated(indexed), 0L)
+  testthat::expect_false(any(internal_names %in% indexed))
+  testthat::expect_identical(sort(suppressed), sort(documented_internal_topics))
+  testthat::expect_length(intersect(suppressed, expected_exports), 0L)
 })
 
 testthat::test_that("documentation namespace calls use public exports", {
@@ -298,18 +295,41 @@ testthat::test_that("documentation namespace calls use public exports", {
 })
 
 testthat::test_that("Makefile test target stops on test failure", {
-  expected <- paste0(
-    "\t@$(RSCRIPT) -e \"",
-    "devtools::test(reporter='summary', stop_on_failure=TRUE)\""
-  )
   makefile <- testthat::test_path("..", "..", "Makefile")
-  testthat::expect_true(expected %in% readLines(makefile, warn = FALSE))
+  lines <- readLines(makefile, warn = FALSE)
+  headers <- grep(
+    "^[A-Za-z0-9_.-]+([[:space:]]+[A-Za-z0-9_.-]+)*[[:space:]]*:",
+    lines
+  )
+  test_headers <- which(lines == "test:")
+  testthat::expect_identical(length(test_headers), 1L)
+
+  next_header <- headers[headers > test_headers[[1L]]][[1L]]
+  recipe <- lines[(test_headers[[1L]] + 1L):(next_header - 1L)]
+  recipe <- recipe[nzchar(recipe)]
+  testthat::expect_identical(
+    recipe,
+    "\t@$(RSCRIPT) -e \"devtools::test(reporter='summary', stop_on_failure=TRUE)\""
+  )
 })
 
 testthat::test_that("report output stays outside the source tree", {
   root <- testthat::test_path("..", "..")
+  tracked <- system2(
+    "git",
+    c("-C", root, "ls-files", "--", "reports/paper.html"),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+  ignored <- system2(
+    "git",
+    c("-C", root, "check-ignore", "-q", "reports/paper.html"),
+    stdout = FALSE,
+    stderr = FALSE
+  )
 
-  testthat::expect_false(file.exists(file.path(root, "reports", "paper.html")))
+  testthat::expect_length(tracked, 0L)
+  testthat::expect_identical(ignored, 0L)
   testthat::expect_true(
     "/reports/paper.html" %in% readLines(file.path(root, ".gitignore"), warn = FALSE)
   )

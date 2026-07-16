@@ -24,14 +24,20 @@ artifact-contract evidence, not as proof that live map services work.
 Use the [settings guide](settings.md) for the primary real-data route.
 `settings.example.yaml` is real-data only: its configured input directory must
 contain `site.csv` with `site`, `lat`, and `lon`; `obs.csv` and `op.csv` are
-optional. The shell entry point is:
+optional. After `make bootstrap`, the source checkout entry point is:
 
 ```sh
-Rscript scripts/run_project.R settings.yaml
+Rscript scripts/run_project.R settings.example.yaml
 ```
 
-The script delegates to the public settings API, writes the resolved run config
-under the project output directory, and runs the same target graph.
+After `localmap` has been installed as an R package, the equivalent API route is:
+
+```r
+localmap::run_settings("settings.example.yaml")
+```
+
+Both routes delegate to the public settings API, write the resolved run config
+under the project output directory, and run the same target graph.
 
 ## 2. Implement incrementally
 

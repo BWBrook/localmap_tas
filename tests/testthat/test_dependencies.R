@@ -84,14 +84,19 @@ testthat::test_that("plain R startup keeps sandbox paths valid after cwd changes
       "  startsWith(path, '/') || grepl('^[A-Za-z]:', path) || startsWith(path, paste0(slash, slash))",
       "}",
       "sandbox <- Sys.getenv('RENV_PATHS_SANDBOX')",
+      "expected_sandbox <- normalizePath(file.path(getwd(), 'renv', 'sandbox'), winslash = '/', mustWork = TRUE)",
+      "sandbox <- normalizePath(sandbox, winslash = '/', mustWork = TRUE)",
       "grid_before <- find.package('grid')",
       "setwd('man')",
       "grid_after <- find.package('grid')",
       "checks <- c(",
+      "  sandbox_exact = identical(sandbox, expected_sandbox),",
       "  sandbox_absolute = is_absolute(sandbox),",
       "  base_library_absolute = is_absolute(.Library),",
+      "  library_paths_absolute = all(vapply(.libPaths(), is_absolute, logical(1))),",
       "  grid_before_absolute = is_absolute(grid_before),",
       "  grid_after_absolute = is_absolute(grid_after),",
+      "  grid_path_stable = identical(grid_before, grid_after),",
       "  grid_namespace_exists = file.exists(file.path(grid_after, 'NAMESPACE'))",
       ")",
       "cat(paste(names(checks), checks, sep = '='), sep = '\\n')",
@@ -100,7 +105,12 @@ testthat::test_that("plain R startup keeps sandbox paths valid after cwd changes
     probe
   )
 
-  withr::local_envvar(c(R_LIBS = NA, R_CMD = NA, R_LIBS_USER = NA))
+  withr::local_envvar(c(
+    R_LIBS = NA,
+    R_CMD = NA,
+    R_LIBS_USER = NA,
+    RENV_PATHS_SANDBOX = NA
+  ))
   output <- withr::with_dir(
     project_root,
     suppressWarnings(system2(file.path(R.home("bin"), "Rscript"), probe,
@@ -111,4 +121,23 @@ testthat::test_that("plain R startup keeps sandbox paths valid after cwd changes
   if (is.null(status)) status <- 0L
 
   testthat::expect_identical(status, 0L, info = paste(output, collapse = "\n"))
+})
+
+testthat::test_that("sandbox startup test clears inherited state and checks exact path", {
+  path <- testthat::test_path("test_dependencies.R")
+  lines <- readLines(path, warn = FALSE)
+  start <- grep(
+    'testthat::test_that\\("plain R startup keeps sandbox paths valid',
+    lines
+  )
+  later_tests <- grep("^testthat::test_that", lines)
+  end <- later_tests[later_tests > start][[1L]] - 1L
+  target_test <- lines[start:end]
+
+  testthat::expect_true(any(grepl(
+    "RENV_PATHS_SANDBOX = NA",
+    target_test,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl("sandbox_exact", target_test, fixed = TRUE)))
 })

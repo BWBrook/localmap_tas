@@ -19,7 +19,15 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 
 Before running `settings.example.yaml`, `site.csv` must exist in the configured
 input directory with `site`, `lat`, and `lon` columns. `obs.csv` and `op.csv` are
-optional.
+optional. These input files are not included in the checkout.
+
+After `make bootstrap`, use the source-loading checkout wrapper:
+
+```sh
+Rscript scripts/run_project.R settings.example.yaml
+```
+
+If `localmap` has been installed as an R package, call the public API directly:
 
 ```{r run-settings, eval=FALSE}
 localmap::run_settings("settings.example.yaml")

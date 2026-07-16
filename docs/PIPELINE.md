@@ -17,10 +17,22 @@ settings YAML
   -> maps, panels, attributes, attribution, and run manifest
 ```
 
-`scripts/run_project.R <settings-path>` is a thin wrapper around
-`localmap::run_settings(settings_path)`. The authoritative settings fields and
-input requirements are in [Simplified settings workflow](settings.md); complete
-profile semantics are in [Config reference](config_reference.md).
+After `make bootstrap`, the source checkout route loads `localmap` before
+invoking the settings API:
+
+```sh
+Rscript scripts/run_project.R settings.example.yaml
+```
+
+After the package has been installed, the equivalent public API route is:
+
+```r
+localmap::run_settings("settings.example.yaml")
+```
+
+The authoritative settings fields and input requirements are in
+[Simplified settings workflow](settings.md); complete profile semantics are in
+[Config reference](config_reference.md).
 
 ## Profile flow
 

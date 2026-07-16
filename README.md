@@ -34,38 +34,46 @@ The deterministic route produces non-empty evidence including:
 
 `settings.example.yaml` is a real-data-only template. Before running it,
 `site.csv` must exist in the configured input directory with `site`, `lat`, and
-`lon` columns. `obs.csv` and `op.csv` are optional.
+`lon` columns. `obs.csv` and `op.csv` are optional. These input files are not
+included in the checkout.
 
-```r
-localmap::run_settings("settings.example.yaml")
-```
-
-The command resolves the selected base profile, writes
-`outputs/<project>/run_config.yaml`, and runs the standard pipeline. The shell
-wrapper provides the same route:
+After `make bootstrap`, the checkout route loads the source package before
+running the settings workflow:
 
 ```sh
 Rscript scripts/run_project.R settings.example.yaml
 ```
 
-See the [settings guide](../quarto/settings.html) for field resolution and input
-requirements, the [configuration reference](../quarto/config_reference.html)
-for the full profile schema, and the [layer guide](../quarto/layers_guide.html)
+When `localmap` has been installed as an R package, the public API route is:
+
+```r
+localmap::run_settings("settings.example.yaml")
+```
+
+Both routes resolve the selected base profile, write
+`outputs/<project>/run_config.yaml`, and run the standard pipeline. See the
+[settings guide](https://github.com/BWBrook/localmap_tas/blob/main/docs/settings.md)
+for field resolution and input requirements, the
+[configuration reference](https://github.com/BWBrook/localmap_tas/blob/main/docs/config_reference.md)
+for the full profile schema, and the
+[layer guide](https://github.com/BWBrook/localmap_tas/blob/main/docs/layers_guide.md)
 before using live or local spatial sources.
 
 ## Outputs and interpretation
 
 Outputs are written under `outputs/<profile>/` or the configured project output
 directory and are ignored by Git. Read
-[the output schema](../quarto/output_schema_v1.html) alongside provenance
+[the output schema](https://github.com/BWBrook/localmap_tas/blob/main/docs/output_schema_v1.md)
+alongside provenance
 sidecars and the attribution report before interpreting a map or extracted
 value.
 
 ## Contributors
 
 The supported commands and review order are in
-[Development Notes](../quarto/DEVELOPMENT.html). The mandatory implementation
-and artifact-review process is in [Workflow](../quarto/workflow.html);
+[Development Notes](https://github.com/BWBrook/localmap_tas/blob/main/docs/DEVELOPMENT.qmd).
+The mandatory implementation and artifact-review process is in
+[Workflow](https://github.com/BWBrook/localmap_tas/blob/main/docs/workflow.md);
 architecture and scope remain maintained in `docs/architecture.md` and
 `docs/roadmap.md`.
 

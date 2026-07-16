@@ -11,8 +11,18 @@ home:
 
 navbar:
   structure:
-    left: [reference, articles]
+    left: [docs, get-started, reference, articles, report]
     right: [search]
+  components:
+    docs:
+      text: Docs
+      href: ../quarto/index.html
+    get-started:
+      text: Get started
+      href: ../quarto/settings.html
+    report:
+      text: JC report
+      href: ../reports/paper.html
 
 reference:
   - title: Primary

@@ -6,17 +6,21 @@ configuration, and runs the standard `{targets}` pipeline.
 
 `settings.example.yaml` is real-data only. Before using it, the configured
 input directory must contain `site.csv` with `site`, `lat`, and `lon` columns.
-`obs.csv` and `op.csv` are optional.
+`obs.csv` and `op.csv` are optional. These input files are not included in the
+checkout.
+
+After `make bootstrap`, the checkout wrapper loads the source package and runs
+the example settings path:
+
+```sh
+Rscript scripts/run_project.R settings.example.yaml
+```
+
+For a copied settings file, pass that path to the same wrapper. If `localmap`
+has been installed as an R package, the equivalent public API route is:
 
 ```r
 localmap::run_settings("settings.example.yaml")
-```
-
-For a copied file, the script wrapper is equivalent:
-
-```sh
-cp settings.example.yaml settings.yaml
-Rscript scripts/run_project.R settings.yaml
 ```
 
 ## Input tables

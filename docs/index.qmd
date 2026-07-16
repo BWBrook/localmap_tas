@@ -21,7 +21,16 @@ placeholders, and disabled topographic tiles. It does not promise
 
 `settings.example.yaml` is a real-data-only template. Before running it,
 `site.csv` must exist in the configured input directory with `site`, `lat`, and
-`lon` columns. `obs.csv` and `op.csv` are optional.
+`lon` columns. `obs.csv` and `op.csv` are optional. These input files are not
+included in the checkout.
+
+After `make bootstrap`, run the source-loading checkout wrapper:
+
+```sh
+Rscript scripts/run_project.R settings.example.yaml
+```
+
+If `localmap` has instead been installed as an R package, use its public API:
 
 ```r
 localmap::run_settings("settings.example.yaml")

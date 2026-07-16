@@ -42,6 +42,15 @@ artifact contracts, not successful live imagery acquisition.
 exist in the configured input directory with `site`, `lat`, and `lon` columns;
 `obs.csv` and `op.csv` are optional.
 
+After `make bootstrap`, the checkout route loads the source package:
+
+```sh
+Rscript scripts/run_project.R settings.example.yaml
+```
+
+After `localmap` has been installed as an R package, the equivalent public API
+route is:
+
 ```r
 localmap::run_settings("settings.example.yaml")
 ```

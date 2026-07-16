@@ -1,11 +1,11 @@
 Package: localmap
-Title: Local Species Occurrence Mapping Toolkit
+Title: Settings-First Tasmanian Field-Site Mapping
 Version: 0.0.0.9000
 Authors@R: c(person(given = "Barry", family = "Brook", role = c("aut","cre"), email = "barry.brook@utas.edu.au"))
-Description: Tools for sourcing, harmonising, and mapping species occurrence data
-    managed by the Localmap project. The compendium keeps the reproducible
-    workflow conventions from the template, integrating 'renv', 'targets', and
-    'Quarto' to support transparent biodiversity analyses.
+Description: Builds reproducible maps, site-attribute tables, and provenance
+    records for configured Tasmanian field sites. A settings-first interface
+    resolves project inputs and spatial layers into a 'targets' workflow with
+    explicit offline and live-data behaviour.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
