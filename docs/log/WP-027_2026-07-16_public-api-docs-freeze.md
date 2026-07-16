@@ -13,8 +13,12 @@ The product posture has two workflows: the deterministic, offline,
 fixture-backed `jc_ci` demonstration and the prerequisite-backed real-data
 settings workflow. Checkout and installed-package entrypoints are two
 invocation contexts for the same real-data workflow, not additional workflows.
-WP-027 freezes API and documentation behavior without changing runtime bodies,
-targets, schemas, output locations, version metadata, or release state.
+WP-027 freezes API and documentation behavior while including bounded
+validation hygiene approved by the plan's `Final-review adjudication
+(2026-07-16)`: byte-idempotent/CWD-stable bootstrap corrections (`eba2cfa`,
+`db214eb`) and development-only source-package/test partitioning for truthful
+`make check`. These changes do not alter targets, schemas, product runtime
+behavior, output contracts, version metadata, or release state.
 
 The final canonical root is
 `outputs/canonical_runs/WP-027_20260716T140421Z`. All evidence paths below are
@@ -252,6 +256,16 @@ non-empty inspection.
 
 ## Acceptance audit
 
+**Final-review adjudication (2026-07-16).** The auditor's dissent and the
+orchestrator's bounded disposition are retained rather than folded into a
+generic pass claim:
+
+| Auditor finding | Bounded orchestrator adjudication |
+|---|---|
+| Strict visual Step 4 wording was not literally met by uniform offline placeholders, minor edge-annotation clipping, viewer-dependent transparency, and a duplicated occurrence fallback. | Accepted proportionately under the tracked plan amendment: primary fixture maps are nonblank/aligned; placeholder status is explicit in sidecars/docs; these caveats are waived for deterministic validation evidence with `release_payload=false`, not release imagery. No coverage registration is claimed for blank layers. |
+| `.Rbuildignore` exclusions and checkout/package test partitioning could be read as WP-028 packaging work. | Accepted as WP-027 validation hygiene required for truthful mandatory `make check`: package-safe API tests remain included, checkout-only contracts still run under `make test`, and no release payload/checklist/version/tag/push occurred. |
+| The bootstrap no-revisit wording appeared to conflict with the two hygiene corrections. | The prohibition applies to opportunistic redesign. User-authorized commits `eba2cfa` and `db214eb` narrowly provide byte-idempotent restore and CWD-stable sandbox paths without target, schema, or product-runtime change. |
+
 | ID | Status | Direct evidence |
 |---|---|---|
 | A1 | Accepted | Approved design `docs/plans/2026-07-16-wp-027-public-api-and-docs-design.md` plus the single tracked execution plan; neither was rewritten during implementation. |
@@ -267,5 +281,5 @@ non-empty inspection.
 | A11 | Accepted | Canonical Quarto/pkgdown/report inspection plus `docs/link-scan.tsv` proves 395 links and 0 missing, with stale framing and corrected paths reviewed. |
 | A12 | Accepted | `scripts/validate_wp027.R`, `tests/testthat/test-wp027-harness.R`, dry-run stream, retained failures, final `SHA256SUMS`, and rename-only promotion prove harness safety. |
 | A13 | Accepted | This ledger, the exactly six interpretation bullets in `docs/AGENT_NOTES.md`, and the complete reread of `docs/CHANGELOG.md` Unreleased close the tracked record. |
-| A14 | Accepted | `metadata.txt`, 16 gate records, 31 products, 395-link ledger, and 207/207 independent hashes support the single promoted canonical directory; it is explicitly not a release payload. |
-| A15 | Accepted | Validated HEAD remains clean at Version `0.0.0.9000`; metadata says `release_payload=false`; no tag, push, release packaging, target/schema/output behavior, or WP-028 work occurred. |
+| A14 | Accepted | `metadata.txt`, 16 gate records, 31 products, 395-link ledger, and 207/207 independent hashes support the single promoted canonical directory. Under the plan's final-review amendment, bounded visual caveats are accepted as deterministic evidence; blank placeholder layers carry no coverage-registration claim, and the result is explicitly not release imagery or a release payload. |
+| A15 | Accepted | Validated HEAD remains clean at Version `0.0.0.9000`; metadata says `release_payload=false`. The `.Rbuildignore`/test partition and approved bootstrap commits `eba2cfa`/`db214eb` are development validation hygiene, not release packaging or product-runtime redesign; no checklist, version, tag, push, payload, publication, or WP-028 work occurred. |

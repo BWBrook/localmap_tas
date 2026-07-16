@@ -53,6 +53,32 @@ supersedes conflicting Task 2 scope or protection wording:
   approved design baseline, allow only `Title` and `Description` to differ,
   and require `Version: 0.0.0.9000` plus all other release metadata to match.
 
+## Final-review adjudication (2026-07-16)
+
+This amendment records the final auditor findings and the orchestrator's
+bounded adjudication. It supersedes only conflicting wording on these three
+points; every other design, scope, evidence, and acceptance requirement remains
+in force:
+
+1. Visual Step 4 is proportionately satisfied when primary fixture maps are
+   nonblank and internally aligned, and uniform offline-placeholder status is
+   explicit in adjacent sidecars or documentation. Minor edge-annotation
+   clipping, viewer-dependent transparency, and the duplicated occurrence-map
+   fallback are documented and waived for WP-027 because this is deterministic
+   validation evidence with `release_payload=false`, not release imagery. Do
+   not claim coverage registration for blank placeholder layers.
+2. Development-only `.Rbuildignore` exclusions and checkout/package test
+   partitioning needed to make mandatory `make check` truthful are WP-027
+   validation hygiene, not WP-028 release packaging. Package-safe API tests
+   remain in the source package, checkout-only contracts still run under
+   `make test`, and no release payload, checklist, version, tag, push, or
+   publication action occurred.
+3. The no-revisit bootstrap instruction prohibits opportunistic redesign, not
+   narrow user-authorized hygiene needed for byte-idempotent restore and
+   CWD-stable sandbox paths. Commits `eba2cfa` and `db214eb` are approved
+   hygiene corrections; neither changes targets, schemas, or product runtime
+   behavior.
+
 ## Pre-flight Conflict Scan
 
 - [ ] From `/Users/bwbrook/git/localmap_tas`, prove the approved baseline is present and this plan is tracked before implementation begins:
