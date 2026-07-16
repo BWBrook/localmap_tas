@@ -22,6 +22,10 @@ local spatial products.
 4. Explicit offline degradation: imagery placeholders carry warnings and
    provenance rather than silently representing live data.
 
+The product has exactly two workflows: the deterministic offline JC
+demonstration and the real-data settings workflow; the checkout wrapper and
+installed-package API are invocation contexts for that same real-data workflow.
+
 ## Deterministic demonstration route
 
 The repository demonstration is the two-step offline JC profile:
@@ -42,14 +46,14 @@ artifact contracts, not successful live imagery acquisition.
 exist in the configured input directory with `site`, `lat`, and `lon` columns;
 `obs.csv` and `op.csv` are optional.
 
-After `make bootstrap`, the checkout route loads the source package:
+After `make bootstrap`, the checkout invocation context loads the source package:
 
 ```sh
 Rscript scripts/run_project.R settings.example.yaml
 ```
 
 After `localmap` has been installed as an R package, the equivalent public API
-route is:
+invocation context is:
 
 ```r
 localmap::run_settings("settings.example.yaml")

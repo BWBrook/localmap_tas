@@ -9,6 +9,29 @@ contract without changing runtime behavior: users start with `cfg_read()` and
 exports are separated, and sourced pipeline helpers disappear from `localmap::`.
 This pre-release freeze is not a compatibility epoch or `1.0.0` contract.
 
+## Independent-review amendment (2026-07-16)
+
+This amendment records the Task 2 independent-review adjudication and
+supersedes earlier scope or protection wording only where it conflicts with
+the following decisions:
+
+- Task 2 additionally authorizes only the `Title` and `Description` fields in
+  `DESCRIPTION`, `scripts/build_public_site.R`,
+  `tests/testthat/test-documentation-site.R`, and the single public-site
+  Makefile recipe `@$(RSCRIPT) scripts/build_public_site.R`.
+- `DESCRIPTION` remains at `Version: 0.0.0.9000`; every other DESCRIPTION
+  field and all version, tag, packaging, and release metadata remain protected.
+- The product has exactly two workflows: the deterministic offline JC
+  demonstration and the real-data settings workflow. The checkout wrapper and
+  installed-package API are two invocation contexts for the same real-data
+  workflow, not additional workflows or routes.
+- The known non-fatal Quarto external-output warning is explicitly waived for
+  WP-027 because `outputs/quarto` is the binding generated/source destination.
+- Future Task 3 and Task 4 protected-path audits must accept the reviewed
+  DESCRIPTION at `9938ba8` as the post-Task-2 baseline, while still checking
+  structurally that all fields other than `Title` and `Description` match the
+  approved design baseline and that `Version` remains `0.0.0.9000`.
+
 ## Complete API disposition
 
 The post-WP-027 `NAMESPACE` must contain exactly 17 exports: 13 stable and four
@@ -80,9 +103,9 @@ Each source has one job; generated HTML is never an authoring surface.
 
 | Exact source file | Responsibility |
 |---|---|
-| `README.md` | Package promise, two-step JC demonstration, real-data settings route, expected products, and contributor links. |
+| `README.md` | Package promise, two-step JC demonstration, real-data settings workflow, expected products, and contributor links. |
 | `settings.example.yaml` | Real-data template; state required user inputs and never present it as clean-clone fixture input. |
-| `docs/product_brief.md` | Product posture and both primary routes: clean JC demonstration and prerequisite-backed real-data settings. |
+| `docs/product_brief.md` | Product posture and both workflows: clean JC demonstration and prerequisite-backed real-data settings. |
 | `docs/index.qmd` | Quarto project home, correct YAML front matter, workflow overview, and links to settings, vignette, report, and reference. |
 | `docs/settings.md` | Authoritative settings workflow, inputs, fields, `run_settings()` behavior, and output location. |
 | `docs/DEVELOPMENT.qmd` | Contributor commands, validation order, and current product framing. |
@@ -119,7 +142,8 @@ Required content changes:
 2. Repair `docs/index.qmd` front matter and stale links; update only stale
    framing/examples in the authoritative workflow, config, layer, and output guides.
 3. Align README, product brief, Quarto home, settings guide, and vignette on the
-   two primary routes; keep `scripts/run_project.R` as the `run_settings()` wrapper.
+   two workflows; keep `scripts/run_project.R` as the checkout invocation context
+   for the real-data settings workflow.
 4. Group every export once in pkgdown, label experimental exports, and exclude
    all internal functions from the public reference index.
 5. Repair report YAML and paths without changing analysis or target behavior.
@@ -140,11 +164,14 @@ and marking configured WMS/ArcGIS layers offline. Network and large downloads
 are disabled by default; the explicit zero-valued flags make the deterministic
 guarantee visible and reviewable at the command boundary.
 
-This `jc_ci` contract is the repository demonstration path. The primary
-real-data path is `run_settings("settings.example.yaml")` only after the user
-provides the template's prerequisites, including `site.csv` with `site`, `lat`,
-and `lon` in the configured input directory. Document both primary workflows,
-but do not give `settings.example.yaml` new fixture or clean-clone semantics.
+This `jc_ci` contract is the repository demonstration workflow. The real-data
+settings workflow uses `Rscript scripts/run_project.R settings.example.yaml`
+from a checkout, or `localmap::run_settings("settings.example.yaml")` after the
+package is installed, only after the user provides the template's prerequisites,
+including `site.csv` with `site`, `lat`, and `lon` in the configured input
+directory. These are invocation contexts for one workflow. Document both
+workflows, but do not give `settings.example.yaml` new fixture or clean-clone
+semantics.
 
 The quickstart acceptance check must assert non-empty products at least at:
 

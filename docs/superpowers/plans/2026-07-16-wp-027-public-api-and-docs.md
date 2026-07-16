@@ -19,7 +19,7 @@
 - Keep `settings.example.yaml` a prerequisite-backed real-data template; never give it clean-clone fixture semantics.
 - The clean demonstration is exactly `jc_ci`, offline, fixture-backed, and does not promise `outputs/jc/maps/species_topo.png`.
 - Generated sites, reports, maps, tables, logs, and canonical runs remain under ignored `outputs/` paths and are evidence, never authoring sources.
-- Do not alter `DESCRIPTION`, `_targets.R`, `config/config.yaml`, `renv.lock`, `docs/release_checklist.md`, versions, tags, or release metadata.
+- Do not alter `_targets.R`, `config/config.yaml`, `renv.lock`, `docs/release_checklist.md`, versions, tags, or release metadata. For Task 2 only, the independent-review amendment below permits `DESCRIPTION` `Title` and `Description`; all other DESCRIPTION fields remain protected.
 - Do not fetch, pull, push, publish, contact remotes, create a release payload, or begin WP-028 packaging.
 - Use local commits with the exact task messages below. Stage exact paths only.
 - Stop on a dirty or conflicting owned path, unexplained inventory drift, any warning/skip outside the exact accepted baselines below, failed gate, or scope expansion; preserve evidence and report the owning task.
@@ -30,6 +30,28 @@
 - After each task, dispatch an independent specification reviewer, then an independent code/document quality reviewer. Fix findings in the owning task before accepting its commit.
 - After Task 4, run a broad final review against the complete design and A1-A15 matrix rather than relying on task summaries.
 - A reviewer must inspect raw diffs, commands, logs, artifacts, and hashes in proportion to risk; a claimed pass or completion flag is not evidence.
+
+## Independent-review amendment (2026-07-16)
+
+This amendment records the Task 2 independent-review adjudication and
+supersedes conflicting Task 2 scope or protection wording:
+
+- Task 2 additionally authorizes only the `Title` and `Description` fields in
+  `DESCRIPTION`, `scripts/build_public_site.R`,
+  `tests/testthat/test-documentation-site.R`, and the single public-site
+  Makefile recipe `@$(RSCRIPT) scripts/build_public_site.R`.
+- `DESCRIPTION` remains at `Version: 0.0.0.9000`; every other DESCRIPTION
+  field and all version, tag, packaging, and release metadata remain protected.
+- The product has exactly two workflows: the deterministic offline JC
+  demonstration and the real-data settings workflow. The checkout wrapper and
+  installed-package API are two invocation contexts for the same real-data
+  workflow, not additional workflows or routes.
+- The known non-fatal Quarto external-output warning is explicitly waived for
+  WP-027 because `outputs/quarto` is the binding generated/source destination.
+- For future Task 3 and Task 4 protected-path validation, accept `9938ba8` as
+  the post-Task-2 DESCRIPTION baseline. Parse DESCRIPTION as DCF against the
+  approved design baseline, allow only `Title` and `Description` to differ,
+  and require `Version: 0.0.0.9000` plus all other release metadata to match.
 
 ## Pre-flight Conflict Scan
 
@@ -233,13 +255,14 @@ Expected: exactly 28 staged paths. The cached diff check has exactly four findin
 
 **Files:**
 - Modify: `README.md`, `settings.example.yaml`, `docs/product_brief.md`, `docs/index.qmd`, `docs/settings.md`, `docs/DEVELOPMENT.qmd`, `docs/PIPELINE.md`, `docs/workflow.md`, `docs/config_reference.md`, `docs/layers_guide.md`, `docs/output_schema_v1.md`, `vignettes/intro.Rmd`
-- Modify: `_pkgdown.yml`, `Makefile`, `reports/paper.qmd`, `docs/CHANGELOG.md`, `tests/testthat/test-public-api.R`
+- Modify: `_pkgdown.yml`, `Makefile`, `reports/paper.qmd`, `docs/CHANGELOG.md`, `tests/testthat/test-public-api.R`, and only `Title`/`Description` in `DESCRIPTION`
+- Create: `scripts/build_public_site.R`, `tests/testthat/test-documentation-site.R`
 - Rename: `quarto.yml` -> `docs/_quarto.yml` and update it as the recognized docs-root Quarto project file
 - Generate but never stage: `outputs/jc/**`, `outputs/quarto/**`, `outputs/pkgdown/**`, `outputs/reports/paper.html`
 
 **Interfaces:**
 - Consumes: Task 1's exact tier vectors and unchanged `scripts/run_project.R <settings-path>` wrapper around `localmap::run_settings(settings_path)`.
-- Produces: one two-route wording contract, five pkgdown groups with counts `2,4,3,4,4`, Quarto at `outputs/quarto`, pkgdown at `outputs/pkgdown`, and a JC report at `outputs/reports/paper.html`.
+- Produces: one two-workflow wording contract, with checkout and installed-package invocation contexts for the real-data workflow; five pkgdown groups with counts `2,4,3,4,4`; Quarto at `outputs/quarto`; pkgdown at `outputs/pkgdown`; and a JC report at `outputs/reports/paper.html`.
 - Extends: `test-public-api.R` with pkgdown completeness/no-duplicates/no-internals and documentation namespace checks.
 - The design's `quarto.yml` ownership is fulfilled by the tracked rename to Quarto's valid `docs/_quarto.yml`; generated HTML never replaces this source.
 
@@ -255,7 +278,7 @@ Rscript -e "devtools::test(filter = 'public-api', reporter = 'summary', stop_on_
 
 Expected: clean tree; HEAD message is Task 1's exact commit message; the working checkout's exact export/formals contract passes.
 
-- [ ] **Step 2: Establish the two primary routes in every onboarding source**
+- [ ] **Step 2: Establish the two workflows and real-data invocation contexts**
 
 Use this exact clean-checkout shell block in `README.md`, `docs/product_brief.md`, `docs/index.qmd`, `docs/PIPELINE.md`, and `docs/workflow.md`:
 
@@ -264,7 +287,10 @@ make bootstrap
 LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 R_CONFIG_ACTIVE=jc_ci TARGETS_PROFILE=ci make pipeline
 ```
 
-Use this exact separate real-data call in README, product brief, Quarto home, settings guide, and vignette:
+Keep the checkout wrapper and installed-package API distinct, but identify both
+as invocation contexts for the same real-data settings workflow. Use this exact
+installed-package call in README, product brief, Quarto home, settings guide,
+and vignette only after stating that `localmap` must be installed:
 
 ```r
 localmap::run_settings("settings.example.yaml")
@@ -276,9 +302,9 @@ State before that call that `site.csv` must exist in the configured input direct
 
 | Source | Required edit |
 |---|---|
-| `README.md` | Package promise, two-step JC route, real-data route, expected products, contributor links |
+| `README.md` | Package promise, two-step JC workflow, real-data workflow and both invocation contexts, expected products, contributor links |
 | `settings.example.yaml` | Commented prerequisites; no clean-clone claim |
-| `docs/product_brief.md` | Configured Tasmanian site mapping posture and both routes |
+| `docs/product_brief.md` | Configured Tasmanian site mapping posture and both workflows |
 | `docs/index.qmd` | Valid front matter, workflow overview, settings/vignette/report/reference links |
 | `docs/settings.md` | Authoritative fields, resolution, `run_settings()`, inputs, outputs |
 | `docs/DEVELOPMENT.qmd` | Contributor commands and validation order |
@@ -431,7 +457,7 @@ outputs/jc/layers/topography_arcgis.png
 
 - [ ] **Step 8: Inspect generated evidence without authoring from it**
 
-Open `outputs/quarto/index.html`, `outputs/quarto/settings.html`, `outputs/pkgdown/index.html`, `outputs/pkgdown/reference/index.html`, `outputs/pkgdown/articles/intro.html`, and `outputs/reports/paper.html`. Confirm two routes remain distinct, reference group counts are `2,4,3,4,4`, no internal helper is indexed, report maps/tables/provenance are populated, and no placeholder is described as fetched live imagery.
+Open `outputs/quarto/index.html`, `outputs/quarto/settings.html`, `outputs/pkgdown/index.html`, `outputs/pkgdown/reference/index.html`, `outputs/pkgdown/articles/intro.html`, and `outputs/reports/paper.html`. Confirm the two workflows remain distinct, the real-data invocation contexts remain correctly conditioned, reference group counts are `2,4,3,4,4`, no internal helper is indexed, report maps/tables/provenance are populated, and no placeholder is described as fetched live imagery.
 
 - [ ] **Step 9: Review checkpoint and exact local commit**
 
@@ -461,7 +487,7 @@ Expected: only named sources are staged; no `outputs/` path is staged; commit su
 - The Tests gate consumes Task 2's hardened `make test` recipe, so any test failure returns nonzero. Its separate raw stdout/stderr remain under `steps/`; Test contracts writes `test-warning-inventory.tsv` with exact columns `scope`, `kind`, `ordinal`, `test`, `text`, `accepted` and rejects a full-suite inventory other than seven accepted offline/spatial warnings plus the one established network skip.
 - Canonical output is exactly one `outputs/canonical_runs/WP-027_<UTC_TIMESTAMP>` promoted from sibling `.WP-027_<UTC_TIMESTAMP>.tmp` by verified `file.rename()` only.
 
-**Stop Conditions:** Do not run the canonical no-argument harness in Task 3. Stop if the script runs when sourced, dry-run touches repository outputs or real commands, failure evidence is lost, hashes can be bypassed, command order differs, or full tests regress.
+**Stop Conditions:** Do not run the canonical no-argument harness in Task 3. Stop if the script runs when sourced, dry-run touches repository outputs or real commands, failure evidence is lost, hashes can be bypassed, command order differs, or full tests regress. Any Task 3 protected-path check must use `9938ba8` as the accepted post-Task-2 DESCRIPTION baseline and retain the amendment's structural Version/release-metadata check.
 
 - [ ] **Step 1: Write failing pure-helper and fixture tests first**
 
@@ -596,10 +622,12 @@ git status --short
 git log --format='%s' -3
 test ! -e docs/log/WP-027_2026-07-16_public-api-docs-freeze.md
 test -z "$(find outputs/canonical_runs -mindepth 1 -maxdepth 1 -type d -name 'WP-027_*' -print 2>/dev/null)"
-git diff --exit-code a55733d860f78e48753749977ce69d6a2e0d2b41..HEAD -- DESCRIPTION _targets.R config/config.yaml renv.lock docs/release_checklist.md docs/AGENT_NOTES.md
+git diff --exit-code a55733d860f78e48753749977ce69d6a2e0d2b41..HEAD -- _targets.R config/config.yaml renv.lock docs/release_checklist.md docs/AGENT_NOTES.md
+git diff --exit-code 9938ba84a80e10773cf5dab19bca54cf0e60f1be..HEAD -- DESCRIPTION
+Rscript -e 'baseline <- read.dcf(textConnection(paste(system("git show a55733d860f78e48753749977ce69d6a2e0d2b41:DESCRIPTION", intern = TRUE), collapse = "\n"))); current <- read.dcf("DESCRIPTION"); stopifnot(setequal(colnames(current), colnames(baseline))); protected <- setdiff(colnames(baseline), c("Title", "Description")); stopifnot(identical(current[1, protected], baseline[1, protected])); stopifnot(identical(unname(current[1, "Version"]), "0.0.0.9000"))'
 ```
 
-Expected: clean tree; last three implementation messages are Tasks 1-3 in order; no closeout/canonical conflict; protected files unchanged. Audit baseline-to-HEAD paths against Tasks 1-3 plus this tracked plan, and inspect `git diff --word-diff=plain ... -- R` to prove roxygen-only R changes.
+Expected: clean tree; last three implementation messages are Tasks 1-3 in order; no closeout/canonical conflict; protected files unchanged after the authorized Task 2 DESCRIPTION title/description update. The post-Task-2 DESCRIPTION is unchanged, its DCF fields other than `Title` and `Description` equal the approved baseline, and `Version` is exactly `0.0.0.9000`. Audit baseline-to-HEAD paths against Tasks 1-3 plus this tracked plan, and inspect `git diff --word-diff=plain ... -- R` to prove roxygen-only R changes.
 
 - [ ] **Step 2: Run the canonical harness once against the committed HEAD**
 
@@ -658,7 +686,7 @@ Read canonical `coverage_summary.csv`, `site_attributes_long.parquet`, and `site
 
 - [ ] **Step 6: Inspect both sites and the report**
 
-Open canonical Quarto home, settings page, pkgdown home/reference and representative stable/experimental pages, plus `reports/paper.html`. Confirm settings-first posture, clean-vs-real route separation, valid navigation/assets, exact five reference tiers and 17 unique exports, visible experimental guidance, populated maps/table previews/attribution/manifest, all six corrected paths, no stale framing, and zero unresolved generated relative links.
+Open canonical Quarto home, settings page, pkgdown home/reference and representative stable/experimental pages, plus `reports/paper.html`. Confirm settings-first posture, clean-vs-real workflow separation, the two correctly conditioned real-data invocation contexts, valid navigation/assets, exact five reference tiers and 17 unique exports, visible experimental guidance, populated maps/table previews/attribution/manifest, all six corrected paths, no stale framing, and zero unresolved generated relative links.
 
 - [ ] **Step 7: Write the evidence ledger and AGENT_NOTES from observations**
 
@@ -676,7 +704,7 @@ Create the WP log with exactly these headings:
 ## Acceptance audit
 ```
 
-Record baseline and validated HEAD; 13/4/13 disposition; nine pre/post rows and full counts; all 13 focused behavior/return test mappings; all 16 command/environment/results with raw relative pointers; literal canonical path; dry-run, check, link, hash, and atomic rename results; two-route/report sanity; every inspected artifact and observed concern; A1-A15 direct evidence. Under test evidence, record the exact accepted baseline: public API `0 warnings/0 skips/0 failures`; focused migrations `6 warnings/1 established network skip/0 failures`; full suite `7 warnings/1 established network skip/0 failures`, with the complete normalized warning text/test context and a statement that no additional warning or skip occurred. Under generated metadata, record that roxygen2 8.0.0 produced exactly one terminal blank line in each of `man/ala_configure.Rd`, `man/fetch_layer_registry.Rd`, `man/generate_topo_tile_map.Rd`, and `man/read_manifest.Rd`; a second `devtools::document()` preserved their SHA-256 hashes and full generated diff; the cached diff check contained exactly those four `new blank line at EOF.` findings; and no generated file was hand-edited. Retain three uncertainties: fixtures are demonstration evidence, offline placeholders do not test live services, and visual review is not quantitative spatial-accuracy validation.
+Record baseline and validated HEAD; 13/4/13 disposition; nine pre/post rows and full counts; all 13 focused behavior/return test mappings; all 16 command/environment/results with raw relative pointers; literal canonical path; dry-run, check, link, hash, and atomic rename results; two-workflow/report sanity; every inspected artifact and observed concern; A1-A15 direct evidence. Under test evidence, record the exact accepted baseline: public API `0 warnings/0 skips/0 failures`; focused migrations `6 warnings/1 established network skip/0 failures`; full suite `7 warnings/1 established network skip/0 failures`, with the complete normalized warning text/test context and a statement that no additional warning or skip occurred. Under generated metadata, record that roxygen2 8.0.0 produced exactly one terminal blank line in each of `man/ala_configure.Rd`, `man/fetch_layer_registry.Rd`, `man/generate_topo_tile_map.Rd`, and `man/read_manifest.Rd`; a second `devtools::document()` preserved their SHA-256 hashes and full generated diff; the cached diff check contained exactly those four `new blank line at EOF.` findings; and no generated file was hand-edited. Retain three uncertainties: fixtures are demonstration evidence, offline placeholders do not test live services, and visual review is not quantitative spatial-accuracy validation.
 
 Append a dated `2026-07-16` WP-027 closeout near the top of `docs/AGENT_NOTES.md`. Include exactly six interpretation bullets for: overview/species maps; camera/panel maps; two imagery placeholders; three tables; Quarto/pkgdown; report. Re-read, but do not rewrite, the complete Unreleased changelog.
 
