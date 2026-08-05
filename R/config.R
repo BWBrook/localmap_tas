@@ -215,11 +215,6 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
   }
 
   cfg_require_string(
-    data_cfg$manifest,
-    "data$manifest",
-    "Point to a CSV manifest (e.g., metadata/data_manifest.csv)."
-  )
-  cfg_require_string(
     data_cfg$species_requests,
     "data$species_requests",
     "Point to a species request CSV (e.g., metadata/species_requests.csv)."

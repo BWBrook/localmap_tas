@@ -1,5 +1,13 @@
 # AGENT NOTES
 
+- 2026-08-05: Removed the obsolete input-manifest API and configuration field.
+  - Deleted `read_manifest()`, `preview_manifest()`, and
+    `combine_manifest_csvs()` with their direct tests and generated pages, and
+    removed `data$manifest` from mirrored configs, validation, fixtures, and
+    reference docs.
+  - Run-level `run_manifest`, output-schema validation, and provenance outputs
+    remain supported; historical WP-027 plans, logs, and evidence are intact.
+
 - 2026-08-05: Retired obsolete manifest/report execution paths.
   - Removed the inactive `{targets}` raw-manifest/report branch and its dead
     report-render helper, while keeping output-schema validation and current

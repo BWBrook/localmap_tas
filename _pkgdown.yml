@@ -34,18 +34,16 @@ reference:
   - title: "Advanced: rendering and outputs"
     contents: [render_overview_map, map_species_occurrences, assemble_panel_figure, validate_output_manifest]
   - title: Experimental
-    contents: [ala_configure, fetch_layer_registry, generate_topo_tile_map, read_manifest]
+    contents: [ala_configure, fetch_layer_registry, generate_topo_tile_map]
   - title: internal
     contents:
       - ala_default_occurrence_fields
       - analysis_layer_types
       - build_layer_provenance
-      - combine_manifest_csvs
       - fetch_arcgis_imagery
       - fetch_camera_wms_tile
       - fetch_wms_imagery
       - prepare_camera_site_context
-      - preview_manifest
       - render_aoi_debug_plot
       - validate_analysis_layers
       - validate_layer_registry

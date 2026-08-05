@@ -17,17 +17,14 @@ stable_exports <- c(
 experimental_exports <- c(
   "ala_configure",
   "fetch_layer_registry",
-  "generate_topo_tile_map",
-  "read_manifest"
+  "generate_topo_tile_map"
 )
 
 internal_names <- c(
   "ala_default_occurrence_fields",
   "build_layer_provenance",
-  "combine_manifest_csvs",
   "fetch_arcgis_imagery",
   "fetch_wms_imagery",
-  "preview_manifest",
   "validate_analysis_layers",
   "validate_layer_registry",
   "write_attribution_report",
@@ -41,12 +38,10 @@ documented_internal_topics <- c(
   "ala_default_occurrence_fields",
   "analysis_layer_types",
   "build_layer_provenance",
-  "combine_manifest_csvs",
   "fetch_arcgis_imagery",
   "fetch_camera_wms_tile",
   "fetch_wms_imagery",
   "prepare_camera_site_context",
-  "preview_manifest",
   "render_aoi_debug_plot",
   "validate_analysis_layers",
   "validate_layer_registry",
@@ -70,15 +65,12 @@ approved_complete_disposition <- c(
   "build_layer_provenance",
   "build_site_attributes_long",
   "cfg_read",
-  "combine_manifest_csvs",
   "fetch_analysis_layers",
   "fetch_arcgis_imagery",
   "fetch_layer_registry",
   "fetch_wms_imagery",
   "generate_topo_tile_map",
   "map_species_occurrences",
-  "preview_manifest",
-  "read_manifest",
   "read_species_requests",
   "render_overview_map",
   "run_settings",
@@ -192,7 +184,7 @@ testthat::test_that("public exports match the exact tier contract", {
       "\\1",
       export_declarations
     )
-    testthat::expect_length(declared_exports, 17L)
+    testthat::expect_length(declared_exports, 16L)
     testthat::expect_identical(anyDuplicated(declared_exports), 0L)
     testthat::expect_identical(sort(declared_exports), expected_exports)
   }
@@ -204,12 +196,12 @@ testthat::test_that("public exports match the exact tier contract", {
   )
 
   testthat::expect_length(stable_exports, 13L)
-  testthat::expect_length(experimental_exports, 4L)
-  testthat::expect_length(internal_names, 13L)
-  testthat::expect_length(unique(internal_names), 13L)
+  testthat::expect_length(experimental_exports, 3L)
+  testthat::expect_length(internal_names, 11L)
+  testthat::expect_length(unique(internal_names), 11L)
   testthat::expect_length(intersect(stable_exports, experimental_exports), 0L)
-  testthat::expect_length(unique(c(stable_exports, experimental_exports)), 17L)
-  testthat::expect_length(complete_disposition, 30L)
+  testthat::expect_length(unique(c(stable_exports, experimental_exports)), 16L)
+  testthat::expect_length(complete_disposition, 27L)
   testthat::expect_identical(anyDuplicated(complete_disposition), 0L)
   testthat::expect_identical(
     sort(complete_disposition),

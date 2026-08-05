@@ -17,8 +17,7 @@ checkout_stable_exports <- c(
 checkout_experimental_exports <- c(
   "ala_configure",
   "fetch_layer_registry",
-  "generate_topo_tile_map",
-  "read_manifest"
+  "generate_topo_tile_map"
 )
 
 checkout_expected_exports <- sort(c(
@@ -29,10 +28,8 @@ checkout_expected_exports <- sort(c(
 checkout_internal_names <- c(
   "ala_default_occurrence_fields",
   "build_layer_provenance",
-  "combine_manifest_csvs",
   "fetch_arcgis_imagery",
   "fetch_wms_imagery",
-  "preview_manifest",
   "validate_analysis_layers",
   "validate_layer_registry",
   "write_attribution_report",
@@ -46,12 +43,10 @@ checkout_documented_internal_topics <- c(
   "ala_default_occurrence_fields",
   "analysis_layer_types",
   "build_layer_provenance",
-  "combine_manifest_csvs",
   "fetch_arcgis_imagery",
   "fetch_camera_wms_tile",
   "fetch_wms_imagery",
   "prepare_camera_site_context",
-  "preview_manifest",
   "render_aoi_debug_plot",
   "validate_analysis_layers",
   "validate_layer_registry",
@@ -83,7 +78,7 @@ testthat::test_that("pkgdown indexes every public export exactly once", {
   testthat::expect_length(public_reference, 5L)
   testthat::expect_identical(
     vapply(public_reference, function(section) length(section$contents), integer(1)),
-    c(2L, 4L, 3L, 4L, 4L)
+    c(2L, 4L, 3L, 4L, 3L)
   )
   testthat::expect_identical(sort(indexed), checkout_expected_exports)
   testthat::expect_identical(anyDuplicated(indexed), 0L)

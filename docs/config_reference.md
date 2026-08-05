@@ -26,7 +26,6 @@ interface.
 
 Required:
 - `aoi` (list, required): area of interest definition.
-- `manifest` (string): CSV manifest path (e.g., `metadata/data_manifest.csv`).
 - `species_requests` (string): species query CSV path (e.g., `metadata/species_requests.csv`).
 - JC profile uses `metadata/species_requests_jc.csv` (species codes from `obs.csv`).
 - `occurrence` (list): occurrence settings.

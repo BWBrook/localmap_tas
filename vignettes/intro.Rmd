@@ -60,8 +60,7 @@ head(occurrences)
 
 ## Experimental exports
 
-`ala_configure()`, `fetch_layer_registry()`, `generate_topo_tile_map()`, and
-`read_manifest()` remain callable for transitional workflows but are
-experimental. New end-to-end work should begin with `run_settings()`; use
-`cfg_read()` and the grouped stable reference when lower-level control is
-required.
+`ala_configure()`, `fetch_layer_registry()`, and `generate_topo_tile_map()` are
+experimental lower-level controls. New end-to-end work should begin with
+`run_settings()`; use `cfg_read()` and the grouped stable reference when
+lower-level control is required.

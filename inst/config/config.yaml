@@ -13,7 +13,6 @@ default:
       size_km: 400
       rotation_deg: 0
       crs: "EPSG:28355"
-    manifest: "metadata/data_manifest.csv"
     species_requests: "metadata/species_requests.csv"
     analysis_layers: []
     dem_variant: "ga_1s"

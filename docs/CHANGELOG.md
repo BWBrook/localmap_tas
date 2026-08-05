@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format follows Keep a Changelog. This project adheres to Semantic Versioning where applicable.
 
 ## [Unreleased]
+### Changed
+- Removed the obsolete input-manifest reader, preview, and combiner API and the
+  `data$manifest` configuration field. Run-level `run_manifest` and output
+  provenance/schema manifests remain supported.
+
 ### Added
 - Settings-first onboarding across the README, Quarto site, vignette, and user
   guides, with separate deterministic `jc_ci` and prerequisite-backed real-data
