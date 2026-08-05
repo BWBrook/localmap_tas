@@ -432,15 +432,6 @@ list(
     description = "Overview map with AOI, sites, and optional coverage polygon."
   ),
   targets::tar_target(
-    camera_sites_panel,
-    camera_sites_stack_maps(
-      stack_cfg = cfg$data$camera_sites$stack,
-      prerequisites = list(camera_sites_map, species_map)
-    ),
-    format = "file",
-    description = "Vertically stacked panel of camera site maps."
-  ),
-  targets::tar_target(
     panel_figure,
     assemble_panel_figure(
       panel_cfg = cfg$data$panel_figure,
@@ -483,7 +474,6 @@ list(
         list(
           species_map = species_map,
           camera_sites_map = camera_sites_map,
-          camera_sites_panel = camera_sites_panel,
           camera_sites_tile = camera_sites_tile,
           aoi_debug_plot = aoi_debug_plot,
           coverage_summary = coverage_summary,

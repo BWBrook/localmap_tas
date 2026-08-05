@@ -23,7 +23,6 @@ are validated in the pipeline via the `output_schema_v1` target.
 
 - `species_map` → `outputs/<profile>/maps/species_occurrences.png`
 - `camera_sites_map` → `outputs/<profile>/maps/camera_sites.png`
-- `camera_sites_panel` → `outputs/<profile>/maps/camera_sites_panel.png`
 - `camera_sites_tile` → `outputs/<profile>/tiles/camera_sites_tile.png`
 - `coverage_summary` → `outputs/<profile>/tables/coverage_summary.csv`
 - `site_attributes_long` → `outputs/<profile>/tables/site_attributes_long.parquet`

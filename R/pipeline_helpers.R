@@ -127,7 +127,6 @@ build_output_schema_expected_outputs <- function(profile, ctx) {
     return(list(
       species_map = ctx$species_map,
       camera_sites_map = ctx$camera_sites_map,
-      camera_sites_panel = ctx$camera_sites_panel,
       camera_sites_tile = ctx$camera_sites_tile,
       aoi_debug_plot = ctx$aoi_debug_plot,
       coverage_summary = ctx$coverage_summary,
@@ -272,7 +271,6 @@ build_output_schema_expected_outputs <- function(profile, ctx) {
     return(list(
       species_map = ctx$species_map,
       camera_sites_map = ctx$camera_sites_map,
-      camera_sites_panel = ctx$camera_sites_panel,
       camera_sites_tile = ctx$camera_sites_tile,
       aoi_debug_plot = ctx$aoi_debug_plot,
       coverage_summary = ctx$coverage_summary,
@@ -379,7 +377,6 @@ build_output_schema_expected_outputs <- function(profile, ctx) {
   list(
     species_map = ctx$species_map,
     camera_sites_map = ctx$camera_sites_map,
-    camera_sites_panel = ctx$camera_sites_panel,
     camera_sites_tile = ctx$camera_sites_tile,
     aoi_debug_plot = ctx$aoi_debug_plot,
     coverage_summary = ctx$coverage_summary,

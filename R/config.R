@@ -435,13 +435,6 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
       checkmate::assert_string(camera_cfg$map$output_path, min.chars = 1L)
     }
   }
-  if (!is.null(camera_cfg$stack)) {
-    checkmate::assert_list(camera_cfg$stack, any.missing = FALSE)
-    if (!is.null(camera_cfg$stack$output_path)) {
-      checkmate::assert_string(camera_cfg$stack$output_path, min.chars = 1L)
-    }
-  }
-
   if (requires_occurrence) {
     ala_cfg <- cfg$ala
     if (is.null(ala_cfg) || !is.list(ala_cfg)) {

@@ -1,7 +1,6 @@
 output_id,type,description,path,format,crs,profile,producer
 species_map,map,Species occurrence overview map,outputs/jc/maps/species_occurrences.png,png,EPSG:4326,jc,map_species_occurrences
 camera_sites_map,map,Camera sites basemap map,outputs/jc/maps/camera_sites.png,png,EPSG:3857,jc,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of JC maps,outputs/jc/maps/camera_sites_panel.png,png,EPSG:3857,jc,camera_sites_stack_maps
 camera_sites_tile,basemap,Camera basemap tile,outputs/jc/tiles/camera_sites_tile.png,png,EPSG:3857,jc,fetch_camera_wms_tile
 aoi_debug_plot,figure,AOI debug plot with sites,outputs/jc/maps/aoi_debug.png,png,EPSG:4326,default,render_aoi_debug_plot
 coverage_summary,table,Coverage zone summary table,outputs/jc/tables/coverage_summary.csv,csv,EPSG:28355,jc,write_coverage_summary

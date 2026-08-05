@@ -1,7 +1,6 @@
 output_id,type,description,path,format,crs,profile,producer
 species_map,map,Species occurrence overview map (JC AOI),outputs/tas/maps/species_occurrences.png,png,EPSG:4326,tas_canonical,map_species_occurrences
 camera_sites_map,map,Camera sites basemap map (JC AOI),outputs/tas/maps/camera_sites.png,png,EPSG:3857,tas_canonical,render_camera_sites_map
-camera_sites_panel,figure,Stacked panel of Tas canonical maps,outputs/tas/maps/camera_sites_panel.png,png,EPSG:3857,tas_canonical,camera_sites_stack_maps
 camera_sites_tile,basemap,Camera basemap tile,outputs/tas/tiles/camera_sites_tile.png,png,EPSG:3857,tas_canonical,fetch_camera_wms_tile
 aoi_debug_plot,figure,AOI debug plot with sites,outputs/tas/maps/aoi_debug.png,png,EPSG:4326,tas_canonical,render_aoi_debug_plot
 coverage_summary,table,Coverage zone summary table,outputs/tas/tables/coverage_summary.csv,csv,EPSG:28355,tas_canonical,write_coverage_summary

@@ -1,5 +1,11 @@
 # AGENT NOTES
 
+- 2026-08-05: Retired the orphan standalone camera-sites panel branch.
+  - Removed the `camera_sites_panel` target, camera-stack config/schema entries,
+    current output-manifest rows, and expected-output/test references.
+  - Preserved `camera_sites_stack_maps()`, `assemble_panel_figure()`, and the
+    general `panel_figure` PNG/PDF path; historical logs and plans are intact.
+
 - 2026-08-05: Aligned config validation with settings product selection.
   - `attributes` and `atlas` runs can validate without species requests,
     occurrence settings, or top-level ALA configuration; `figure`, `all`, and

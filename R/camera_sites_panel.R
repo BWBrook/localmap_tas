@@ -214,7 +214,7 @@ camera_sites_stack_maps <- function(stack_cfg,
 
   output_path <- camera_sites_default(
     stack_cfg$output_path,
-    here::here("outputs", "maps", "camera_sites_panel.png")
+    here::here("outputs", "maps", "panel_figure.png")
   )
   output_path <- normalise_output_path(output_path)
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)

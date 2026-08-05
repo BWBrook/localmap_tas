@@ -114,27 +114,6 @@ default:
           layout: overlay
           width_fraction: 0.2
           margin_fraction: 0.05
-      stack:
-        glob: outputs/default/maps/camera_sites_*.png
-        input_dir: outputs/default/maps
-        pattern: camera_sites_.*\\.png$
-        order:
-          - "camera_sites_mccall_m"
-          - "camera_sites_mccall_p"
-          - "camera_sites_rosebery_m"
-          - "camera_sites_rosebery_p"
-          - "camera_sites_mt_roland_m"
-          - "camera_sites_mt_roland_p"
-        columns: 2    # 2 across × 3 down for six panels
-        rows: 3
-        output_path: outputs/default/maps/camera_sites_panel.png
-        gap_px: 6
-        background: "#ffffff"
-        labels:
-          values: ["a)", "b)", "c)", "d)", "e)", "f)"]
-          padding_px: 20
-          colour: "#050505"
-          font_size: 50
   ala:
     email: "barry.brook@utas.edu.au"
     atlas: "ALA"
@@ -186,21 +165,6 @@ demo:
         output_path: "outputs/demo/maps/camera_sites.png"
         legend:
           show: false
-      stack:
-        paths:
-          - "outputs/demo/maps/species_occurrences.png"
-          - "outputs/demo/maps/camera_sites.png"
-        glob: []
-        input_dir: []
-        columns: 1
-        rows: 2
-        output_path: "outputs/demo/maps/camera_sites_panel.png"
-        gap_px: 8
-        labels:
-          values: ["a)", "b)"]
-          padding_px: 12
-          colour: "#ffffff"
-          font_size: 28
     coverage:
       enabled: true
       buffer_m: 250
@@ -557,21 +521,6 @@ jc:
         output_path: "outputs/jc/tiles/camera_sites_tile.png"
       map:
         output_path: "outputs/jc/maps/camera_sites.png"
-      stack:
-        paths:
-          - "outputs/jc/maps/species_occurrences.png"
-          - "outputs/jc/maps/camera_sites.png"
-        glob: []
-        input_dir: []
-        columns: 1
-        rows: 2
-        output_path: "outputs/jc/maps/camera_sites_panel.png"
-        gap_px: 8
-        labels:
-          values: ["a)", "b)"]
-          padding_px: 12
-          colour: "#050505"
-          font_size: 28
     analysis_layers:
       - id: "jc_tasveg"
         type: "vector_arcgis"
@@ -931,21 +880,6 @@ tas_canonical:
         output_path: "outputs/tas/tiles/camera_sites_tile.png"
       map:
         output_path: "outputs/tas/maps/camera_sites.png"
-      stack:
-        paths:
-          - "outputs/tas/maps/species_occurrences.png"
-          - "outputs/tas/maps/camera_sites.png"
-        glob: []
-        input_dir: []
-        columns: 1
-        rows: 2
-        output_path: "outputs/tas/maps/camera_sites_panel.png"
-        gap_px: 8
-        labels:
-          values: ["a)", "b)"]
-          padding_px: 12
-          colour: "#050505"
-          font_size: 28
     layers:
       - id: "orthophoto_arcgis"
         type: "arcgis_export"

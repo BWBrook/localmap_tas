@@ -36,7 +36,6 @@ testthat::test_that("output schema helper returns required demo outputs", {
   ctx <- list(
     species_map = "outputs/demo/maps/species_occurrences.png",
     camera_sites_map = "outputs/demo/maps/camera_sites.png",
-    camera_sites_panel = "outputs/demo/maps/camera_sites_panel.png",
     camera_sites_tile = "outputs/demo/tiles/camera_sites_tile.png",
     aoi_debug_plot = "outputs/demo/maps/aoi_debug.png",
     coverage_summary = "outputs/demo/tables/coverage_summary.csv",

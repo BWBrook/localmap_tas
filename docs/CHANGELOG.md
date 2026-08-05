@@ -12,6 +12,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Configuration validation now follows the selected settings products:
   `attributes` and `atlas` runs may omit occurrence/ALA inputs, while `figure`,
   `all`, and profiles with omitted products retain those requirements.
+- Retired the orphan `camera_sites_panel` target and its camera-stack config;
+  the shared `camera_sites_stack_maps()` compositor remains behind
+  `panel_figure` and its PNG/PDF outputs.
 
 ### Added
 - Settings-first onboarding across the README, Quarto site, vignette, and user
