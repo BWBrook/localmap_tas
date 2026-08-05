@@ -1,3 +1,117 @@
+minimal_product_config_lines <- function(product = NULL,
+                                         include_species = FALSE,
+                                         include_occurrence = FALSE,
+                                         include_ala = FALSE) {
+  lines <- c(
+    "default:",
+    "  schema_version: 2",
+    "  data:",
+    "    outputs:",
+    if (!is.null(product)) sprintf("      products: %s", product),
+    "    aoi:",
+    "      centroid:",
+    "        lat: -41.0",
+    "        lon: 145.0",
+    "      size_km: 10"
+  )
+  if (include_species) {
+    lines <- c(lines, "    species_requests: \"metadata/species_requests.csv\"")
+  }
+  if (include_occurrence) {
+    lines <- c(
+      lines,
+      "    occurrence:",
+      "      fields: [decimalLatitude]",
+      "      map: {}"
+    )
+  }
+  lines <- c(
+    lines,
+    "    camera_sites:",
+    "      path: \"data/raw/lyr_op.csv\"",
+    "      central_site: \"centre\"",
+    "      bbox_half_km: 10"
+  )
+  if (include_ala) {
+    lines <- c(
+      lines,
+      "  ala:",
+      "    email: \"test@example.com\"",
+      "    download_reason_id: 4"
+    )
+  }
+  lines
+}
+
+testthat::test_that("attributes and atlas products do not require ALA inputs", {
+  for (product in c("attributes", "atlas")) {
+    tmp <- tempfile(fileext = ".yaml")
+    writeLines(minimal_product_config_lines(product), tmp)
+    cfg <- localmap::cfg_read(config_path = tmp)
+    testthat::expect_identical(cfg$data$outputs$products, product)
+    unlink(tmp)
+  }
+})
+
+testthat::test_that("occurrence-dependent products retain required config errors", {
+  cases <- list(
+    list(
+      product = "figure",
+      include_species = FALSE,
+      include_occurrence = FALSE,
+      include_ala = FALSE,
+      class = "cfg_required_missing",
+      regexp = "data\\$species_requests"
+    ),
+    list(
+      product = "all",
+      include_species = TRUE,
+      include_occurrence = FALSE,
+      include_ala = FALSE,
+      class = "cfg_occurrence_missing",
+      regexp = "data\\$occurrence"
+    ),
+    list(
+      product = NULL,
+      include_species = TRUE,
+      include_occurrence = TRUE,
+      include_ala = FALSE,
+      class = "cfg_ala_missing",
+      regexp = "`ala`"
+    )
+  )
+
+  for (case in cases) {
+    tmp <- tempfile(fileext = ".yaml")
+    writeLines(
+      minimal_product_config_lines(
+        product = case$product,
+        include_species = case$include_species,
+        include_occurrence = case$include_occurrence,
+        include_ala = case$include_ala
+      ),
+      tmp
+    )
+    testthat::expect_error(
+      localmap::cfg_read(config_path = tmp),
+      class = case$class,
+      regexp = case$regexp
+    )
+    unlink(tmp)
+  }
+})
+
+testthat::test_that("unknown config products fail with allowed values", {
+  tmp <- tempfile(fileext = ".yaml")
+  writeLines(minimal_product_config_lines("report"), tmp)
+  testthat::expect_error(
+    localmap::cfg_read(config_path = tmp),
+    class = "settings_products_invalid",
+    regexp = "Choose from"
+  )
+  unlink(tmp)
+})
+
 testthat::test_that("cfg_read returns a list with default profile", {
   cfg <- localmap::cfg_read()
   testthat::expect_type(cfg, "list")

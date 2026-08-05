@@ -55,6 +55,9 @@ Input coordinates are latitude/longitude in EPSG:4326.
   `land_tenure`, `reserve_estate`, and `soil_ph`.
 - `products`: optional target selector. Choose `attributes`, `atlas`, `figure`,
   or any subset; `all` is the default and selects all three product groups.
+  `attributes` and `atlas` runs do not require species requests, occurrence, or
+  ALA settings; `figure` and `all` retain those occurrence-dependent
+  requirements.
 - `large_downloads.allow`: optional explicit large-download gate.
 - `outputs.dir`: run output root; defaults to `outputs/<project>`.
 

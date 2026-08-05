@@ -20,15 +20,15 @@ interface.
 - `db_path` (string, default: `"data/interim/local.duckdb"`): optional local DB path.
 - `sample_frac` (numeric, default: `1.0`): optional sampling fraction for large datasets.
 - `data` (list, required): workflow inputs and map settings.
-- `ala` (list, required): ALA / galah configuration.
+- `ala` (list, required for `figure`/`all` products): ALA / galah configuration.
 
 ## `data`
 
 Required:
 - `aoi` (list, required): area of interest definition.
-- `species_requests` (string): species query CSV path (e.g., `metadata/species_requests.csv`).
+- `species_requests` (string, required for `figure`/`all` products): species query CSV path (e.g., `metadata/species_requests.csv`).
 - JC profile uses `metadata/species_requests_jc.csv` (species codes from `obs.csv`).
-- `occurrence` (list): occurrence settings.
+- `occurrence` (list, required for `figure`/`all` products): occurrence settings.
 - `camera_sites` (list): camera-site settings.
 - `coverage` (list, optional): coverage polygon settings.
 - `layers` (list, optional): registry of imagery layers (WMS/ArcGIS/file).
@@ -36,6 +36,14 @@ Required:
 - `distance_layers` (list, optional): vector layers used to compute distance-to features.
 - `overview_map` (list, optional): overview map rendering settings.
 - `panel_figure` (list, optional): multi-panel figure assembly settings.
+
+For settings-generated runs, `data$outputs$products` defaults to `all` when it is
+omitted. `attributes` and `atlas` selections can omit the occurrence-dependent
+`species_requests`, `occurrence`, and top-level `ala` configuration; `figure`
+and `all` selections require them. AOI, camera-site, layer, attribute/map, and
+provenance/output-schema validation still applies to every selection. The
+run-level `run_manifest` and output-schema manifests are not input manifests and
+remain part of the supported provenance outputs.
 
 ### `data.aoi`
 

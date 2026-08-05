@@ -214,66 +214,74 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     }
   }
 
-  cfg_require_string(
-    data_cfg$species_requests,
-    "data$species_requests",
-    "Point to a species request CSV (e.g., metadata/species_requests.csv)."
+  output_cfg <- data_cfg$outputs
+  products <- normalize_settings_products(
+    if (is.list(output_cfg)) output_cfg$products else NULL
   )
+  requires_occurrence <- identical(products, "all") || "figure" %in% products
 
-  occ_cfg <- data_cfg$occurrence
-  if (is.null(occ_cfg) || !is.list(occ_cfg)) {
-    rlang::abort(
-      "`data$occurrence` must be a list in the config.",
-      class = "cfg_occurrence_missing"
+  if (requires_occurrence) {
+    cfg_require_string(
+      data_cfg$species_requests,
+      "data$species_requests",
+      "Point to a species request CSV (e.g., metadata/species_requests.csv)."
     )
-  }
 
-  if (!is.null(occ_cfg$min_year)) {
-    checkmate::assert_numeric(occ_cfg$min_year, len = 1L, any.missing = FALSE)
-  }
-  if (!is.null(occ_cfg$min_lat)) {
-    checkmate::assert_numeric(occ_cfg$min_lat, len = 1L, any.missing = FALSE)
-  }
-  if (!is.null(occ_cfg$state_province)) {
-    checkmate::assert_string(occ_cfg$state_province, min.chars = 1L)
-  }
-  if (!is.null(occ_cfg$fields)) {
-    checkmate::assert_character(occ_cfg$fields, min.len = 1L, any.missing = FALSE)
-  } else {
-    rlang::abort(
-      c(
-        "`data$occurrence$fields` is required in the config.",
-        i = "Provide a character vector of ALA occurrence fields."
-      ),
-      class = "cfg_occurrence_fields_missing"
-    )
-  }
-
-  occ_map <- occ_cfg$map
-  if (is.null(occ_map) || !is.list(occ_map)) {
-    rlang::abort(
-      "`data$occurrence$map` must be a list in the config.",
-      class = "cfg_occurrence_map_missing"
-    )
-  }
-  bbox <- occ_map$bounding_box
-  if (!is.null(bbox)) {
-    if (!is.list(bbox)) {
+    occ_cfg <- data_cfg$occurrence
+    if (is.null(occ_cfg) || !is.list(occ_cfg)) {
       rlang::abort(
-        "`data$occurrence$map$bounding_box` must be a list if provided.",
-        class = "cfg_occurrence_bbox_invalid"
+        "`data$occurrence` must be a list in the config.",
+        class = "cfg_occurrence_missing"
       )
     }
-    top_left <- bbox$top_left
-    if (is.null(top_left) || !is.list(top_left) || !all(c("lat", "lon") %in% names(top_left))) {
+
+    if (!is.null(occ_cfg$min_year)) {
+      checkmate::assert_numeric(occ_cfg$min_year, len = 1L, any.missing = FALSE)
+    }
+    if (!is.null(occ_cfg$min_lat)) {
+      checkmate::assert_numeric(occ_cfg$min_lat, len = 1L, any.missing = FALSE)
+    }
+    if (!is.null(occ_cfg$state_province)) {
+      checkmate::assert_string(occ_cfg$state_province, min.chars = 1L)
+    }
+    if (!is.null(occ_cfg$fields)) {
+      checkmate::assert_character(occ_cfg$fields, min.len = 1L, any.missing = FALSE)
+    } else {
       rlang::abort(
-        "`data$occurrence$map$bounding_box$top_left` must be a list with lat/lon.",
-        class = "cfg_occurrence_bbox_top_left_missing"
+        c(
+          "`data$occurrence$fields` is required in the config.",
+          i = "Provide a character vector of ALA occurrence fields."
+        ),
+        class = "cfg_occurrence_fields_missing"
       )
     }
-    checkmate::assert_numeric(as.numeric(top_left$lat), len = 1L, any.missing = FALSE)
-    checkmate::assert_numeric(as.numeric(top_left$lon), len = 1L, any.missing = FALSE)
-    checkmate::assert_numeric(bbox$length_km, len = 1L, lower = 0, any.missing = FALSE)
+
+    occ_map <- occ_cfg$map
+    if (is.null(occ_map) || !is.list(occ_map)) {
+      rlang::abort(
+        "`data$occurrence$map` must be a list in the config.",
+        class = "cfg_occurrence_map_missing"
+      )
+    }
+    bbox <- occ_map$bounding_box
+    if (!is.null(bbox)) {
+      if (!is.list(bbox)) {
+        rlang::abort(
+          "`data$occurrence$map$bounding_box` must be a list if provided.",
+          class = "cfg_occurrence_bbox_invalid"
+        )
+      }
+      top_left <- bbox$top_left
+      if (is.null(top_left) || !is.list(top_left) || !all(c("lat", "lon") %in% names(top_left))) {
+        rlang::abort(
+          "`data$occurrence$map$bounding_box$top_left` must be a list with lat/lon.",
+          class = "cfg_occurrence_bbox_top_left_missing"
+        )
+      }
+      checkmate::assert_numeric(as.numeric(top_left$lat), len = 1L, any.missing = FALSE)
+      checkmate::assert_numeric(as.numeric(top_left$lon), len = 1L, any.missing = FALSE)
+      checkmate::assert_numeric(bbox$length_km, len = 1L, lower = 0, any.missing = FALSE)
+    }
   }
 
   camera_cfg <- data_cfg$camera_sites
@@ -434,30 +442,32 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     }
   }
 
-  ala_cfg <- cfg$ala
-  if (is.null(ala_cfg) || !is.list(ala_cfg)) {
-    rlang::abort("`ala` must be a list in the config.", class = "cfg_ala_missing")
-  }
-  use_fixture <- isTRUE(ala_cfg$use_fixture)
-  if (use_fixture) {
-    checkmate::assert_string(ala_cfg$fixture_occurrences, min.chars = 1L)
-  } else {
-    email <- ala_cfg$email
-    if (!checkmate::test_string(email, min.chars = 1L)) {
-      email <- Sys.getenv("ALA_EMAIL", unset = "")
+  if (requires_occurrence) {
+    ala_cfg <- cfg$ala
+    if (is.null(ala_cfg) || !is.list(ala_cfg)) {
+      rlang::abort("`ala` must be a list in the config.", class = "cfg_ala_missing")
     }
-    if (!checkmate::test_string(email, min.chars = 1L)) {
-      rlang::abort(
-        c(
-          "ALA email is required when not using fixtures.",
-          i = "Set `ala$email` in config or `ALA_EMAIL` in the environment."
-        ),
-        class = "cfg_ala_email_missing"
-      )
+    use_fixture <- isTRUE(ala_cfg$use_fixture)
+    if (use_fixture) {
+      checkmate::assert_string(ala_cfg$fixture_occurrences, min.chars = 1L)
+    } else {
+      email <- ala_cfg$email
+      if (!checkmate::test_string(email, min.chars = 1L)) {
+        email <- Sys.getenv("ALA_EMAIL", unset = "")
+      }
+      if (!checkmate::test_string(email, min.chars = 1L)) {
+        rlang::abort(
+          c(
+            "ALA email is required when not using fixtures.",
+            i = "Set `ala$email` in config or `ALA_EMAIL` in the environment."
+          ),
+          class = "cfg_ala_email_missing"
+        )
+      }
     }
-  }
-  if (!is.null(ala_cfg$download_reason_id)) {
-    checkmate::assert_integerish(ala_cfg$download_reason_id, lower = 1L, len = 1L)
+    if (!is.null(ala_cfg$download_reason_id)) {
+      checkmate::assert_integerish(ala_cfg$download_reason_id, lower = 1L, len = 1L)
+    }
   }
 
   cfg

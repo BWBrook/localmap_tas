@@ -1,5 +1,12 @@
 # AGENT NOTES
 
+- 2026-08-05: Aligned config validation with settings product selection.
+  - `attributes` and `atlas` runs can validate without species requests,
+    occurrence settings, or top-level ALA configuration; `figure`, `all`, and
+    profiles with omitted products retain the existing requirements.
+  - Product target mapping is unchanged, and run-level/output-schema manifests
+    remain supported provenance outputs.
+
 - 2026-08-05: Removed the obsolete input-manifest API and configuration field.
   - Deleted `read_manifest()`, `preview_manifest()`, and
     `combine_manifest_csvs()` with their direct tests and generated pages, and

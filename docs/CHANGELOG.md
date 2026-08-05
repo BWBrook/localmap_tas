@@ -9,6 +9,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Removed the obsolete input-manifest reader, preview, and combiner API and the
   `data$manifest` configuration field. Run-level `run_manifest` and output
   provenance/schema manifests remain supported.
+- Configuration validation now follows the selected settings products:
+  `attributes` and `atlas` runs may omit occurrence/ALA inputs, while `figure`,
+  `all`, and profiles with omitted products retain those requirements.
 
 ### Added
 - Settings-first onboarding across the README, Quarto site, vignette, and user
