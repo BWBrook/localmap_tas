@@ -200,6 +200,10 @@ write_run_manifest <- function(cfg,
       analysis = build_entries(analysis_layers_cfg, analysis_layers, include_output = TRUE)
     )
   )
+  products <- cfg$data$outputs$products
+  if (!is.null(products)) {
+    run_metadata$run$products <- as.character(products)
+  }
 
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
   imagery_write_provenance(output_path, run_metadata)

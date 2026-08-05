@@ -49,7 +49,10 @@ testthat::test_that("provenance outputs capture layer metadata", {
   testthat::expect_true(any(grepl("analysis1", attr_lines)))
 
   run_out <- localmap:::write_run_manifest(
-    cfg = list(schema_version = 2),
+    cfg = list(
+      schema_version = 2,
+      data = list(outputs = list(products = "attributes"))
+    ),
     cfg_file = cfg_path,
     layer_registry = list(list(
       id = "imagery1",
@@ -70,6 +73,7 @@ testthat::test_that("provenance outputs capture layer metadata", {
   )
   testthat::expect_true(file.exists(run_out))
   run_lines <- readLines(run_out)
+  testthat::expect_true(any(grepl("run.products: attributes", run_lines)))
   testthat::expect_true(any(grepl("layers.imagery.imagery1", run_lines)))
   testthat::expect_true(any(grepl("layers.analysis.analysis1", run_lines)))
 })

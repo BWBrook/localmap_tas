@@ -53,6 +53,8 @@ Input coordinates are latitude/longitude in EPSG:4326.
 - `analysis_layers.include`: analysis keys `dem`, `slope`, `canopy_height`,
   `ndvi`, `nbr`, `climate`, `tasveg`, `tasveg_class`, `fire`, `geology`,
   `land_tenure`, `reserve_estate`, and `soil_ph`.
+- `products`: optional target selector. Choose `attributes`, `atlas`, `figure`,
+  or any subset; `all` is the default and selects all three product groups.
 - `large_downloads.allow`: optional explicit large-download gate.
 - `outputs.dir`: run output root; defaults to `outputs/<project>`.
 
@@ -67,8 +69,11 @@ the selected base profile's behavior. See the
 resolves the base profile with `cfg_read()`, applies the settings, and rewrites
 profile output paths beneath the configured output directory. It writes
 `outputs/<project>/run_config.yaml` (or `<outputs.dir>/run_config.yaml`), runs the
-pipeline with that generated configuration, restores the caller's relevant
-environment variables, and returns the run-config path.
+selected product targets with that generated configuration, restores the caller's
+relevant environment variables, and returns the run-config path. When `products`
+is omitted, the runner selects `all`. An explicit non-empty `targets` argument
+remains an advanced override. The selected products are recorded in the generated
+run config and run-manifest provenance.
 
 Review maps, tables, layer sidecars, `provenance/attribution.md`, and
 `provenance/run_manifest.yml` together. The [output guide](output_schema_v1.md)

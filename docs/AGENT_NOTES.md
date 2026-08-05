@@ -1,5 +1,12 @@
 # AGENT NOTES
 
+- 2026-08-05: Settings product selection tranche.
+  - Added normalized `products` selection for `attributes`, `atlas`, `figure`,
+    and `all` (default), mapping settings runs to the core output targets while
+    leaving explicit `targets=` overrides authoritative.
+  - Recorded selected products in generated run configs and run-manifest
+    provenance; updated settings guidance and focused contract tests.
+
 - 2026-07-16: WP-027 public API and documentation freeze closeout. Canonical
   evidence is `outputs/canonical_runs/WP-027_20260716T140421Z` at validated
   HEAD `cc363426bebcf4275dba8275f11a45c5ceefcef5`; the full ledger is

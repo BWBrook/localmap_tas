@@ -1,3 +1,69 @@
+testthat::test_that("settings products normalize and map to core targets", {
+  testthat::expect_equal(localmap:::normalize_settings_products(), "all")
+  testthat::expect_equal(
+    localmap:::normalize_settings_products(c("atlas", "figure", "atlas")),
+    c("atlas", "figure")
+  )
+  testthat::expect_equal(localmap:::normalize_settings_products("all"), "all")
+  testthat::expect_equal(
+    localmap:::normalize_settings_products(c("attributes", "all")),
+    "all"
+  )
+  testthat::expect_error(
+    localmap:::normalize_settings_products("report"),
+    class = "settings_products_invalid",
+    regexp = "Choose from"
+  )
+
+  product_targets <- localmap:::settings_targets_for_products("attributes")
+  testthat::expect_true(
+    all(c(
+      "site_attributes_long_file",
+      "site_attributes_wide_file",
+      "analysis_provenance",
+      "attribution_report",
+      "run_manifest"
+    ) %in% product_targets)
+  )
+  testthat::expect_false(any(c("raw_manifest", "manifest_summary", "report") %in% product_targets))
+  atlas_targets <- localmap:::settings_targets_for_products("atlas")
+  testthat::expect_true(all(c("overview_map", "camera_sites_map") %in% atlas_targets))
+  testthat::expect_false(any(c("species_map", "camera_sites_panel") %in% atlas_targets))
+  testthat::expect_false(any(c(
+    "ala_config",
+    "species_requests",
+    "species_taxa",
+    "species_occurrences",
+    "species_map"
+  ) %in% c(product_targets, atlas_targets)))
+
+  all_targets <- localmap:::settings_targets_for_products("all")
+  testthat::expect_setequal(
+    all_targets,
+    unique(c(
+      localmap:::settings_targets_for_products("attributes"),
+      localmap:::settings_targets_for_products("atlas"),
+      localmap:::settings_targets_for_products("figure")
+    ))
+  )
+})
+
+testthat::test_that("explicit settings targets override product selection", {
+  explicit <- c("cfg", "camera_sites_map")
+  testthat::expect_identical(
+    localmap:::resolve_settings_targets(explicit, products = "attributes"),
+    explicit
+  )
+  testthat::expect_equal(
+    localmap:::resolve_settings_targets(NULL, products = "figure"),
+    localmap:::settings_targets_for_products("figure")
+  )
+  testthat::expect_equal(
+    localmap:::resolve_settings_targets(character(), products = "atlas"),
+    localmap:::settings_targets_for_products("atlas")
+  )
+})
+
 testthat::test_that("apply_settings_to_config updates paths and filters layers", {
   cfg <- localmap::cfg_read(profile = "jc")
 
@@ -40,6 +106,14 @@ testthat::test_that("apply_settings_to_config updates paths and filters layers",
     cfg2$data$overview_map$output_path,
     file.path(tmp_dir, "outputs", "maps", "overview_map.png")
   )
+  testthat::expect_equal(cfg2$data$outputs$products, "all")
+  settings$products <- c("attributes", "figure")
+  cfg3 <- localmap:::apply_settings_to_config(
+    cfg,
+    settings,
+    base_profile = "jc"
+  )
+  testthat::expect_equal(cfg3$data$outputs$products, c("attributes", "figure"))
   layer_ids <- vapply(cfg2$data$layers, function(layer) layer$id, character(1))
   testthat::expect_true(all(layer_ids %in% c("orthophoto_arcgis")))
   analysis_suffixes <- vapply(cfg2$data$analysis_layers, function(layer) {
@@ -95,4 +169,5 @@ testthat::test_that("run_settings restores env vars after running cfg target", {
   run_yaml <- yaml::read_yaml(run_cfg)
   testthat::expect_equal(run_yaml$run$data$outputs$output_dir, output_dir)
   testthat::expect_equal(run_yaml$run$data$camera_sites$central_site, "s1")
+  testthat::expect_equal(run_yaml$run$data$outputs$products, "all")
 })

@@ -53,7 +53,8 @@ localmap::run_settings("settings.example.yaml")
 Both routes resolve the selected base profile, write
 `outputs/<project>/run_config.yaml`, and run the standard pipeline. See the
 [settings guide](https://github.com/BWBrook/localmap_tas/blob/main/docs/settings.md)
-for field resolution and input requirements, the
+for field resolution, product selection (`attributes`, `atlas`, `figure`, or
+`all`, which is the default), and input requirements, the
 [configuration reference](https://github.com/BWBrook/localmap_tas/blob/main/docs/config_reference.md)
 for the full profile schema, and the
 [layer guide](https://github.com/BWBrook/localmap_tas/blob/main/docs/layers_guide.md)

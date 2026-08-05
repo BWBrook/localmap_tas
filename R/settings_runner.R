@@ -45,6 +45,95 @@ normalize_include_list <- function(value) {
   NULL
 }
 
+normalize_settings_products <- function(products = NULL) {
+  allowed <- c("attributes", "atlas", "figure", "all")
+  if (is.null(products) || length(products) == 0L) {
+    return("all")
+  }
+
+  if (is.list(products)) {
+    products <- unlist(products, recursive = TRUE, use.names = FALSE)
+  }
+  products <- as.character(products)
+  if (length(products) == 0L || anyNA(products)) {
+    rlang::abort(
+      c(
+        "Settings `products` must name one or more products.",
+        i = sprintf("Allowed values: %s.", paste(allowed, collapse = ", "))
+      ),
+      class = "settings_products_invalid"
+    )
+  }
+
+  products <- tolower(trimws(products))
+  if (any(!nzchar(products))) {
+    rlang::abort(
+      c(
+        "Settings `products` cannot contain empty names.",
+        i = sprintf("Allowed values: %s.", paste(allowed, collapse = ", "))
+      ),
+      class = "settings_products_invalid"
+    )
+  }
+  unknown <- setdiff(unique(products), allowed)
+  if (length(unknown) > 0L) {
+    rlang::abort(
+      c(
+        sprintf("Unknown settings product(s): %s.", paste(unknown, collapse = ", ")),
+        i = sprintf("Choose from: %s.", paste(allowed, collapse = ", "))
+      ),
+      class = "settings_products_invalid"
+    )
+  }
+
+  if ("all" %in% products) {
+    return("all")
+  }
+  unique(products)
+}
+
+settings_product_target_sets <- function() {
+  list(
+    attributes = c(
+      "site_attributes_long_file",
+      "site_attributes_wide_file",
+      "analysis_provenance",
+      "attribution_report",
+      "run_manifest"
+    ),
+    atlas = c(
+      "overview_map",
+      "camera_sites_map",
+      "analysis_provenance",
+      "attribution_report",
+      "run_manifest"
+    ),
+    figure = c(
+      "panel_figure_png",
+      "panel_figure_pdf",
+      "analysis_provenance",
+      "attribution_report",
+      "run_manifest"
+    )
+  )
+}
+
+settings_targets_for_products <- function(products = NULL) {
+  products <- normalize_settings_products(products)
+  if (identical(products, "all")) {
+    products <- names(settings_product_target_sets())
+  }
+  targets <- settings_product_target_sets()[products]
+  unique(unlist(targets, use.names = FALSE))
+}
+
+resolve_settings_targets <- function(targets = NULL, products = NULL) {
+  if (is.null(targets) || length(targets) == 0L) {
+    return(settings_targets_for_products(products))
+  }
+  targets
+}
+
 filter_layers_by_ids <- function(layers, include_ids) {
   if (is.null(layers) || is.null(include_ids)) {
     return(layers)
@@ -157,6 +246,7 @@ apply_settings_to_config <- function(cfg,
                                      base_profile = NULL) {
   checkmate::assert_list(cfg, any.missing = FALSE)
   checkmate::assert_list(settings, any.missing = FALSE)
+  products <- normalize_settings_products(settings$products)
 
   input_dir <- settings$input_dir
   if (is.null(input_dir) || !nzchar(input_dir)) {
@@ -266,7 +356,8 @@ apply_settings_to_config <- function(cfg,
   cfg$data$outputs <- list(
     project = project,
     output_dir = output_dir,
-    settings_path = settings_path
+    settings_path = settings_path,
+    products = products
   )
 
   cfg
@@ -331,6 +422,8 @@ run_settings <- function(settings_path,
   callr_args <- list(wd = script_dir)
   old_wd <- setwd(script_dir)
   on.exit(setwd(old_wd), add = TRUE)
+
+  targets <- resolve_settings_targets(targets, run_cfg$data$outputs$products)
 
   if (is.null(targets) || length(targets) == 0L) {
     targets::tar_make(

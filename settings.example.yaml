@@ -9,6 +9,8 @@ settings:
   obs_file: "obs.csv"
   op_file: "op.csv"
   central_site: "jc_cen"
+  # Select attributes, atlas, figure, any subset, or all (the default).
+  products: all
   aoi:
     mode: "auto"
     buffer_km: 0.1
