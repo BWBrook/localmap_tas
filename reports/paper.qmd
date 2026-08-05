@@ -15,17 +15,12 @@ knitr::opts_knit$set(root.dir = here::here())
 
 # Overview
 
-This report demonstrates the end-to-end JC workflow: AOI and maps,
-raster/vector attribute extraction, and provenance/attribution outputs. Render
-it after running the deterministic JC pipeline described in
-`docs/workflow.md`. The WMS and ArcGIS images are offline placeholders in the
-`jc_ci` profile, not imagery fetched from live services.
-
-```{r}
-#| label: summary
-summary_tbl <- targets::tar_read(manifest_summary)
-summary_tbl
-```
+This report is an optional manual view of the current JC outputs: AOI and maps,
+raster/vector attribute extraction, and provenance/attribution records. Render
+it after running the deterministic JC pipeline described in `docs/workflow.md`;
+it reads those files directly and is not a `{targets}` target. The WMS and
+ArcGIS images are offline placeholders in the `jc_ci` profile, not imagery
+fetched from live services.
 
 # Maps
 

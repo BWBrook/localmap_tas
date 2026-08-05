@@ -1,5 +1,15 @@
 # AGENT NOTES
 
+- 2026-08-05: Retired obsolete manifest/report execution paths.
+  - Removed the inactive `{targets}` raw-manifest/report branch and its dead
+    report-render helper, while keeping output-schema validation and current
+    mapping/extraction/provenance targets intact.
+  - Deleted the WP-027 validation harness and test; historical WP-027 plans,
+    logs, and evidence remain, as do the low-level manifest readers/helpers for
+    the separate compatibility decision.
+  - Static target/reference checks are covered in this tranche; full tests remain
+    blocked by the active R library's missing `{arrow}` installation.
+
 - 2026-08-05: Settings product selection tranche.
   - Added normalized `products` selection for `attributes`, `atlas`, `figure`,
     and `all` (default), mapping settings runs to the core output targets while

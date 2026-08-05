@@ -122,35 +122,6 @@ output_manifest_file_for_profile <- function(profile) {
   "inst/extdata/output_manifest_v1.csv"
 }
 
-render_report_artifact <- function(qmd = "reports/paper.qmd") {
-  out_dir <- dirname(qmd)
-  quarto_path <- tryCatch(quarto::quarto_path(), error = function(e) "")
-  has_quarto <- isTRUE(requireNamespace("quarto", quietly = TRUE)) &&
-    is.character(quarto_path) &&
-    length(quarto_path) == 1L &&
-    nzchar(quarto_path) &&
-    !is.na(quarto_path)
-  base <- tools::file_path_sans_ext(basename(qmd))
-  html <- file.path(out_dir, paste0(base, ".html"))
-  ok <- FALSE
-  if (has_quarto) {
-    ok <- isTRUE(tryCatch({
-      quarto::quarto_render(input = qmd, quiet = TRUE)
-      file.exists(html)
-    }, error = function(e) FALSE))
-  }
-  if (!ok) {
-    writeLines(
-      paste(
-        "<html><body><p>Report placeholder",
-        "(Quarto not available or render failed).</p></body></html>"
-      ),
-      html
-    )
-  }
-  html
-}
-
 build_output_schema_expected_outputs <- function(profile, ctx) {
   if (profile %in% c("tas_canonical", "tas_canonical_ci")) {
     return(list(

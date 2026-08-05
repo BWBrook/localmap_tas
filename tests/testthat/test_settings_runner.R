@@ -25,7 +25,7 @@ testthat::test_that("settings products normalize and map to core targets", {
       "run_manifest"
     ) %in% product_targets)
   )
-  testthat::expect_false(any(c("raw_manifest", "manifest_summary", "report") %in% product_targets))
+  testthat::expect_false("report" %in% product_targets)
   atlas_targets <- localmap:::settings_targets_for_products("atlas")
   testthat::expect_true(all(c("overview_map", "camera_sites_map") %in% atlas_targets))
   testthat::expect_false(any(c("species_map", "camera_sites_panel") %in% atlas_targets))

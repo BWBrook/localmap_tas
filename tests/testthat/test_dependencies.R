@@ -185,8 +185,7 @@ testthat::test_that("source builds exclude checkout-only validation contracts", 
     c(
       "test_dependencies.R",
       "test-documentation-site.R",
-      "test-public-api-checkout.R",
-      "test-wp027-harness.R"
+      "test-public-api-checkout.R"
     )
   )
 
