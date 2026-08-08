@@ -38,7 +38,7 @@ localmap::run_settings("settings.example.yaml")
 
 Read the [settings guide](settings.md) for inputs and field resolution, then use
 the [pipeline overview](PIPELINE.md), [configuration reference](config_reference.md),
-[layer guide](layers_guide.md), and [output guide](output_schema_v1.md) as needed.
+[layer guide](layers_guide.md), and [workflow](workflow.md) as needed.
 
 Package-level examples are in the
 [getting-started vignette](../pkgdown/articles/intro.html), all public functions

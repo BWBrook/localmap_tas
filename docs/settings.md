@@ -79,6 +79,6 @@ remains an advanced override. The selected products are recorded in the generate
 run config and run-manifest provenance.
 
 Review maps, tables, layer sidecars, `provenance/attribution.md`, and
-`provenance/run_manifest.yml` together. The [output guide](output_schema_v1.md)
-explains interpretation; the [layer guide](layers_guide.md) distinguishes live
-imagery, cache hits, fixtures, and placeholders.
+`provenance/run_manifest.yml` together, then follow the artefact-review cycle in
+the [workflow](workflow.md). The [layer guide](layers_guide.md) distinguishes
+live imagery, cache hits, fixtures, and placeholders.

@@ -112,5 +112,5 @@ that every source was acquired live.
   is rendered, because the final live workflow is designed around that source.
 
 Review layer sidecars together with `provenance/attribution.md` and
-`provenance/run_manifest.yml`. The [output guide](output_schema_v1.md) explains
-how those records relate to the declared products.
+`provenance/run_manifest.yml`, then inspect the selected maps and tables under
+the [workflow](workflow.md) artefact-review cycle.

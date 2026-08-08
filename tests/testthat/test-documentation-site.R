@@ -109,7 +109,6 @@ testthat::test_that("README navigation uses durable repository source URLs", {
       "docs/settings.md",
       "docs/config_reference.md",
       "docs/layers_guide.md",
-      "docs/output_schema_v1.md",
       "docs/DEVELOPMENT.qmd",
       "docs/workflow.md"
     )
@@ -153,5 +152,5 @@ testthat::test_that("Quarto retains the mandated external output destination", {
   config <- yaml::read_yaml(file.path(project_root, "docs", "_quarto.yml"))
 
   testthat::expect_identical(config$project$`output-dir`, "../outputs/quarto")
-  testthat::expect_length(config$project$render, 8L)
+  testthat::expect_length(config$project$render, 7L)
 })

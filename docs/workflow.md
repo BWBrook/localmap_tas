@@ -86,8 +86,8 @@ After every output-affecting change:
 6. Fix, rerun, and reinspect until the products are coherent. Passing tests alone
    is not artifact acceptance.
 
-See [Layer registry guide](layers_guide.md) and
-[Output schema v1](output_schema_v1.md) for the interpretation contracts.
+See the [Layer registry guide](layers_guide.md) for provenance interpretation,
+and assess each selected product through the artefact-review steps above.
 
 ## 5. Reproducibility and acquisition rules
 

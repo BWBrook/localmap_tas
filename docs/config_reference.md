@@ -41,9 +41,10 @@ For settings-generated runs, `data$outputs$products` defaults to `all` when it i
 omitted. `attributes` and `atlas` selections can omit the occurrence-dependent
 `species_requests`, `occurrence`, and top-level `ala` configuration; `figure`
 and `all` selections require them. AOI, camera-site, layer, attribute/map, and
-provenance/output-schema validation still applies to every selection. The
-run-level `run_manifest` and output-schema manifests are not input manifests and
-remain part of the supported provenance outputs.
+provenance validation still applies to every selection. The run-level
+`run_manifest` records the selected products, resolved config, and layer
+sources, parameters, and paths; review it with layer sidecars, attribution, and
+the actual product artefacts. It does not certify that product outputs completed.
 
 ### `data.aoi`
 

@@ -11,7 +11,6 @@ write_run_manifest(
   layer_outputs,
   analysis_layers_cfg,
   analysis_layers,
-  output_manifest_file,
   output_path = NULL
 )
 }
@@ -28,9 +27,7 @@ write_run_manifest(
 
 \item{analysis_layers}{Tibble from \code{fetch_analysis_layers()}.}
 
-\item{output_manifest_file}{Output schema manifest path.}
-
-\item{output_path}{Output manifest path.}
+\item{output_path}{Run-manifest output path.}
 }
 \value{
 Output path to the run manifest.

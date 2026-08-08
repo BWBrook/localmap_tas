@@ -2,7 +2,7 @@ project:
   title: localmap
   type: website
   output-dir: ../outputs/quarto
-  render: [index.qmd, settings.md, PIPELINE.md, config_reference.md, layers_guide.md, output_schema_v1.md, workflow.md, DEVELOPMENT.qmd]
+  render: [index.qmd, settings.md, PIPELINE.md, config_reference.md, layers_guide.md, workflow.md, DEVELOPMENT.qmd]
 
 website:
   title: localmap
@@ -20,8 +20,6 @@ website:
             text: Configuration
           - href: layers_guide.md
             text: Layers
-          - href: output_schema_v1.md
-            text: Outputs
           - href: workflow.md
             text: Workflow
           - href: DEVELOPMENT.qmd

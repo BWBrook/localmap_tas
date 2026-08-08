@@ -10,8 +10,7 @@ stable_exports <- c(
   "fetch_analysis_layers",
   "map_species_occurrences",
   "read_species_requests",
-  "render_overview_map",
-  "validate_output_manifest"
+  "render_overview_map"
 )
 
 experimental_exports <- c(
@@ -76,7 +75,6 @@ approved_complete_disposition <- c(
   "run_settings",
   "validate_analysis_layers",
   "validate_layer_registry",
-  "validate_output_manifest",
   "write_attribution_report",
   "write_coverage_summary",
   "write_run_manifest",
@@ -150,10 +148,6 @@ stable_formals <- list(
     coverage = "NULL",
     layers = "NULL",
     map_cfg = "NULL"
-  ),
-  validate_output_manifest = c(
-    manifest = "<missing>",
-    expected_outputs = "NULL"
   )
 )
 
@@ -184,7 +178,7 @@ testthat::test_that("public exports match the exact tier contract", {
       "\\1",
       export_declarations
     )
-    testthat::expect_length(declared_exports, 16L)
+    testthat::expect_length(declared_exports, 15L)
     testthat::expect_identical(anyDuplicated(declared_exports), 0L)
     testthat::expect_identical(sort(declared_exports), expected_exports)
   }
@@ -195,13 +189,13 @@ testthat::test_that("public exports match the exact tier contract", {
     internal_names
   )
 
-  testthat::expect_length(stable_exports, 13L)
+  testthat::expect_length(stable_exports, 12L)
   testthat::expect_length(experimental_exports, 3L)
   testthat::expect_length(internal_names, 11L)
   testthat::expect_length(unique(internal_names), 11L)
   testthat::expect_length(intersect(stable_exports, experimental_exports), 0L)
-  testthat::expect_length(unique(c(stable_exports, experimental_exports)), 16L)
-  testthat::expect_length(complete_disposition, 27L)
+  testthat::expect_length(unique(c(stable_exports, experimental_exports)), 15L)
+  testthat::expect_length(complete_disposition, 26L)
   testthat::expect_identical(anyDuplicated(complete_disposition), 0L)
   testthat::expect_identical(
     sort(complete_disposition),

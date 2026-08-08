@@ -63,11 +63,11 @@ before using live or local spatial sources.
 ## Outputs and interpretation
 
 Outputs are written under `outputs/<profile>/` or the configured project output
-directory and are ignored by Git. Read
-[the output schema](https://github.com/BWBrook/localmap_tas/blob/main/docs/output_schema_v1.md)
-alongside provenance
-sidecars and the attribution report before interpreting a map or extracted
-value.
+directory and are ignored by Git. Review the selected maps and tables together
+with layer provenance sidecars, the attribution report, and the run manifest.
+Follow the artefact-review steps in
+[Workflow](https://github.com/BWBrook/localmap_tas/blob/main/docs/workflow.md)
+before interpreting a map or extracted value.
 
 ## Contributors
 

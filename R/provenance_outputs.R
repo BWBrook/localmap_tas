@@ -101,8 +101,7 @@ write_attribution_report <- function(layers,
 #' @param layer_outputs Tibble from `fetch_layer_registry()`.
 #' @param analysis_layers_cfg Config list for analysis layers.
 #' @param analysis_layers Tibble from `fetch_analysis_layers()`.
-#' @param output_manifest_file Output schema manifest path.
-#' @param output_path Output manifest path.
+#' @param output_path Run-manifest output path.
 #' @return Output path to the run manifest.
 write_run_manifest <- function(cfg,
                                cfg_file,
@@ -110,7 +109,6 @@ write_run_manifest <- function(cfg,
                                layer_outputs,
                                analysis_layers_cfg,
                                analysis_layers,
-                               output_manifest_file,
                                output_path = NULL) {
   if (is.null(output_path) || !nzchar(output_path)) {
     output_path <- here::here("outputs", "provenance", "run_manifest.yml")
@@ -120,12 +118,6 @@ write_run_manifest <- function(cfg,
   cfg_hash <- NA_character_
   if (!is.null(cfg_file) && nzchar(cfg_file) && file.exists(cfg_file)) {
     cfg_hash <- unname(tools::md5sum(cfg_file))
-  }
-  manifest_hash <- NA_character_
-  if (!is.null(output_manifest_file) &&
-        nzchar(output_manifest_file) &&
-        file.exists(output_manifest_file)) {
-    manifest_hash <- unname(tools::md5sum(output_manifest_file))
   }
 
   build_entries <- function(cfg_layers, outputs, include_output = TRUE) {
@@ -189,11 +181,6 @@ write_run_manifest <- function(cfg,
       schema_version = cfg$schema_version %||% NA_character_,
       path = cfg_file %||% NA_character_,
       hash = cfg_hash
-    ),
-    output_schema = list(
-      version = "v1",
-      manifest = output_manifest_file %||% NA_character_,
-      hash = manifest_hash
     ),
     layers = list(
       imagery = build_entries(layer_registry, layer_outputs, include_output = TRUE),

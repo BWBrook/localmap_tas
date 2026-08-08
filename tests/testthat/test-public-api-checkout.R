@@ -10,8 +10,7 @@ checkout_stable_exports <- c(
   "fetch_analysis_layers",
   "map_species_occurrences",
   "read_species_requests",
-  "render_overview_map",
-  "validate_output_manifest"
+  "render_overview_map"
 )
 
 checkout_experimental_exports <- c(
@@ -78,7 +77,7 @@ testthat::test_that("pkgdown indexes every public export exactly once", {
   testthat::expect_length(public_reference, 5L)
   testthat::expect_identical(
     vapply(public_reference, function(section) length(section$contents), integer(1)),
-    c(2L, 4L, 3L, 4L, 3L)
+    c(2L, 4L, 3L, 3L, 3L)
   )
   testthat::expect_identical(sort(indexed), checkout_expected_exports)
   testthat::expect_identical(anyDuplicated(indexed), 0L)

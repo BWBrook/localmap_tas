@@ -32,7 +32,7 @@ reference:
   - title: "Advanced: ALA"
     contents: [read_species_requests, ala_resolve_species, ala_fetch_occurrences]
   - title: "Advanced: rendering and outputs"
-    contents: [render_overview_map, map_species_occurrences, assemble_panel_figure, validate_output_manifest]
+    contents: [render_overview_map, map_species_occurrences, assemble_panel_figure]
   - title: Experimental
     contents: [ala_configure, fetch_layer_registry, generate_topo_tile_map]
   - title: internal

@@ -374,7 +374,6 @@ list(
       layer_outputs = layer_outputs,
       analysis_layers_cfg = cfg$data$analysis_layers,
       analysis_layers = analysis_layers,
-      output_manifest_file = output_manifest_file,
       output_path = file.path(output_dir, "provenance", "run_manifest.yml")
     ),
     format = "file",
@@ -450,53 +449,5 @@ list(
     panel_figure$pdf,
     format = "file",
     description = "Multi-panel figure PDF output."
-  ),
-
-  targets::tar_target(
-    output_manifest_file,
-    output_manifest_file_for_profile(localmap_active_profile(cfg)),
-    format = "file",
-    description = "Output schema manifest (v1) file."
-  ),
-
-  targets::tar_target(
-    output_manifest,
-    readr::read_csv(output_manifest_file, show_col_types = FALSE, num_threads = 1),
-    description = "Output schema manifest (v1) defining expected outputs."
-  ),
-
-  targets::tar_target(
-    output_schema_v1,
-    {
-      profile <- localmap_active_profile(cfg)
-      expected_outputs <- build_output_schema_expected_outputs(
-        profile,
-        list(
-          species_map = species_map,
-          camera_sites_map = camera_sites_map,
-          camera_sites_tile = camera_sites_tile,
-          aoi_debug_plot = aoi_debug_plot,
-          coverage_summary = coverage_summary,
-          layer_output_paths = layer_output_paths,
-          layer_provenance_paths = layer_provenance_paths,
-          analysis_layer_paths = analysis_layer_paths,
-          analysis_layer_provenance_paths = analysis_layer_provenance_paths,
-          analysis_layer_preview_paths = analysis_layer_preview_paths,
-          overview_map = overview_map,
-          panel_figure_png = panel_figure_png,
-          panel_figure_pdf = panel_figure_pdf,
-          tasveg_class_legend = tasveg_class_legend,
-          tasveg_class_lookup = tasveg_class_lookup,
-          analysis_attribute_lookups = analysis_attribute_lookups,
-          site_attributes_long_file = site_attributes_long_file,
-          site_attributes_wide_file = site_attributes_wide_file,
-          analysis_provenance = analysis_provenance,
-          attribution_report = attribution_report,
-          run_manifest = run_manifest
-        )
-      )
-      validate_output_manifest(manifest = output_manifest, expected_outputs = expected_outputs)
-    },
-    description = "Validated output schema manifest (v1) for produced artefacts."
   )
 )

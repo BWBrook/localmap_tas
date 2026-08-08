@@ -6,9 +6,13 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Changed
+- 2026-08-08: Retired the static output-schema v1 contract, including its three
+  targets, manifests, validator/API, and run-manifest coupling. Selected
+  product endpoints, `{targets}` file tracking, layer/run provenance,
+  attribution, and artefact review remain the evidence contract.
 - Removed the obsolete input-manifest reader, preview, and combiner API and the
-  `data$manifest` configuration field. Run-level `run_manifest` and output
-  provenance/schema manifests remain supported.
+  `data$manifest` configuration field. Run-level `run_manifest` and layer
+  provenance remain supported.
 - Configuration validation now follows the selected settings products:
   `attributes` and `atlas` runs may omit occurrence/ALA inputs, while `figure`,
   `all`, and profiles with omitted products retain those requirements.
@@ -85,15 +89,15 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   on satellite imagery.
 
 ### Changed
-- The pre-release public API is grouped into 13 stable functions and four
-  experimental transitional exports (`ala_configure()`,
-  `fetch_layer_registry()`, `generate_topo_tile_map()`, and `read_manifest()`).
+- The pre-release public API is grouped into 12 stable functions and three
+  experimental exports (`ala_configure()`, `fetch_layer_registry()`, and
+  `generate_topo_tile_map()`).
 - Thirteen pipeline helpers are now internal, with these migration routes:
   `ala_default_occurrence_fields()` to resolved fields from `cfg_read()`;
   `build_layer_provenance()`, `write_attribution_report()`,
-  `write_coverage_summary()`, and `write_run_manifest()` to generated products
-  plus `validate_output_manifest()`; `combine_manifest_csvs()` to the configured
-  pipeline; `fetch_arcgis_imagery()` and `fetch_wms_imagery()` to configured
+  `write_coverage_summary()`, and `write_run_manifest()` to generated products;
+  `combine_manifest_csvs()` to the configured pipeline; `fetch_arcgis_imagery()`
+  and `fetch_wms_imagery()` to configured
   layers through `run_settings()`; `preview_manifest()` to `read_manifest()` and
   ordinary table inspection; `validate_analysis_layers()` to
   `fetch_analysis_layers()` or `run_settings()`; `validate_layer_registry()` to
@@ -105,7 +109,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   the JC report renders to `outputs/reports/paper.html`.
 - R/renv baseline moved forward to R 4.6.x; Makefile R entrypoints use the
   active `Rscript` on `PATH`, with decisive Mac mini validation on R 4.6.1.
-- `_targets.R` now delegates profile-specific expected-output assembly, report fallback rendering, TASVEG class lookup resolution, and manifest selection to internal helper functions to keep the pipeline declarative without changing target names or outputs.
+- `_targets.R` delegates TASVEG class lookup resolution and other reusable
+  operations to internal helpers to keep the pipeline declarative.
 - Config handling is now split into load, migrate, validate, and resolve phases behind the existing `cfg_read()` entrypoint, preserving the schema and output layout while reducing coupling in `R/config.R`.
 - Camera-site internals are now separated by responsibility: defaults, graticule generation, and panel assembly live in dedicated helper modules instead of one oversized renderer file.
 - Analysis-layer internals are now separated by responsibility: validation and remote download/WCS fallback helpers live outside the main acquisition module, reducing the size and coupling of `R/analysis_layers.R`.
@@ -155,8 +160,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 - Bootstrap now relies on `renv::restore()` as the canonical dependency source instead of a stale hand-maintained package list.
 - `dependencies.R` now derives its optional helper installs from `DESCRIPTION`, so contributor instructions stay aligned with the package metadata.
 - `make test` and `R CMD check` now use package-aware test entrypoints, so the canonical checks exercise `localmap` instead of skipping most tests.
-- Demo output-schema validation now handles profiles without analysis layers and validates against a demo-specific expected-output map.
 - Removed the no-longer-required `pak` suggestion from the project metadata and refreshed `renv.lock`, restoring a clean `renv::status()`.
 - Added a separate QA bootstrap path and active CI workflow so lint, offline pipelines, and package checks match the documented release gates.
 - `tests/run-tests.R` is now `R CMD check` compatible, and `.renvignore` is excluded from package builds.
-- Added positive contract tests for demo output manifests, provenance keys, overview-map aspect ratio, site-attribute wide-table mapping, and `run_settings()` environment restoration.
+- Added positive contract tests for provenance keys, overview-map aspect ratio,
+  site-attribute wide-table mapping, and `run_settings()` environment restoration.

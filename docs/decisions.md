@@ -70,7 +70,9 @@ Format:
 ## 2026-01-09 — Output schema v1 manifest
 **Decision:** Track expected artefacts in a manifest CSV (`inst/extdata/output_manifest_v1.csv`) and validate via `output_schema_v1` target.
 **Rationale:** Makes output contracts explicit and testable, reducing silent output drift.
-**Status:** Active.
+**Status:** Retired 2026-08-08. No external consumer remained; selected product
+endpoints, `{targets}` file tracking, provenance, attribution, and artefact
+review now form the evidence contract.
 
 ## 2026-01-09 — AOI rotation convention (planned)
 **Decision:** Define AOI `rotation_deg` as clockwise from geographic north, applied in the analysis CRS (EPSG:28355).

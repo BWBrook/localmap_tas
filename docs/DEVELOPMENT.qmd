@@ -50,7 +50,8 @@ require investigation rather than normalization.
 
 After the pipeline and renders, inspect maps, tables, provenance, both sites,
 and the report. Follow the [workflow](workflow.md) for the required artifact
-review cycle and [output guide](output_schema_v1.md) for interpretation.
+review cycle and the [layer guide](layers_guide.md) for acquisition and
+provenance interpretation.
 
 ## CI notes
 

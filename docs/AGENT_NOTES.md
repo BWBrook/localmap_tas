@@ -1,5 +1,12 @@
 # AGENT NOTES
 
+- 2026-08-08: Retired the complete static output-schema v1 system.
+  - Removed its three targets, static manifests, mapper, validator/API,
+    generated help, focused tests, and run-manifest hash coupling without a
+    replacement or compatibility layer.
+  - Preserved selected product endpoints, `{targets}` file tracking, resolved
+    config and layer provenance, attribution, and representative artefact review.
+
 - 2026-08-05: Retired the orphan standalone camera-sites panel branch.
   - Removed the `camera_sites_panel` target, camera-stack config/schema entries,
     current output-manifest rows, and expected-output/test references.

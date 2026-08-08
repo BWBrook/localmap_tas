@@ -44,8 +44,9 @@ The direct profile route begins at `cfg_read()`. Its major branches are:
 - Imagery and analysis-layer registries feed cached/placeholder layers,
   previews, and site-attribute extraction.
 - Map products feed panel assembly.
-- Declared outputs feed attribution and output-manifest validation. The optional
-  report is rendered manually from completed current outputs.
+- Layer acquisitions feed attribution and run provenance; selected product
+  endpoints remain file-tracked by `{targets}`. The optional report is rendered
+  manually from completed current outputs.
 
 The exact target graph remains defined in `_targets.R`; use
 `targets::tar_visnetwork()` for current dependencies rather than treating this

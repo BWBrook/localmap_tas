@@ -24,10 +24,8 @@ testthat::test_that("provenance outputs capture layer metadata", {
   prov_path <- tempfile(fileext = ".csv")
   attr_path <- tempfile(fileext = ".md")
   cfg_path <- tempfile(fileext = ".yml")
-  manifest_path <- tempfile(fileext = ".csv")
   run_path <- tempfile(fileext = ".yml")
   writeLines("schema_version: 2", cfg_path)
-  writeLines("output_id,type,path", manifest_path)
 
   prov_out <- localmap:::build_layer_provenance(
     layers = layers,
@@ -58,6 +56,11 @@ testthat::test_that("provenance outputs capture layer metadata", {
       id = "imagery1",
       type = "wms",
       url = "http://example",
+      layers = "LIST",
+      crs = "EPSG:3857",
+      width = 512,
+      height = 512,
+      format = "image/png",
       attribution = list(source = "Imagery Source")
     )),
     layer_outputs = layers,
@@ -65,17 +68,70 @@ testthat::test_that("provenance outputs capture layer metadata", {
       id = "analysis1",
       type = "raster_file",
       path = "analysis1.tif",
+      crs = "EPSG:28355",
+      categorical = FALSE,
+      bands = 1,
+      units = "m",
       attribution = list(source = "Analysis Source")
     )),
     analysis_layers = analysis_layers,
-    output_manifest_file = manifest_path,
     output_path = run_path
   )
   testthat::expect_true(file.exists(run_out))
   run_lines <- readLines(run_out)
   testthat::expect_true(any(grepl("run.products: attributes", run_lines)))
-  testthat::expect_true(any(grepl("layers.imagery.imagery1", run_lines)))
-  testthat::expect_true(any(grepl("layers.analysis.analysis1", run_lines)))
+  testthat::expect_true(any(grepl("config.schema_version: 2", run_lines)))
+  testthat::expect_true(any(grepl(
+    sprintf("config.path: %s", cfg_path),
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    sprintf("config.hash: %s", unname(tools::md5sum(cfg_path))),
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.imagery.imagery1.source: http://example",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.imagery.imagery1.params.layers: LIST",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.imagery.imagery1.output_path: outputs/jc/layers/imagery1.png",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.imagery.imagery1.provenance_path: outputs/jc/layers/imagery1.png.yml",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.imagery.imagery1.cache_path: data/cache/imagery1.png",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.imagery.imagery1.attribution.source: Imagery Source",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.analysis.analysis1.source: analysis1.tif",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "layers.analysis.analysis1.params.crs: EPSG:28355",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_false(any(grepl("^output_schema(?:\\.|:)", run_lines, perl = TRUE)))
 })
 
 testthat::test_that("imagery provenance includes required machine-readable keys", {
