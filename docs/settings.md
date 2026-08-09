@@ -23,6 +23,23 @@ has been installed as an R package, the equivalent public API route is:
 localmap::run_settings("settings.example.yaml")
 ```
 
+## Offline attributes example
+
+The repository also includes `settings.attributes-jc.yaml`, a complete
+network-free example for exact-point extraction at all 13 packaged JC camera
+sites. It selects the continuous `dem` and categorical `tasveg_class` analysis
+layers and explicitly disables inherited imagery and distance layers:
+
+```sh
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript scripts/run_project.R settings.attributes-jc.yaml
+```
+
+This selects only the attributes product and shared provenance/attribution
+targets. Inspect `tables/site_attributes_long.parquet` and
+`tables/site_attributes_wide.csv` under `outputs/jc_attributes_offline/`, then
+review the two layer sidecars, attribution report, and run manifest before
+using the values.
+
 ## Input tables
 
 - `site.csv` is required. Existing `count`/`obs` and `rd` columns are used when
@@ -53,6 +70,7 @@ Input coordinates are latitude/longitude in EPSG:4326.
 - `analysis_layers.include`: analysis keys `dem`, `slope`, `canopy_height`,
   `ndvi`, `nbr`, `climate`, `tasveg`, `tasveg_class`, `fire`, `geology`,
   `land_tenure`, `reserve_estate`, and `soil_ph`.
+- `distance_layers.include`: distance keys `roads` and `localities`.
 - `products`: optional target selector. Choose `attributes`, `atlas`, `figure`,
   or any subset; `all` is the default and selects all three product groups.
   `attributes` and `atlas` runs do not require species requests, occurrence, or
@@ -63,7 +81,8 @@ Input coordinates are latitude/longitude in EPSG:4326.
 
 Dependency resolution is automatic: `slope` includes `dem`; `ndvi` or `nbr`
 includes `multiband`; `tasveg` includes `tasveg_class`. Unspecified values retain
-the selected base profile's behavior. See the
+the selected base profile's behavior. An explicit empty `include: []` disables
+that layer family. See the
 [configuration reference](config_reference.md) for that complete schema.
 
 ## Resolution and outputs

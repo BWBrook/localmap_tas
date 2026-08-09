@@ -30,6 +30,21 @@ The deterministic route produces non-empty evidence including:
   `outputs/jc/layers/`; and
 - attribution and run-manifest records under `outputs/jc/provenance/`.
 
+## Offline attributes settings route
+
+`settings.attributes-jc.yaml` is a concise exact-point extraction example for
+the 13 packaged JC camera sites. It selects the continuous JC DEM and
+categorical TASVEG class fixtures, with imagery and distance layers disabled:
+
+```sh
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript scripts/run_project.R settings.attributes-jc.yaml
+```
+
+Only the attributes product and shared provenance/attribution targets run.
+Review the long Parquet and wide CSV tables under
+`outputs/jc_attributes_offline/tables/` with their records under
+`outputs/jc_attributes_offline/provenance/`.
+
 ## Real-data settings route
 
 `settings.example.yaml` is a real-data-only template. Before running it,

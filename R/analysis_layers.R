@@ -89,7 +89,7 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
     type <- layer$type
     source_descriptor <- layer$path %||% layer$url %||% layer$source_id %||% ""
     offline_flag <- isTRUE(layer$offline)
-    if (type %in% c("vector_arcgis", "raster_arcgis")) {
+    if (type %in% c("vector_arcgis", "raster_arcgis", "raster_wcs")) {
       if (!localmap_network_allowed()) {
         offline_flag <- TRUE
       }
@@ -145,7 +145,11 @@ fetch_analysis_layers <- function(layers, aoi, cache_dir = NULL) {
       units = layer$units,
       source_id = layer$source_id
     )
-    uses_offline_fixture <- identical(type, "vector_arcgis") &&
+    uses_offline_fixture <- type %in% c(
+      "vector_arcgis",
+      "raster_arcgis",
+      "raster_wcs"
+    ) &&
       isTRUE(offline_flag) &&
       !is.null(layer$fixture_path) &&
       nzchar(layer$fixture_path)

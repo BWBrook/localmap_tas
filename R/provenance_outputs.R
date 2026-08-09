@@ -188,8 +188,19 @@ write_run_manifest <- function(cfg,
     )
   )
   products <- cfg$data$outputs$products
+  if (is.null(products) || any(products %in% c("attributes", "all"))) {
+    run_metadata$attributes <- list(
+      site_input_path = cfg$data$camera_sites$jc$site_path %||% NA_character_,
+      configured_long_path = cfg$data$attributes$output_long %||% NA_character_,
+      configured_wide_path = cfg$data$attributes$output_wide %||% NA_character_
+    )
+  }
   if (!is.null(products)) {
     run_metadata$run$products <- as.character(products)
+  }
+  settings_path <- cfg$data$outputs$settings_path
+  if (!is.null(settings_path) && nzchar(settings_path)) {
+    run_metadata$run$settings_path <- settings_path
   }
 
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)

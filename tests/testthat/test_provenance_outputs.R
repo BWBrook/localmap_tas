@@ -49,7 +49,17 @@ testthat::test_that("provenance outputs capture layer metadata", {
   run_out <- localmap:::write_run_manifest(
     cfg = list(
       schema_version = 2,
-      data = list(outputs = list(products = "attributes"))
+      data = list(
+        outputs = list(
+          products = "attributes",
+          settings_path = "settings.attributes-jc.yaml"
+        ),
+        camera_sites = list(jc = list(site_path = "inst/extdata/sites.csv")),
+        attributes = list(
+          output_long = "outputs/attributes.parquet",
+          output_wide = "outputs/attributes.csv"
+        )
+      )
     ),
     cfg_file = cfg_path,
     layer_registry = list(list(
@@ -80,6 +90,11 @@ testthat::test_that("provenance outputs capture layer metadata", {
   testthat::expect_true(file.exists(run_out))
   run_lines <- readLines(run_out)
   testthat::expect_true(any(grepl("run.products: attributes", run_lines)))
+  testthat::expect_true(any(grepl(
+    "run.settings_path: settings.attributes-jc.yaml",
+    run_lines,
+    fixed = TRUE
+  )))
   testthat::expect_true(any(grepl("config.schema_version: 2", run_lines)))
   testthat::expect_true(any(grepl(
     sprintf("config.path: %s", cfg_path),
@@ -131,7 +146,48 @@ testthat::test_that("provenance outputs capture layer metadata", {
     run_lines,
     fixed = TRUE
   )))
+  testthat::expect_true(any(grepl(
+    "attributes.site_input_path: inst/extdata/sites.csv",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "attributes.configured_long_path: outputs/attributes.parquet",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "attributes.configured_wide_path: outputs/attributes.csv",
+    run_lines,
+    fixed = TRUE
+  )))
   testthat::expect_false(any(grepl("^output_schema(?:\\.|:)", run_lines, perl = TRUE)))
+
+  atlas_path <- tempfile(fileext = ".yml")
+  localmap:::write_run_manifest(
+    cfg = list(
+      schema_version = 2,
+      data = list(
+        outputs = list(products = "atlas"),
+        camera_sites = list(jc = list(site_path = "inst/extdata/sites.csv")),
+        attributes = list(
+          output_long = "outputs/attributes.parquet",
+          output_wide = "outputs/attributes.csv"
+        )
+      )
+    ),
+    cfg_file = cfg_path,
+    layer_registry = list(),
+    layer_outputs = NULL,
+    analysis_layers_cfg = list(),
+    analysis_layers = NULL,
+    output_path = atlas_path
+  )
+  testthat::expect_false(any(grepl(
+    "^attributes(?:\\.|:)",
+    readLines(atlas_path),
+    perl = TRUE
+  )))
 })
 
 testthat::test_that("imagery provenance includes required machine-readable keys", {

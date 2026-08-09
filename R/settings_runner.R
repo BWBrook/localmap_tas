@@ -333,12 +333,21 @@ apply_settings_to_config <- function(cfg,
       localities = "localities_wms"
     )
     include_ids <- unique(unlist(layer_map[tolower(layer_include)], use.names = FALSE))
+    if (is.null(include_ids)) include_ids <- character()
     cfg$data$layers <- filter_layers_by_ids(cfg$data$layers, include_ids)
   }
 
   analysis_include <- normalize_include_list(settings$analysis_layers)
   if (!is.null(analysis_include)) {
     cfg$data$analysis_layers <- filter_analysis_layers(cfg$data$analysis_layers, analysis_include)
+  }
+
+  distance_include <- normalize_include_list(settings$distance_layers)
+  if (!is.null(distance_include)) {
+    cfg$data$distance_layers <- filter_layers_by_ids(
+      cfg$data$distance_layers,
+      tolower(distance_include)
+    )
   }
 
   base_output_dir <- cfg$data$outputs$output_dir

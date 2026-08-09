@@ -79,6 +79,8 @@ testthat::test_that("WCS raster layers use fixtures when offline", {
   aoi <- localmap::build_aoi_from_config(aoi_cfg)
 
   raster_out <- tempfile(fileext = ".tif")
+  cache_dir <- tempfile()
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
   layers <- list(
     list(
       id = "dem_wcs",
@@ -86,14 +88,31 @@ testthat::test_that("WCS raster layers use fixtures when offline", {
       url = "https://services.ga.gov.au/gis/services/DEM_SRTM_1Second_2024/MapServer/WCSServer",
       coverage = "1",
       output_path = raster_out,
-      offline = TRUE,
       fixture_path = "inst/extdata/jc_dem.tif",
       attribution = list(source = "fixture")
     )
   )
 
-  res <- localmap::fetch_analysis_layers(layers, aoi = aoi)
+  old <- Sys.getenv("LOCALMAP_ALLOW_NETWORK", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) {
+      Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+    } else {
+      Sys.setenv(LOCALMAP_ALLOW_NETWORK = old)
+    }
+  }, add = TRUE)
+  Sys.unsetenv("LOCALMAP_ALLOW_NETWORK")
+
+  res <- localmap::fetch_analysis_layers(layers, aoi = aoi, cache_dir = cache_dir)
   testthat::expect_true(file.exists(res$path[res$id == "dem_wcs"]))
+  provenance <- yaml::read_yaml(res$provenance_path[[1]])
+  testthat::expect_identical(provenance$status, "offline_fixture")
+  testthat::expect_true(provenance[["params.offline"]])
+
+  file.remove(res$path[[1]])
+  cached <- localmap::fetch_analysis_layers(layers, aoi = aoi, cache_dir = cache_dir)
+  cached_provenance <- yaml::read_yaml(cached$provenance_path[[1]])
+  testthat::expect_identical(cached_provenance$status, "offline_fixture")
 })
 
 testthat::test_that("derived slope and indices are computed", {

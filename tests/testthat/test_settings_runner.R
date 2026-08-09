@@ -120,6 +120,16 @@ testthat::test_that("apply_settings_to_config updates paths and filters layers",
     sub("^[^_]+_", "", layer$id)
   }, character(1))
   testthat::expect_true(all(analysis_suffixes %in% c("dem")))
+
+  settings$layers <- list(include = list())
+  settings$distance_layers <- list(include = list())
+  cfg_without_imagery <- localmap:::apply_settings_to_config(
+    cfg,
+    settings,
+    base_profile = "jc"
+  )
+  testthat::expect_length(cfg_without_imagery$data$layers, 0L)
+  testthat::expect_length(cfg_without_imagery$data$distance_layers, 0L)
 })
 
 testthat::test_that("run_settings restores env vars after running cfg target", {

@@ -6,6 +6,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Changed
+- 2026-08-09: Aligned the locked R `{arrow}` package at 25.0.0 with the
+  supported Homebrew Apache Arrow 25 series.
 - 2026-08-08: Retired the static output-schema v1 contract, including its three
   targets, manifests, validator/API, and run-manifest coupling. Selected
   product endpoints, `{targets}` file tracking, layer/run provenance,
@@ -21,6 +23,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `panel_figure` and its PNG/PDF outputs.
 
 ### Added
+- 2026-08-09: Added a copyable offline `products: attributes` settings example
+  for exact-point DEM and TASVEG-class extraction at all 13 packaged JC sites.
 - Settings-first onboarding across the README, Quarto site, vignette, and user
   guides, with separate deterministic `jc_ci` and prerequisite-backed real-data
   routes.
@@ -132,6 +136,10 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `data$occurrence$map`).
 
 ### Fixed
+- 2026-08-09: Empty settings include lists now disable inherited imagery and
+  distance layers; attributes run manifests identify the settings, site input,
+  and configured tables; cached offline WCS fixtures retain honest
+  `offline_fixture` provenance.
 - Moved the Quarto project contract to recognized `docs/_quarto.yml`, repaired
   its navigation and output root, and corrected the JC report YAML and all six
   map/table/provenance paths under `outputs/jc/`.

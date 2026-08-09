@@ -1,5 +1,24 @@
 # AGENT NOTES
 
+- 2026-08-09: Proved the offline settings-driven attributes vertical slice.
+  - Aligned project `{arrow}` 25.0.0 with Homebrew Apache Arrow 25.0.0 and
+    changed only the Arrow lock record; package loading succeeds.
+  - Added `settings.attributes-jc.yaml` for all 13 packaged JC sites with only
+    `jc_dem` and `jc_tasveg_class`; imagery, distance, occurrence, ALA, atlas,
+    and figure work are excluded by the resolved settings target selection.
+  - Fixed explicit empty imagery/distance include lists, recorded the settings,
+    site input, and configured attribute tables in the run manifest, and kept
+    cached offline WCS fixtures labelled `offline_fixture`.
+  - Artefact review: the canonical long table has 39 rows and no duplicate
+    `(site_id, layer_id, attribute_name)` keys; the wide table has 13 rows; site
+    IDs and coordinates exactly match the fixture; all selected values are
+    present. DEM values span 30.763-92.965 m, and TASVEG codes are DOB (5), DTO
+    (3), FPS (1), and WOB (4), with intelligible class labels.
+  - The wide convenience table retains 15 explicit all-`NA` columns for
+    unselected layer families. On the identical second invocation, the two
+    settings/config targets completed, all 14 downstream targets were skipped,
+    and all ten generated artefact hashes were unchanged.
+
 - 2026-08-08: Retired the complete static output-schema v1 system.
   - Removed its three targets, static manifests, mapper, validator/API,
     generated help, focused tests, and run-manifest hash coupling without a
