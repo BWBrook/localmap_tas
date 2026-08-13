@@ -38,7 +38,10 @@ This selects only the attributes product and shared provenance/attribution
 targets. Inspect `tables/site_attributes_long.parquet` and
 `tables/site_attributes_wide.csv` under `outputs/jc_attributes_offline/`, then
 review the two layer sidecars, attribution report, and run manifest before
-using the values.
+using the values. The wide CSV retains identifiers, coordinates, site metadata,
+and only mapped attributes represented in the long table. A selected attribute
+remains present when all its extracted values are `NA`; unselected attribute
+families do not produce empty columns.
 
 ## Input tables
 

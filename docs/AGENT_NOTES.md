@@ -1,5 +1,19 @@
 # AGENT NOTES
 
+- 2026-08-14: Corrected the convenience wide attributes table to be selected-only.
+  - Removed universal padding of known attribute families while preserving
+    canonical ordering, site identifiers/coordinates, input metadata, and
+    collision renaming; mapped attributes remain present even when all values
+    are genuinely `NA`.
+  - The offline JC settings slice produced 13 rows with exactly `site_id`,
+    `lat`, `lon`, `dem`, `tasveg_class`, `rd`, and `obs`; all sites and
+    coordinates match the fixture, and selected values remain complete.
+  - The canonical long Parquet remained 39 rows with unique
+    `(site_id, layer_id, attribute_name)` keys and unchanged SHA-256
+    `3ad61feabe88688101c13ab6e0ef9effbaef013cf144fdf1ccfc3dc9b309d865`.
+  - An identical second invocation skipped all 14 downstream targets, and all
+    ten generated artefact hashes were unchanged. No live data access occurred.
+
 - 2026-08-09: Proved the offline settings-driven attributes vertical slice.
   - Aligned project `{arrow}` 25.0.0 with Homebrew Apache Arrow 25.0.0 and
     changed only the Arrow lock record; package loading succeeds.

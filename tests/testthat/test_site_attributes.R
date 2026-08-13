@@ -84,18 +84,8 @@ testthat::test_that("site attributes outputs write long + wide products", {
   testthat::expect_true(file.exists(long_out))
   testthat::expect_true(file.exists(wide_out))
   wide_tbl <- utils::read.csv(wide_out, stringsAsFactors = FALSE)
-  expected_cols <- c(
-    "canopy_height_m",
-    "soil_ph",
-    "bio1_mean_temp_c",
-    "bio12_annual_precip_mm",
-    "fire_sensitivity",
-    "fire_flammability",
-    "geology_description",
-    "land_tenure_class",
-    "reserve_estate_class"
-  )
-  testthat::expect_true(all(expected_cols %in% names(wide_tbl)))
+  testthat::expect_named(wide_tbl, c("site_id", "lat", "lon"))
+  testthat::expect_equal(nrow(wide_tbl), nrow(sites))
 })
 
 testthat::test_that("attribute lookups stay empty-but-named without analysis layers", {
@@ -170,6 +160,22 @@ testthat::test_that("site attributes wide maps representative fields into stable
   )
   wide_tbl <- utils::read.csv(wide_out, stringsAsFactors = FALSE)
 
+  testthat::expect_named(
+    wide_tbl,
+    c(
+      "site_id",
+      "lat",
+      "lon",
+      "dem",
+      "slope",
+      "ndvi",
+      "tasveg_category",
+      "fire_sensitivity",
+      "geology_description",
+      "land_tenure_class",
+      "distance_to_road"
+    )
+  )
   testthat::expect_equal(wide_tbl$dem[[1]], 101.5)
   testthat::expect_equal(wide_tbl$slope[[1]], 12.1)
   testthat::expect_equal(wide_tbl$ndvi[[1]], 0.34)
@@ -184,4 +190,66 @@ testthat::test_that("site attributes wide maps representative fields into stable
     wide_tbl$land_tenure_class[[1]],
     unname(localmap:::attribute_code_from_label("Public Reserve"))
   )
+})
+
+testthat::test_that("wide output retains selected missing fields and site metadata", {
+  attributes <- tibble::tibble(
+    site_id = rep(c("site_a", "site_b"), each = 3),
+    layer_id = rep(c("jc_dem", "jc_slope", "jc_tasveg_class"), 2),
+    attribute_name = rep(c("value", "slope", "VEGCODE"), 2),
+    value = c("101.5", NA_character_, "DOB", "98.2", NA_character_, "WOB")
+  )
+  sites <- tibble::tibble(
+    site = c("site_a", "site_b"),
+    lat = c(-42.0, -42.1),
+    lon = c(146.0, 146.1),
+    rd = c(10L, 12L),
+    obs = c(3L, 4L),
+    dem = c("field_a", "field_b")
+  )
+  out_path <- tempfile(fileext = ".csv")
+
+  localmap:::write_site_attributes_wide(attributes, sites, out_path)
+  wide_tbl <- utils::read.csv(out_path, stringsAsFactors = FALSE)
+
+  testthat::expect_named(
+    wide_tbl,
+    c(
+      "site_id",
+      "lat",
+      "lon",
+      "dem",
+      "slope",
+      "tasveg_class",
+      "rd",
+      "obs",
+      "site_dem"
+    )
+  )
+  testthat::expect_true(all(is.na(wide_tbl$slope)))
+  testthat::expect_false("ndvi" %in% names(wide_tbl))
+  testthat::expect_equal(wide_tbl$rd, c(10L, 12L))
+  testthat::expect_equal(wide_tbl$obs, c(3L, 4L))
+  testthat::expect_equal(wide_tbl$site_dem, c("field_a", "field_b"))
+})
+
+testthat::test_that("wide output with no attributes contains site fields only", {
+  sites <- tibble::tibble(
+    site = c("site_a", "site_b"),
+    lat = c(-42.0, -42.1),
+    lon = c(146.0, 146.1),
+    rd = c(10L, 12L),
+    obs = c(3L, 4L)
+  )
+  out_path <- tempfile(fileext = ".csv")
+
+  localmap:::write_site_attributes_wide(
+    localmap:::empty_site_attributes(),
+    sites,
+    out_path
+  )
+  wide_tbl <- utils::read.csv(out_path, stringsAsFactors = FALSE)
+
+  testthat::expect_named(wide_tbl, c("site_id", "lat", "lon", "rd", "obs"))
+  testthat::expect_equal(nrow(wide_tbl), 2L)
 })

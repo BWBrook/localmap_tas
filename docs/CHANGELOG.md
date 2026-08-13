@@ -6,6 +6,9 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Changed
+- 2026-08-14: `site_attributes_wide.csv` now contains only mapped attributes
+  represented in the long table, while retaining selected all-`NA` attributes,
+  canonical ordering, coordinates, and site metadata.
 - 2026-08-09: Aligned the locked R `{arrow}` package at 25.0.0 with the
   supported Homebrew Apache Arrow 25 series.
 - 2026-08-08: Retired the static output-schema v1 contract, including its three

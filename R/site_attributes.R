@@ -233,14 +233,9 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
     }
   }
 
-  missing_cols <- setdiff(desired_cols, names(wide))
-  if (length(missing_cols) > 0L) {
-    for (col in missing_cols) {
-      wide[[col]] <- NA_character_
-    }
-  }
+  present_cols <- intersect(desired_cols, names(wide))
   extra_cols <- setdiff(names(wide), desired_cols)
-  wide <- wide[, c(desired_cols, extra_cols), drop = FALSE]
+  wide <- wide[, c(present_cols, extra_cols), drop = FALSE]
   numeric_cols <- c(
     "lat",
     "lon",

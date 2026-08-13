@@ -43,7 +43,8 @@ LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript scripts/run_pr
 Only the attributes product and shared provenance/attribution targets run.
 Review the long Parquet and wide CSV tables under
 `outputs/jc_attributes_offline/tables/` with their records under
-`outputs/jc_attributes_offline/provenance/`.
+`outputs/jc_attributes_offline/provenance/`. The wide CSV contains only mapped
+attributes represented in the long table, followed by available site metadata.
 
 ## Real-data settings route
 
