@@ -374,11 +374,52 @@ cfg_validate <- function(cfg, config_path = NULL, expected_schema_version = 2L) 
     if (!is.null(attributes_cfg$enabled)) {
       checkmate::assert_logical(attributes_cfg$enabled, len = 1L, any.missing = FALSE)
     }
+    radius_m <- attributes_cfg$radius_m %||% 0
+    if (!checkmate::test_number(radius_m, lower = 0, finite = TRUE)) {
+      rlang::abort(
+        "`data$attributes$radius_m` must be one finite non-negative number.",
+        class = "cfg_attributes_radius_invalid"
+      )
+    }
     if (!is.null(attributes_cfg$output_long)) {
       checkmate::assert_string(attributes_cfg$output_long, min.chars = 1L)
     }
     if (!is.null(attributes_cfg$output_wide)) {
       checkmate::assert_string(attributes_cfg$output_wide, min.chars = 1L)
+    }
+    if (radius_m > 0 && !identical(attributes_cfg$enabled, FALSE)) {
+      active_layers <- Filter(
+        function(layer) !isTRUE(layer$skip_attributes),
+        analysis_layers_cfg %||% list()
+      )
+      unsupported <- vapply(active_layers, function(layer) {
+        layer$type %in% c("vector_file", "vector_arcgis") || isTRUE(layer$categorical)
+      }, logical(1))
+      unsupported_layers <- active_layers[unsupported]
+      unsupported_labels <- vapply(unsupported_layers, function(layer) {
+        reason <- if (isTRUE(layer$categorical)) "categorical raster" else layer$type
+        sprintf("'%s' (%s)", layer$id, reason)
+      }, character(1))
+      distance_layers <- data_cfg$distance_layers %||% list()
+      if (!is.null(distance_layers$id)) {
+        distance_layers <- list(distance_layers)
+      }
+      if (length(distance_layers) > 0L) {
+        distance_labels <- vapply(distance_layers, function(layer) {
+          sprintf("'%s' (distance)", layer$id %||% layer$distance_to %||% "unnamed")
+        }, character(1))
+        unsupported_labels <- c(unsupported_labels, distance_labels)
+      }
+      if (length(unsupported_labels) > 0L) {
+        rlang::abort(
+          c(
+            "Buffered attributes support continuous raster layers only.",
+            i = sprintf("Unsupported source(s): %s.", paste(unsupported_labels, collapse = ", ")),
+            i = "Set `data$attributes$radius_m: 0` or remove the unsupported source(s)."
+          ),
+          class = "cfg_attributes_buffer_unsupported"
+        )
+      }
     }
   }
 

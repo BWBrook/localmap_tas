@@ -5,15 +5,24 @@
 #' @param sites Data frame with `site`, `lat`, `lon`.
 #' @param analysis_layers Tibble from `fetch_analysis_layers()`.
 #' @param aoi Optional AOI list from `build_aoi_from_config()`.
-#' @param analysis_crs Optional CRS string for distance calculations.
+#' @param analysis_crs Optional CRS string for distances and buffered extraction.
 #' @param distance_layers Optional list of distance-layer configs.
+#' @param radius_m Non-negative extraction radius in metres. Zero uses exact points.
 #' @return Tibble of site attributes in long form.
 #' @export
 build_site_attributes_long <- function(sites,
                                        analysis_layers,
                                        aoi = NULL,
                                        analysis_crs = NULL,
-                                       distance_layers = NULL) {
+                                       distance_layers = NULL,
+                                       radius_m = 0) {
+  radius_m <- radius_m %||% 0
+  if (!checkmate::test_number(radius_m, lower = 0, finite = TRUE)) {
+    rlang::abort(
+      "`radius_m` must be one finite non-negative number.",
+      class = "site_attributes_radius_invalid"
+    )
+  }
   if (is.null(sites) || !is.data.frame(sites) || nrow(sites) == 0L) {
     return(empty_site_attributes())
   }
@@ -26,7 +35,10 @@ build_site_attributes_long <- function(sites,
   }
 
   if (is.null(analysis_layers) || !is.data.frame(analysis_layers) || nrow(analysis_layers) == 0L) {
-    return(empty_site_attributes())
+    if (radius_m == 0) {
+      return(empty_site_attributes())
+    }
+    analysis_layers <- tibble::tibble(id = character(), type = character())
   }
 
   raster_types <- c(
@@ -54,14 +66,59 @@ build_site_attributes_long <- function(sites,
     vector_layers <- vector_layers[!skip_vals, , drop = FALSE]
   }
 
-  raster_long <- extract_raster_attributes(sites, raster_layers)
-  vector_long <- extract_vector_attributes(sites, vector_layers)
-  distance_long <- extract_distance_attributes(
-    sites = sites,
-    distance_layers = distance_layers,
-    aoi = aoi,
-    analysis_crs = analysis_crs
-  )
+  if (radius_m > 0) {
+    categorical_ids <- character()
+    if ("categorical" %in% names(raster_layers)) {
+      categorical <- raster_layers$categorical
+      categorical[is.na(categorical)] <- FALSE
+      categorical_ids <- as.character(raster_layers$id[categorical])
+      raster_layers <- raster_layers[!categorical, , drop = FALSE]
+    }
+    unsupported <- c(
+      sprintf("'%s' (categorical raster)", categorical_ids),
+      sprintf("'%s' (%s)", vector_layers$id, vector_layers$type)
+    )
+    active_distance_layers <- distance_layers %||% list()
+    if (!is.list(active_distance_layers)) {
+      rlang::abort("distance_layers must be a list.", class = "distance_layers_invalid")
+    }
+    if (!is.null(active_distance_layers$id)) {
+      active_distance_layers <- list(active_distance_layers)
+    }
+    if (length(active_distance_layers) > 0L) {
+      distance_ids <- vapply(active_distance_layers, function(layer) {
+        layer$id %||% layer$distance_to %||% "unnamed"
+      }, character(1))
+      unsupported <- c(unsupported, sprintf("'%s' (distance)", distance_ids))
+    }
+    if (length(unsupported) > 0L) {
+      rlang::abort(
+        c(
+          "Buffered attributes support continuous raster layers only.",
+          i = sprintf("Unsupported source(s): %s.", paste(unsupported, collapse = ", ")),
+          i = "Use `radius_m = 0` or remove the unsupported source(s)."
+        ),
+        class = "site_attributes_buffer_unsupported"
+      )
+    }
+    raster_long <- extract_buffered_raster_attributes(
+      sites = sites,
+      raster_layers = raster_layers,
+      analysis_crs = analysis_crs,
+      radius_m = radius_m
+    )
+    vector_long <- empty_site_attributes()
+    distance_long <- empty_site_attributes()
+  } else {
+    raster_long <- extract_raster_attributes(sites, raster_layers)
+    vector_long <- extract_vector_attributes(sites, vector_layers)
+    distance_long <- extract_distance_attributes(
+      sites = sites,
+      distance_layers = distance_layers,
+      aoi = aoi,
+      analysis_crs = analysis_crs
+    )
+  }
 
   combined <- dplyr::bind_rows(raster_long, vector_long, distance_long)
   if (nrow(combined) == 0L) {
@@ -120,10 +177,8 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
   }
   checkmate::assert_string(output_path, min.chars = 1L)
 
-  desired_cols <- c(
-    "site_id",
-    "lat",
-    "lon",
+  id_cols <- c("site_id", "lat", "lon")
+  attribute_cols <- c(
     "dem",
     "slope",
     "ndvi",
@@ -142,6 +197,7 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
     "distance_to_road",
     "distance_to_locality"
   )
+  desired_cols <- c(id_cols, attribute_cols)
 
   if (!is.null(sites) &&
         is.data.frame(sites) &&
@@ -173,10 +229,28 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
   if (nrow(attributes) == 0L) {
     wide <- site_tbl
   } else {
+    buffer_stat_pattern <- "(?:mean|valid_fraction)_r[0-9]+(?:p[0-9]+)?m$"
     attributes <- attributes |>
       dplyr::mutate(
         attribute_norm = gsub("[^a-z0-9]+", "_", tolower(.data$attribute_name)),
+        buffer_stat = stringr::str_extract(.data$attribute_name, buffer_stat_pattern),
         target = dplyr::case_when(
+          !is.na(.data$buffer_stat) & grepl("_dem$", .data$layer_id) ~
+            paste0("dem_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_chm$", .data$layer_id) ~
+            paste0("canopy_height_m_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_slope$", .data$layer_id) ~
+            paste0("slope_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_soil_ph$", .data$layer_id) ~
+            paste0("soil_ph_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_ndvi$", .data$layer_id) ~
+            paste0("ndvi_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_nbr$", .data$layer_id) ~
+            paste0("nbr_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_bio1$", .data$layer_id) ~
+            paste0("bio1_mean_temp_c_", .data$buffer_stat),
+          !is.na(.data$buffer_stat) & grepl("_bio12$", .data$layer_id) ~
+            paste0("bio12_annual_precip_mm_", .data$buffer_stat),
           grepl("_dem$", .data$layer_id) & .data$attribute_name == "value" ~ "dem",
           grepl("_chm$", .data$layer_id) & .data$attribute_name == "value" ~ "canopy_height_m",
           grepl("_slope$", .data$layer_id) & .data$attribute_name == "slope" ~ "slope",
@@ -214,6 +288,18 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
       dplyr::group_by(.data$site_id, .data$target) |>
       dplyr::summarise(value = dplyr::first(.data$value), .groups = "drop")
 
+    mapped_conflicts <- setdiff(
+      intersect(names(site_tbl), unique(attributes$target)),
+      "site_id"
+    )
+    if (length(mapped_conflicts) > 0L) {
+      site_tbl <- dplyr::rename_with(
+        site_tbl,
+        ~ paste0("site_", .x),
+        tidyselect::all_of(mapped_conflicts)
+      )
+    }
+
     wide <- attributes |>
       dplyr::select(dplyr::all_of(c("site_id", "target", "value"))) |>
       tidyr::pivot_wider(
@@ -233,8 +319,24 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
     }
   }
 
-  present_cols <- intersect(desired_cols, names(wide))
-  extra_cols <- setdiff(names(wide), desired_cols)
+  buffered_pattern <- "_r[0-9]+(p[0-9]+)?m$"
+  ordered_attribute_cols <- unlist(lapply(attribute_cols, function(column) {
+    c(
+      intersect(column, names(wide)),
+      grep(
+        paste0("^", column, "_mean", buffered_pattern),
+        names(wide),
+        value = TRUE
+      ),
+      grep(
+        paste0("^", column, "_valid_fraction", buffered_pattern),
+        names(wide),
+        value = TRUE
+      )
+    )
+  }), use.names = FALSE)
+  present_cols <- c(intersect(id_cols, names(wide)), ordered_attribute_cols)
+  extra_cols <- setdiff(names(wide), present_cols)
   wide <- wide[, c(present_cols, extra_cols), drop = FALSE]
   numeric_cols <- c(
     "lat",
@@ -248,7 +350,8 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
     "bio1_mean_temp_c",
     "bio12_annual_precip_mm",
     "distance_to_road",
-    "distance_to_locality"
+    "distance_to_locality",
+    ordered_attribute_cols[grepl(buffered_pattern, ordered_attribute_cols)]
   )
   for (col in intersect(numeric_cols, names(wide))) {
     wide[[col]] <- suppressWarnings(as.numeric(wide[[col]]))
@@ -257,6 +360,130 @@ write_site_attributes_wide <- function(attributes, sites = NULL, output_path = N
   dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
   utils::write.csv(wide, output_path, row.names = FALSE, na = "NA")
   output_path
+}
+
+extract_buffered_raster_attributes <- function(sites,
+                                               raster_layers,
+                                               analysis_crs,
+                                               radius_m) {
+  if (is.null(raster_layers) || nrow(raster_layers) == 0L) {
+    return(empty_site_attributes())
+  }
+  if (is.null(analysis_crs) || !checkmate::test_string(analysis_crs, min.chars = 1L)) {
+    rlang::abort(
+      "A projected metric `analysis_crs` is required for buffered attributes.",
+      class = "site_attributes_buffer_crs_invalid"
+    )
+  }
+  analysis_crs <- sf::st_crs(analysis_crs)
+  crs_units <- tolower(analysis_crs$units_gdal %||% "")
+  if (is.na(analysis_crs) || !crs_units %in% c("metre", "meter")) {
+    rlang::abort(
+      "Buffered attributes require an analysis CRS with metre units.",
+      class = "site_attributes_buffer_crs_invalid"
+    )
+  }
+
+  sites_sf <- sf::st_as_sf(sites, coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+  sites_metric <- sf::st_transform(sites_sf, analysis_crs)
+  buffers <- sf::st_buffer(sites_metric, dist = radius_m)
+  buffer_areas <- as.numeric(sf::st_area(buffers))
+  radius_label <- format(radius_m, scientific = FALSE, trim = TRUE, digits = 15)
+  radius_label <- gsub("\\.", "p", radius_label)
+
+  output <- lapply(seq_len(nrow(raster_layers)), function(idx) {
+    layer <- raster_layers[idx, , drop = FALSE]
+    path <- as.character(layer$path[[1]])
+    if (!file.exists(path)) {
+      rlang::abort(
+        sprintf("Raster layer missing for extraction: %s", path),
+        class = "site_attributes_raster_missing"
+      )
+    }
+    rast <- terra::rast(path)
+    raster_crs <- sf::st_crs(terra::crs(rast))
+    if (is.na(raster_crs) || !isTRUE(raster_crs == analysis_crs)) {
+      rlang::abort(
+        sprintf(
+          "Buffered raster layer '%s' must use the configured analysis CRS.",
+          layer$id[[1]]
+        ),
+        class = "site_attributes_buffer_crs_mismatch"
+      )
+    }
+
+    extracted <- terra::extract(
+      rast,
+      terra::vect(buffers),
+      cells = TRUE,
+      exact = TRUE,
+      ID = TRUE
+    )
+    fraction_col <- intersect(c("fraction", "weight"), names(extracted))
+    if (length(fraction_col) != 1L) {
+      rlang::abort(
+        sprintf(
+          "Buffered raster extraction failed to return overlap fractions for '%s'.",
+          layer$id[[1]]
+        ),
+        class = "site_attributes_buffer_fraction_missing"
+      )
+    }
+    band_cols <- setdiff(names(extracted), c("ID", "cell", fraction_col))
+    if (length(band_cols) != terra::nlyr(rast)) {
+      rlang::abort(
+        sprintf("Buffered raster extraction returned unexpected bands for '%s'.", layer$id[[1]]),
+        class = "site_attributes_buffer_bands_invalid"
+      )
+    }
+    band_names <- band_cols
+    if (length(band_names) == 1L) {
+      band_name_lower <- tolower(band_names[[1]])
+      generic_name <- is.na(band_names[[1]]) || !nzchar(band_names[[1]]) ||
+        grepl("^(lyr\\.|file)", band_name_lower) || band_name_lower == "band_1"
+      if (isTRUE(generic_name)) {
+        band_names <- "value"
+      }
+    }
+
+    cell_area_m2 <- abs(prod(terra::res(rast)))
+    layer_units <- if ("units" %in% names(layer)) layer$units[[1]] else NA_character_
+    source_id <- if ("source_id" %in% names(layer)) layer$source_id[[1]] else NA_character_
+    dplyr::bind_rows(lapply(seq_along(band_cols), function(band_idx) {
+      means <- rep(NA_real_, nrow(sites))
+      valid_fractions <- numeric(nrow(sites))
+      for (site_idx in seq_len(nrow(sites))) {
+        rows <- extracted[extracted$ID == site_idx, , drop = FALSE]
+        values <- suppressWarnings(as.numeric(rows[[band_cols[[band_idx]]]]))
+        overlap_area <- as.numeric(rows[[fraction_col]]) * cell_area_m2
+        valid <- is.finite(values) & is.finite(overlap_area) & overlap_area > 0
+        valid_area <- sum(overlap_area[valid])
+        if (valid_area > 0) {
+          means[[site_idx]] <- sum(values[valid] * overlap_area[valid]) / valid_area
+          valid_fractions[[site_idx]] <- valid_area / buffer_areas[[site_idx]]
+        }
+      }
+      valid_fractions <- pmin(1, pmax(0, valid_fractions))
+      tibble::tibble(
+        site_id = rep(as.character(sites$site), each = 2L),
+        attribute_name = rep(
+          c(
+            paste0(band_names[[band_idx]], "_mean_r", radius_label, "m"),
+            paste0(band_names[[band_idx]], "_valid_fraction_r", radius_label, "m")
+          ),
+          times = nrow(sites)
+        ),
+        value = as.character(c(rbind(means, valid_fractions))),
+        layer_id = as.character(layer$id[[1]]),
+        layer_type = as.character(layer$type[[1]]),
+        units = rep(c(as.character(layer_units), "fraction"), times = nrow(sites)),
+        source_id = as.character(source_id),
+        provenance_path = as.character(layer$provenance_path[[1]])
+      )
+    }))
+  })
+
+  dplyr::bind_rows(output)
 }
 
 extract_raster_attributes <- function(sites, raster_layers) {

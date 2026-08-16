@@ -44,5 +44,51 @@ cfg_load_profile <- function(profile, config_path) {
 cfg_resolve <- function(cfg) {
   cfg <- cfg_apply_dem_variant(cfg)
   cfg <- cfg_apply_output_dir(cfg)
+  cfg <- cfg_resolve_attribute_mode(cfg)
+  cfg <- cfg_resolve_buffered_attribute_aoi(cfg)
+  cfg
+}
+
+cfg_resolve_attribute_mode <- function(cfg) {
+  attributes_cfg <- cfg$data$attributes
+  if (is.null(attributes_cfg) || !is.list(attributes_cfg)) {
+    return(cfg)
+  }
+  radius_m <- attributes_cfg$radius_m %||% 0
+  cfg$data$attributes$extraction_mode <- if (radius_m > 0) "buffered" else "exact_point"
+  cfg
+}
+
+cfg_resolve_buffered_attribute_aoi <- function(cfg) {
+  radius_m <- cfg$data$attributes$radius_m %||% 0
+  if (radius_m == 0) {
+    return(cfg)
+  }
+
+  aoi_cfg <- cfg$data$aoi
+  mode <- resolve_aoi_mode(aoi_cfg)
+  rotation_deg <- aoi_cfg$rotation_deg %||% 0
+  if (!identical(mode, "auto") || rotation_deg != 0) {
+    rlang::abort(
+      c(
+        "Buffered attributes require an unrotated auto AOI.",
+        i = sprintf("Configured AOI mode is '%s' with rotation_deg %s.", mode, rotation_deg),
+        i = "Set `data$aoi$mode: auto` and `rotation_deg: 0` so complete site buffers are acquired."
+      ),
+      class = "cfg_attributes_buffer_aoi_unsupported"
+    )
+  }
+
+  margin_km <- radius_m / 1000
+  aoi_cfg$mode <- "auto"
+  if (!is.null(aoi_cfg$buffer_km)) {
+    aoi_cfg$buffer_km <- max(aoi_cfg$buffer_km, margin_km)
+  } else {
+    aoi_cfg$min_buffer_km <- max(aoi_cfg$min_buffer_km %||% 0.25, margin_km)
+    if (!is.null(aoi_cfg$max_buffer_km)) {
+      aoi_cfg$max_buffer_km <- max(aoi_cfg$max_buffer_km, margin_km)
+    }
+  }
+  cfg$data$aoi <- aoi_cfg
   cfg
 }

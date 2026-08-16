@@ -323,6 +323,17 @@ apply_settings_to_config <- function(cfg,
     cfg$data$large_downloads$allow <- isTRUE(settings$large_downloads$allow)
   }
 
+  if (!is.null(settings$attributes$radius_m)) {
+    radius_m <- settings$attributes$radius_m
+    if (!checkmate::test_number(radius_m, lower = 0, finite = TRUE)) {
+      rlang::abort(
+        "`attributes.radius_m` must be one finite non-negative number.",
+        class = "cfg_attributes_radius_invalid"
+      )
+    }
+    cfg$data$attributes$radius_m <- radius_m
+  }
+
   layer_include <- normalize_include_list(settings$layers)
   if (!is.null(layer_include)) {
     layer_map <- list(
@@ -369,7 +380,8 @@ apply_settings_to_config <- function(cfg,
     products = products
   )
 
-  cfg
+  cfg <- cfg_resolve_attribute_mode(cfg)
+  cfg_resolve_buffered_attribute_aoi(cfg)
 }
 
 #' Run the pipeline using simplified settings

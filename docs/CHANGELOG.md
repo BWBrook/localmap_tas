@@ -6,6 +6,10 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
 
 ## [Unreleased]
 ### Changed
+- 2026-08-16: Site attributes now support one optional run-wide continuous-
+  raster buffer radius, with overlap-area-weighted means, full-buffer valid-data
+  fractions, an automatic complete-buffer AOI margin floor, self-describing
+  table columns, and explicit run provenance.
 - 2026-08-14: `site_attributes_wide.csv` now contains only mapped attributes
   represented in the long table, while retaining selected all-`NA` attributes,
   canonical ordering, coordinates, and site metadata.
@@ -26,6 +30,8 @@ The format follows Keep a Changelog. This project adheres to Semantic Versioning
   `panel_figure` and its PNG/PDF outputs.
 
 ### Added
+- 2026-08-16: Added a copyable offline 100 m JC DEM-only buffered attributes
+  settings example and synthetic edge/NODATA coverage tests.
 - 2026-08-09: Added a copyable offline `products: attributes` settings example
   for exact-point DEM and TASVEG-class extraction at all 13 packaged JC sites.
 - Settings-first onboarding across the README, Quarto site, vignette, and user

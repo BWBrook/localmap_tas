@@ -307,7 +307,8 @@ list(
           analysis_layers = analysis_layers,
           aoi = aoi,
           analysis_crs = cfg$data$aoi$crs,
-          distance_layers = cfg$data$distance_layers
+          distance_layers = cfg$data$distance_layers,
+          radius_m = attributes_cfg$radius_m
         )
       } else {
         empty_site_attributes()

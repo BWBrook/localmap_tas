@@ -56,6 +56,7 @@ testthat::test_that("provenance outputs capture layer metadata", {
         ),
         camera_sites = list(jc = list(site_path = "inst/extdata/sites.csv")),
         attributes = list(
+          radius_m = 100,
           output_long = "outputs/attributes.parquet",
           output_wide = "outputs/attributes.csv"
         )
@@ -158,6 +159,16 @@ testthat::test_that("provenance outputs capture layer metadata", {
   )))
   testthat::expect_true(any(grepl(
     "attributes.configured_wide_path: outputs/attributes.csv",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "attributes.extraction_mode: buffered",
+    run_lines,
+    fixed = TRUE
+  )))
+  testthat::expect_true(any(grepl(
+    "attributes.radius_m: 100",
     run_lines,
     fixed = TRUE
   )))

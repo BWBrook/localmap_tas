@@ -21,6 +21,7 @@ default:
       output_dir: "outputs/default"
     attributes:
       enabled: true
+      radius_m: 0
       output_long: "outputs/default/tables/site_attributes_long.parquet"
       output_wide: "outputs/default/tables/site_attributes_wide.csv"
     occurrence:

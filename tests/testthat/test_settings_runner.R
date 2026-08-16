@@ -64,6 +64,36 @@ testthat::test_that("explicit settings targets override product selection", {
   )
 })
 
+testthat::test_that("buffered config resolution guarantees the auto AOI margin", {
+  cfg <- list(data = list(
+    attributes = list(radius_m = 500),
+    aoi = list(mode = "auto", buffer_km = 0.1, rotation_deg = 0)
+  ))
+
+  small <- localmap:::cfg_resolve_buffered_attribute_aoi(cfg)
+  testthat::expect_equal(small$data$aoi$buffer_km, 0.5)
+
+  cfg$data$aoi$buffer_km <- 0.8
+  large <- localmap:::cfg_resolve_buffered_attribute_aoi(cfg)
+  testthat::expect_equal(large$data$aoi$buffer_km, 0.8)
+
+  cfg$data$aoi <- list(min_buffer_km = 0.1, max_buffer_km = 0.2, rotation_deg = 0)
+  implicit <- localmap:::cfg_resolve_buffered_attribute_aoi(cfg)
+  testthat::expect_identical(implicit$data$aoi$mode, "auto")
+  testthat::expect_equal(implicit$data$aoi$min_buffer_km, 0.5)
+  testthat::expect_equal(implicit$data$aoi$max_buffer_km, 0.5)
+
+  cfg$data$aoi <- list(mode = "fixed", size_km = 10, rotation_deg = 0)
+  testthat::expect_error(
+    localmap:::cfg_resolve_buffered_attribute_aoi(cfg),
+    class = "cfg_attributes_buffer_aoi_unsupported",
+    regexp = "unrotated auto AOI"
+  )
+
+  cfg$data$attributes$radius_m <- 0
+  testthat::expect_identical(localmap:::cfg_resolve_buffered_attribute_aoi(cfg), cfg)
+})
+
 testthat::test_that("apply_settings_to_config updates paths and filters layers", {
   cfg <- localmap::cfg_read(profile = "jc")
 
@@ -87,6 +117,7 @@ testthat::test_that("apply_settings_to_config updates paths and filters layers",
     site_file = "site.csv",
     central_site = "s1",
     outputs = list(dir = file.path(tmp_dir, "outputs")),
+    attributes = list(radius_m = 100),
     layers = list(include = c("orthophoto")),
     analysis_layers = list(include = c("dem"))
   )
@@ -107,6 +138,8 @@ testthat::test_that("apply_settings_to_config updates paths and filters layers",
     file.path(tmp_dir, "outputs", "maps", "overview_map.png")
   )
   testthat::expect_equal(cfg2$data$outputs$products, "all")
+  testthat::expect_equal(cfg2$data$attributes$radius_m, 100)
+  testthat::expect_identical(cfg2$data$attributes$extraction_mode, "buffered")
   settings$products <- c("attributes", "figure")
   cfg3 <- localmap:::apply_settings_to_config(
     cfg,

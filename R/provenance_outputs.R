@@ -189,10 +189,14 @@ write_run_manifest <- function(cfg,
   )
   products <- cfg$data$outputs$products
   if (is.null(products) || any(products %in% c("attributes", "all"))) {
+    radius_m <- cfg$data$attributes$radius_m %||% 0
+    extraction_mode <- if (radius_m > 0) "buffered" else "exact_point"
     run_metadata$attributes <- list(
       site_input_path = cfg$data$camera_sites$jc$site_path %||% NA_character_,
       configured_long_path = cfg$data$attributes$output_long %||% NA_character_,
-      configured_wide_path = cfg$data$attributes$output_wide %||% NA_character_
+      configured_wide_path = cfg$data$attributes$output_wide %||% NA_character_,
+      extraction_mode = extraction_mode,
+      radius_m = radius_m
     )
   }
   if (!is.null(products)) {

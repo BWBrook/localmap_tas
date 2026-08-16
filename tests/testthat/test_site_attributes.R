@@ -21,9 +21,147 @@ testthat::test_that("raster extraction returns sites × bands rows", {
   )
 
   out <- localmap::build_site_attributes_long(sites = sites, analysis_layers = layers)
+  out_zero <- localmap::build_site_attributes_long(
+    sites = sites,
+    analysis_layers = layers,
+    radius_m = 0
+  )
   expected_rows <- n_sites * 4L
   testthat::expect_equal(nrow(out), expected_rows)
   testthat::expect_true(all(c("red", "nir", "swir2") %in% out$attribute_name))
+  testthat::expect_identical(out_zero, out)
+})
+
+testthat::test_that("buffered raster oracle covers weights, edges, and NODATA", {
+  site_metric <- sf::st_sfc(sf::st_point(c(500000, 5250000)), crs = 28355)
+  site_ll <- sf::st_transform(site_metric, 4326)
+  coords <- sf::st_coordinates(site_ll)
+  sites <- tibble::tibble(site = "edge", lon = coords[1, 1], lat = coords[1, 2])
+
+  rast <- terra::rast(
+    xmin = 500000,
+    xmax = 500200,
+    ymin = 5249900,
+    ymax = 5250100,
+    resolution = 10,
+    crs = "EPSG:28355"
+  )
+  cells <- seq_len(terra::ncell(rast))
+  values <- as.numeric(cells)
+  values[terra::yFromCell(rast, cells) >= 5250000] <- NA
+  terra::values(rast) <- values
+  rast_path <- tempfile(fileext = ".tif")
+  terra::writeRaster(rast, rast_path, overwrite = TRUE)
+  layer <- tibble::tibble(
+    id = "edge_dem",
+    type = "raster_file",
+    path = rast_path,
+    provenance_path = "edge_dem.tif.yml",
+    units = "m",
+    categorical = FALSE
+  )
+
+  out <- localmap::build_site_attributes_long(
+    sites,
+    layer,
+    analysis_crs = "EPSG:28355",
+    radius_m = 100
+  )
+  buffer <- sf::st_buffer(
+    sf::st_transform(sf::st_as_sf(sites, coords = c("lon", "lat"), crs = 4326), 28355),
+    100
+  )
+  overlap <- terra::extract(rast, terra::vect(buffer), exact = TRUE, cells = TRUE)
+  valid <- is.finite(overlap$lyr.1)
+  expected_mean <- stats::weighted.mean(overlap$lyr.1[valid], overlap$fraction[valid])
+
+  testthat::expect_setequal(
+    out$attribute_name,
+    c("value_mean_r100m", "value_valid_fraction_r100m")
+  )
+  testthat::expect_equal(
+    as.numeric(out$value[out$attribute_name == "value_mean_r100m"]),
+    expected_mean,
+    tolerance = 1e-12
+  )
+  testthat::expect_equal(
+    as.numeric(out$value[out$attribute_name == "value_valid_fraction_r100m"]),
+    0.25,
+    tolerance = 1e-8
+  )
+  wide_path <- tempfile(fileext = ".csv")
+  localmap:::write_site_attributes_wide(out, sites, wide_path)
+  testthat::expect_named(
+    utils::read.csv(wide_path, check.names = FALSE),
+    c("site_id", "lat", "lon", "dem_mean_r100m", "dem_valid_fraction_r100m")
+  )
+
+  sites$lon <- 144
+  sites$lat <- -40
+  no_support <- localmap::build_site_attributes_long(
+    sites,
+    layer,
+    analysis_crs = "EPSG:28355",
+    radius_m = 100
+  )
+  testthat::expect_true(is.na(as.numeric(
+    no_support$value[no_support$attribute_name == "value_mean_r100m"]
+  )))
+  testthat::expect_identical(
+    as.numeric(no_support$value[
+      no_support$attribute_name == "value_valid_fraction_r100m"
+    ]),
+    0
+  )
+})
+
+testthat::test_that("buffered attributes reject unsupported sources and CRS", {
+  sites <- tibble::tibble(site = "site_a", lon = 146.944, lat = -43)
+  layers <- tibble::tibble(
+    id = c("landcover", "tenure"),
+    type = c("raster_file", "vector_file"),
+    path = c("unused.tif", "unused.gpkg"),
+    provenance_path = c("unused.tif.yml", "unused.gpkg.yml"),
+    categorical = c(TRUE, FALSE)
+  )
+  distance <- list(list(id = "distance_to_road", type = "vector_file"))
+
+  testthat::expect_error(
+    localmap::build_site_attributes_long(
+      sites,
+      layers,
+      analysis_crs = "EPSG:28355",
+      distance_layers = distance,
+      radius_m = 100
+    ),
+    class = "site_attributes_buffer_unsupported",
+    regexp = "landcover.*tenure.*distance_to_road"
+  )
+  continuous <- layers[1, ]
+  continuous$categorical <- FALSE
+  testthat::expect_error(
+    localmap::build_site_attributes_long(
+      sites,
+      continuous,
+      analysis_crs = "EPSG:4326",
+      radius_m = 100
+    ),
+    class = "site_attributes_buffer_crs_invalid"
+  )
+  testthat::expect_error(
+    localmap::build_site_attributes_long(sites, layers[0, ], radius_m = -1),
+    class = "site_attributes_radius_invalid"
+  )
+  testthat::expect_error(
+    localmap::build_site_attributes_long(
+      sites,
+      layers[0, ],
+      distance_layers = distance,
+      radius_m = 100
+    ),
+    class = "site_attributes_buffer_unsupported",
+    regexp = "distance_to_road"
+  )
 })
 
 testthat::test_that("vector extraction returns attributes with NA for no-hit", {

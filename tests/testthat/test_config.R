@@ -299,6 +299,33 @@ testthat::test_that("cfg_read fails on unsupported schema_version", {
   )
 })
 
+testthat::test_that("buffered attributes validate radius and continuous sources", {
+  cfg <- localmap::cfg_read(profile = "jc")
+  cfg$data$attributes$radius_m <- -1
+  testthat::expect_error(
+    localmap:::cfg_validate(cfg),
+    class = "cfg_attributes_radius_invalid"
+  )
+
+  cfg$data$attributes$radius_m <- 100
+  testthat::expect_error(
+    localmap:::cfg_validate(cfg),
+    class = "cfg_attributes_buffer_unsupported",
+    regexp = "jc_tasveg"
+  )
+
+  cfg$data$analysis_layers <- Filter(
+    function(layer) identical(layer$id, "jc_dem"),
+    cfg$data$analysis_layers
+  )
+  cfg$data$distance_layers <- list()
+  testthat::expect_identical(localmap:::cfg_validate(cfg), cfg)
+  testthat::expect_identical(
+    localmap:::cfg_resolve_attribute_mode(cfg)$data$attributes$extraction_mode,
+    "buffered"
+  )
+})
+
 testthat::test_that("cfg_read resolves demo outputs under outputs/demo", {
   cfg <- localmap::cfg_read(profile = "demo")
 

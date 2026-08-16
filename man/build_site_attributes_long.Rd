@@ -9,7 +9,8 @@ build_site_attributes_long(
   analysis_layers,
   aoi = NULL,
   analysis_crs = NULL,
-  distance_layers = NULL
+  distance_layers = NULL,
+  radius_m = 0
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ build_site_attributes_long(
 
 \item{aoi}{Optional AOI list from \code{build_aoi_from_config()}.}
 
-\item{analysis_crs}{Optional CRS string for distance calculations.}
+\item{analysis_crs}{Optional CRS string for distances and buffered extraction.}
 
 \item{distance_layers}{Optional list of distance-layer configs.}
+
+\item{radius_m}{Non-negative extraction radius in metres. Zero uses exact points.}
 }
 \value{
 Tibble of site attributes in long form.

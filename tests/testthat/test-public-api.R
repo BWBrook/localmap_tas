@@ -126,7 +126,8 @@ stable_formals <- list(
     analysis_layers = "<missing>",
     aoi = "NULL",
     analysis_crs = "NULL",
-    distance_layers = "NULL"
+    distance_layers = "NULL",
+    radius_m = "0"
   ),
   fetch_analysis_layers = c(
     layers = "<missing>",

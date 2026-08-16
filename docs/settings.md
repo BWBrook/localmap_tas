@@ -43,6 +43,28 @@ and only mapped attributes represented in the long table. A selected attribute
 remains present when all its extracted values are `NA`; unselected attribute
 families do not produce empty columns.
 
+`settings.attributes-buffered-jc.yaml` is the corresponding network-free
+continuous-raster example. It selects only the DEM, disables imagery and
+distance layers, and sets one run-wide 100 m radius:
+
+```sh
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript scripts/run_project.R settings.attributes-buffered-jc.yaml
+```
+
+The buffered output root is `outputs/jc_attributes_buffered_r100m/`. Its long
+table records `value_mean_r100m` and `value_valid_fraction_r100m`; the wide
+table maps these to `dem_mean_r100m` and `dem_valid_fraction_r100m`. The mean
+uses raster-cell overlap area as its weight. The valid fraction divides valid
+overlap area by the full circular buffer area, including portions outside the
+raster and over NODATA in the denominator. Zero valid support produces an `NA`
+mean and coverage zero. Positive radii accept continuous rasters only and fail
+early with the unsupported source names when categorical, vector, or distance
+sources remain selected. They also require an unrotated `aoi.mode: auto`. The
+resolved config raises an explicit `aoi.buffer_km`, or otherwise the effective
+minimum auto buffer, to at least `attributes.radius_m / 1000`; this ensures
+analysis-layer clipping contains every complete site buffer rather than
+misreporting internal clipping as source missingness.
+
 ## Input tables
 
 - `site.csv` is required. Existing `count`/`obs` and `rd` columns are used when
@@ -67,6 +89,9 @@ Input coordinates are latitude/longitude in EPSG:4326.
 - `central_site`: focal map site; defaults to the first site when the input is
   readable.
 - `aoi`: optional `mode`, `buffer_km`, `size_km`, and `rotation_deg` overrides.
+- `attributes.radius_m`: optional non-negative run-wide extraction radius in
+  metres. Omitted or zero preserves exact-point extraction; a positive value
+  uses circular buffers in the configured metric analysis CRS.
 - `camera_sites.bbox_half_km`: optional camera-map half-width in kilometres.
 - `layers.include`: imagery keys `orthophoto`, `tasveg`, `topography`, `roads`,
   and `localities`.

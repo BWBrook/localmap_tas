@@ -1,5 +1,24 @@
 # AGENT NOTES
 
+- 2026-08-16: Added optional run-wide continuous-raster buffered attributes.
+  - `attributes.radius_m` is exact-point compatible when omitted or zero; a
+    positive radius uses metric circular buffers, overlap-area-weighted means,
+    full-buffer valid-data fractions, and rejects categorical/vector/distance
+    sources by name. Resolved unrotated auto AOIs enforce a margin at least as
+    large as the extraction radius, preventing internal clipping bias.
+  - The accepted exact JC tables retained SHA-256 `3ad61feabe88688101c13ab6e0ef9effbaef013cf144fdf1ccfc3dc9b309d865`
+    (long) and `42af4d2dfa1b3cc947ee5776148db32c7cb5f1771699d7ff0b98f7c9f91de8d7`
+    (wide).
+  - The offline 100 m DEM example produced 26 unique long rows and 13 wide
+    rows; all means were finite, coverage was 0.999999997-1, and all 13 means
+    differed from exact-point DEM values. The resolved AOI contained every
+    complete buffer (maximum numerical outside area `3.31e-17 m2`).
+  - A direct `terra`/`sf` oracle matched the central-site mean within `3e-14`;
+    a synthetic raster-edge/NODATA case gave quarter-buffer coverage, while
+    zero valid support gave an `NA` mean and zero coverage.
+  - An identical second invocation skipped all 14 downstream targets and
+    preserved all eight generated artefact hashes. No live data access occurred.
+
 - 2026-08-14: Corrected the convenience wide attributes table to be selected-only.
   - Removed universal padding of known attribute families while preserving
     canonical ordering, site identifiers/coordinates, input metadata, and

@@ -46,6 +46,23 @@ Review the long Parquet and wide CSV tables under
 `outputs/jc_attributes_offline/provenance/`. The wide CSV contains only mapped
 attributes represented in the long table, followed by available site metadata.
 
+For area summaries, `settings.attributes-buffered-jc.yaml` is a separate
+offline DEM-only example using one 100 m circular buffer per site in the
+configured metric analysis CRS:
+
+```sh
+LOCALMAP_ALLOW_NETWORK=0 LOCALMAP_ALLOW_LARGE_DOWNLOADS=0 Rscript scripts/run_project.R settings.attributes-buffered-jc.yaml
+```
+
+Its wide table under `outputs/jc_attributes_buffered_r100m/tables/` contains
+`dem_mean_r100m` and `dem_valid_fraction_r100m`. Coverage is valid DEM area
+divided by the complete circular buffer area, so raster edges and NODATA reduce
+the fraction. Buffered extraction rejects categorical, vector, and distance
+sources. It also requires an unrotated auto AOI and raises the resolved AOI
+margin to at least the extraction radius so internal clipping cannot masquerade
+as missing raster coverage. Omit `attributes.radius_m` or set it to zero for
+exact-point behavior.
+
 ## Real-data settings route
 
 `settings.example.yaml` is a real-data-only template. Before running it,

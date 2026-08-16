@@ -1,0 +1,23 @@
+# Offline 100 m buffered DEM extraction for the 13 packaged JC camera sites.
+settings:
+  project: "jc_attributes_buffered_r100m"
+  base_profile: "jc"
+  input_dir: "inst/extdata"
+  site_file: "jc_camera_sites_fixture.csv"
+  obs_file: ""
+  op_file: ""
+  products: "attributes"
+  aoi:
+    mode: "auto"
+    buffer_km: 0.1
+  attributes:
+    radius_m: 100
+  layers:
+    include: []
+  analysis_layers:
+    include:
+      - "dem"
+  distance_layers:
+    include: []
+  outputs:
+    dir: "outputs/jc_attributes_buffered_r100m"

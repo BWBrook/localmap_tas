@@ -410,8 +410,26 @@ Related keys:
 Controls site attribute extraction outputs.
 
 - `enabled` (logical, default `true`): enable extraction and table outputs.
+- `radius_m` (number, default `0`): one non-negative run-wide extraction radius
+  in metres. Omitted or zero uses exact points. A positive value creates metric
+  circular buffers and supports continuous raster layers only; categorical
+  rasters, vectors, and distance layers are rejected during configuration
+  validation with their source names.
 - `output_long` (string, optional): path for the canonical long table (parquet).
 - `output_wide` (string, optional): path for the convenience wide CSV.
+
+For positive radii, each raster band produces an overlap-area-weighted mean and
+a valid-data fraction. The fraction denominator is the full circular buffer,
+so raster edges and NODATA reduce coverage; zero valid support gives an `NA`
+mean and zero coverage. Statistic and radius are encoded in the long attribute
+name and mapped wide column, for example `value_mean_r100m` and
+`dem_mean_r100m`. The resolved run config and run manifest record both the
+radius and the derived `exact_point` or `buffered` extraction mode.
+Buffered extraction requires unrotated auto AOI mode. During resolution,
+`buffer_km` (when explicit) or `min_buffer_km` is raised to at least
+`radius_m / 1000`; a smaller `max_buffer_km` is raised as well. The effective
+margin remains visible in the resolved run config and prevents AOI clipping
+from being counted as source-edge or NODATA coverage loss.
 
 ### `data.overview_map`
 

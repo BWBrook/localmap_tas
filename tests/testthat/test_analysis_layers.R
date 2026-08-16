@@ -32,6 +32,8 @@ testthat::test_that("analysis layers create clipped vector and raster outputs", 
   res <- localmap::fetch_analysis_layers(layers, aoi = aoi)
   testthat::expect_true(file.exists(res$path[res$id == "habitats"]))
   testthat::expect_true(file.exists(res$path[res$id == "dem"]))
+  testthat::expect_false(res$categorical[res$id == "habitats"])
+  testthat::expect_false(res$categorical[res$id == "dem"])
 
   vec <- sf::st_read(vector_out, quiet = TRUE)
   aoi_geom <- aoi$aoi
