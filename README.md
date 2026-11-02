@@ -1,5 +1,7 @@
 # localmap_tas: Reproducible local mapping for Tasmania
 
+> **Status:** developed in the open as a working record. This is work in progress: contents may change, and nothing here is peer-reviewed unless stated.
+
 `localmap` is an R package and `{targets}` workflow for configured Tasmanian
 field-site mapping. It turns site coordinates, an area of interest, and selected
 spatial layers into publication-ready maps, site-attribute tables, and explicit
