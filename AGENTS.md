@@ -1,6 +1,6 @@
-# AGENTS.md — localmap_tas (Codex CLI Engineer)
+# AGENTS.md — localmap_tas
 
-This file defines how you (the Codex CLI agent) must operate **inside this repository**.
+These instructions apply to agents working in this repository.
 If a global agent policy conflicts with this file, **this file wins** for this repo.
 
 ## 1) Mission
@@ -10,7 +10,7 @@ Deliver a reproducible, publication-quality **local mapping workflow for Tasmani
 - The system fetches/caches layers, renders maps/panels, and (optionally) extracts site attributes.
 - The workflow is automated via `{targets}` and reproducible via `renv`.
 
-You own implementation. The PI (ChatGPT) owns requirements, architecture, and acceptance criteria.
+Barry resolves consequential scientific and scope decisions. The working agent handles routine architecture and implementation within the agreed requirements.
 
 ## 2) Non-negotiables
 
@@ -18,7 +18,7 @@ You own implementation. The PI (ChatGPT) owns requirements, architecture, and ac
   - render a placeholder (for imagery outputs), or
   - fail with an actionable error if the output would be misleading.
 - **Reproducibility first.** Changes must keep the project runnable on a clean clone.
-- **Local git only.** You may create local commits. Do not push/fetch/pull remotes unless explicitly approved.
+- **Git.** Commit and push coherent work to Barry's existing remote as needed. Fetch as needed and fast-forward only a clean checkout. Preserve unrelated work.
 - **Do not hand-edit `renv.lock`.** Use `renv` tooling.
 - **No large data committed.** Small demo fixtures belong in `inst/extdata/`. Everything else is runtime data and must be ignored.
 
@@ -30,24 +30,17 @@ You own implementation. The PI (ChatGPT) owns requirements, architecture, and ac
 - `docs/decisions.md` — irreversible or costly decisions
 - `docs/workflow.md` — how you must work
 - `docs/release_checklist.md` — pre-tag checks
-- `docs/questions_for_human.md` — only if blocked after multiple attempts
-- `docs/AGENT_NOTES.md` — running lab notebook of what changed and why
+- `docs/questions_for_human.md` — durable record of material questions when useful
+- `docs/AGENT_NOTES.md` — map-quality findings and handoff notes
 - `docs/CHANGELOG.md` — Keep a Changelog style
 
 ## 4) Working style
 
 ### 4.1 Autonomy
-Default to acting without asking the human. Only escalate via `docs/questions_for_human.md` when:
-- you are blocked by missing credentials / tokens / data,
-- there is an irreversible fork with unclear trade-offs,
-- repeated attempts fail and you have exhausted reasonable alternatives.
+Raise material questions with Barry directly and continue unaffected work. Ask when missing credentials, tokens, or data block progress, an irreversible decision has unclear trade-offs, or reasonable alternatives have failed. Use `docs/questions_for_human.md` when a durable record is useful.
 
-### 4.2 Logging discipline
-For each substantial work session:
-- Append a dated entry to `docs/AGENT_NOTES.md`:
-  - what you changed,
-  - what artefacts you generated/inspected,
-  - what remains.
+### 4.2 Project records
+Use `docs/AGENT_NOTES.md` to record what changed, which artefacts you generated or inspected, and what remains when it helps interpretation or handoff.
 
 If you make a major design choice, add it to `docs/decisions.md`.
 
@@ -57,33 +50,18 @@ Examples:
 - `agent: feat(site-maps): add WMS panel workflow`
 - `agent: fix(pkg): correct LICENSE and Rbuildignore`
 
-## 5) Artefact Review Cycle (mandatory)
+## 5) Artefact checks
 
-You must treat generated artefacts (maps, tables, caches) like scientific results: inspect them, interpret them, iterate.
+For changes that affect outputs, run the relevant pipeline targets to generate the affected map PNGs/PDFs, panel figures, extracted attribute tables, and provenance metadata. Inspect the generated maps, tables, and caches as applicable.
 
-For every milestone and for any change that affects outputs:
+Check spatial validity on representative outputs.
 
-1. **Build artefacts**
-   - Run the relevant pipeline targets to generate:
-     - map PNGs/PDFs,
-     - panel figures,
-     - extracted attribute tables,
-     - provenance metadata.
-2. **Sanity (domain checks)**
-   - Confirm spatial sanity:
-     - site points fall within the bounding box,
-     - graticules/scale bars are plausible,
-     - overlays align with basemap (no obvious offsets),
-     - legends are present/absent as configured.
-3. **Interpretation (write it down)**
-   - Add 3–6 bullets to `docs/AGENT_NOTES.md` describing:
-     - what the outputs show,
-     - what looks wrong/suspicious,
-     - what you will change next.
-4. **Iteration**
-   - Fix issues, re-run, and repeat until coherent.
+- site points fall within the bounding box,
+- graticules/scale bars are plausible,
+- overlays align with basemap (no obvious offsets),
+- legends are present/absent as configured.
 
-“Tests pass” is not sufficient if maps are obviously wrong.
+Fix issues and recheck affected outputs. Record material findings and unresolved map-quality issues in `docs/AGENT_NOTES.md` when they help interpretation or handoff.
 
 ## 6) Quality gates you must run before requesting a PI review
 
